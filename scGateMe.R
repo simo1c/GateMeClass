@@ -170,9 +170,6 @@ prioritize_gate_table <- function(new_gates){
       mins <- which(temp$Star == min(temp$Star))
       
       if(length(mins) > 1){
-        # message("Warning! Two or more cell types have the same gating strategy, random choice!")
-        # min <- sample(1:length(mins), 1)
-        # min <- mins[1]
         to_keep <- c(to_keep, temp[mins[1], "id"])
         extended_gate_table_dup[extended_gate_table_dup$Gate == temp$Gate[1] & extended_gate_table_dup$Cell %in% temp$Cell, "Cell"] <- paste0(temp$Cell, collapse = " | ")
       }else{
@@ -416,7 +413,6 @@ scGateMe <- function(exp_matrix,
   # narrow_gate_table = T
   
   set.seed(seed)
-  
   message("Loading gate table...")
   new_gates <- parse_gate_table(gates, narrow_gate_table)
   message("Prioritizing gate table...")
