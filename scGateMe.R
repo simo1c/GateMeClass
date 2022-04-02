@@ -329,69 +329,68 @@ cell_classification <- function(marker_table, gates){
   return(cl_res)
 }
 
-extract_gate_table <- function(exp_matrix, markers, clusters){
-  
-  # clusters <- res$labels_post_clustering
-  # markers <- colnames(gates)[-1]
-  # exp_matrix <- m
-  
-  exp_matrix <- m[, clusters != "Unclassified"]
-  clusters <- clusters[clusters != "Unclassified"]
-  
-  message("Extracting gate table from data...")
-  useful_clusters <- unique(clusters)
-  
-  thresholds <- select_thresholds_from_clusters(exp_matrix,
-                                                markers, 
-                                                clusters, 
-                                                prop_cluster_min = 0)
-  
-  gate_table <- data.frame(matrix(nrow = length(useful_clusters), ncol = length(markers) + 1))
-  colnames(gate_table) <- c("Cell", markers)
-  gate_table$Cell <- useful_clusters
-  rownames(gate_table) <- gate_table$Cell
-  
-  for(mm in markers){
-    
-    #mm <- "CD45"
-    
-    mds <- c()
-    q1s <- c()
-    q3s <- c()
-    
-    for(c in useful_clusters){
-      d <- exp_matrix[mm, as.character(clusters) %in% c]
-      md <- median(d)
-      q1 <- summary(d)["1st Qu."] 
-      q3 <- summary(d)["3rd Qu."]
-      names(md) <- c
-      names(q1) <- c
-      names(q3) <- c  
-      mds <- c(mds, md)
-      q1s <- c(q1s, q1)
-      q3s <- c(q3s, q3)
-    }
-    
-    pos <- which(thresholds[mm] < q1s)
-    neg <- which(thresholds[mm] > q3s)
-    star <- which(thresholds[mm] > q1s & thresholds[mm] < q3s)
-    
-    exp <- rep(NA, length(useful_clusters))
-    names(exp) <- useful_clusters
-    exp[names(star)] <- "*"
-    exp[names(pos)] <- "pos"
-    exp[names(neg)] <- "neg"
-    
-    gate_table[names(exp), mm] <- exp
-    
-  }
-  return(gate_table)
-}
+# extract_gate_table <- function(exp_matrix, markers, clusters){
+#   
+#   # clusters <- res$labels_post_clustering
+#   # markers <- colnames(gates)[-1]
+#   # exp_matrix <- m
+#   
+#   exp_matrix <- m[, clusters != "Unclassified"]
+#   clusters <- clusters[clusters != "Unclassified"]
+#   
+#   message("Extracting gate table from data...")
+#   useful_clusters <- unique(clusters)
+#   
+#   thresholds <- select_thresholds_from_clusters(exp_matrix,
+#                                                 markers, 
+#                                                 clusters, 
+#                                                 prop_cluster_min = 0)
+#   
+#   gate_table <- data.frame(matrix(nrow = length(useful_clusters), ncol = length(markers) + 1))
+#   colnames(gate_table) <- c("Cell", markers)
+#   gate_table$Cell <- useful_clusters
+#   rownames(gate_table) <- gate_table$Cell
+#   
+#   for(mm in markers){
+#     
+#     #mm <- "CD45"
+#     
+#     mds <- c()
+#     q1s <- c()
+#     q3s <- c()
+#     
+#     for(c in useful_clusters){
+#       d <- exp_matrix[mm, as.character(clusters) %in% c]
+#       md <- median(d)
+#       q1 <- summary(d)["1st Qu."] 
+#       q3 <- summary(d)["3rd Qu."]
+#       names(md) <- c
+#       names(q1) <- c
+#       names(q3) <- c  
+#       mds <- c(mds, md)
+#       q1s <- c(q1s, q1)
+#       q3s <- c(q3s, q3)
+#     }
+#     
+#     pos <- which(thresholds[mm] < q1s)
+#     neg <- which(thresholds[mm] > q3s)
+#     star <- which(thresholds[mm] > q1s & thresholds[mm] < q3s)
+#     
+#     exp <- rep(NA, length(useful_clusters))
+#     names(exp) <- useful_clusters
+#     exp[names(star)] <- "*"
+#     exp[names(pos)] <- "pos"
+#     exp[names(neg)] <- "neg"
+#     
+#     gate_table[names(exp), mm] <- exp
+#     
+#   }
+#   return(gate_table)
+# }
 
 ## This is the core function for the classification of the single cells
 scGateMe <- function(exp_matrix,
                      gates, 
-                     ignore_markers = NULL,
                      refine = F,
                      narrow_gate_table = T,
                      verbose = T,
@@ -422,16 +421,6 @@ scGateMe <- function(exp_matrix,
                                                      Gate = paste0(colnames(new_gates2$gate_table)[-1], "*", collapse = "")))
   
   exp_matrix_2 <- exp_matrix[colnames(new_gates$gate_table)[-1], , drop = F]
-  
-  if(!is.null(ignore_markers)){
-    n <- length(ignore_markers)
-    for(i in 1:n){
-      el <- ignore_markers[i]
-      cell <- names(el)
-      markers <- unlist(el)
-      gates[gates$Cell == cell, markers] <- "*"
-    }
-  }
     
   message("Determining the marker signature for each cell...")
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
@@ -472,8 +461,7 @@ scGateMe <- function(exp_matrix,
   }
   
   res <- list(labels = res$labels,
-              marker_table = res$marker_table,
-              thresholds = antimodes)
+              marker_table = res$marker_table)
   
   return(res)
 }
