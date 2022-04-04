@@ -5,7 +5,7 @@ generate_set_values <- function(v, cell){
   
   sets_all <- list()
   sets_to_filter <- list()
- 
+  
   special1 <- grep("[\\|]", v)
   special2 <- grep("[\\^]", v)
   
@@ -107,7 +107,7 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
     df_gates <- cbind(Cell = rownames(df_gates), df_gates)
     gate_table <- df_gates
   }
-
+  
   celltypes <- gate_table$Cell
   
   if(length(grep("[\\*|\\||\\^]", celltypes)) > 0){
@@ -115,9 +115,9 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
   }
   
   extended_gate_table <- data.frame(Cell = NA, Gate = NA)
-      
+  
   for(i in 1:nrow(gate_table)){
-        
+    
     v <- gate_table[i, -1, drop = F]
     cell <- gate_table[i, "Cell"]
     to_add <- generate_set_values(v, cell)
@@ -158,11 +158,11 @@ prioritize_gate_table <- function(new_gates){
     extended_gate_table_dup <- extended_gate_table[extended_gate_table$Gate %in% gate_dup, ]
     extended_gate_table_dup <- merge(extended_gate_table_dup, star_df, by = "Cell")
     extended_gate_table_dup$id <- 1:nrow(extended_gate_table_dup)
-        
+    
     ############ TO OPTIMIZE!!!!!! ##########
     to_keep <- c()
     for(g in unique(extended_gate_table_dup$Gate)){
-            
+      
       #g <- extended_gate_table_dup$Gate[1]
       
       temp <- extended_gate_table_dup[extended_gate_table_dup$Gate == g, ]
@@ -211,42 +211,135 @@ set_marker_expression <- function(exp_matrix, markers, expr_markers, gates, verb
       
       ## Test for multimodality
       p <- suppressWarnings(dip.test(X))
-
-      if(p$p.value < 0.05){
+      
+      icl <- mclustICL(X, G = 1:3, verbose = F)
+      
+      model_temp <- unlist(strsplit(names(summary(icl)[1]), ","))
+      #model <- as.numeric(gsub("V,", "", names(summary(icl)[1])))
+      type_model <- model_temp[1] 
+      model <- as.numeric(model_temp[2])
+      
+      # print(type_model)
+      # print(model)
+      
+      #print(summary(icl))
+      #plot(density(X))
+      
+      # mclustICL(m["CD3", ], G = 1:3, modelNames = "V", verbose = F)
+      # 
+      # 
+      # cl <- Mclust(m["CD3", ], G = 3, verbose = F, modelNames = "V")
+      # temp <- cl$classification
+      # 
+      # mclustICL(m["CD4", temp == 2], G = 1:2, modelNames = "V", verbose = F)
+      # cl2 <- Mclust(m["CD4", temp == 2], G = 2, verbose = F, modelNames = "V")
+      # temp2 <- cl2$classification
+      # 
+      # mclustICL(m["CD274", temp == 2 & temp2 == 2], G = 1:2, modelNames = "V", verbose = F)
+      # 
+      # 
+      # mclustICL(m["CD274", temp == 2], G = 1:4, modelNames = "V", verbose = F)
+      # 
+      # cl <- Mclust(m["CD274", temp == 2], G = 3, verbose = F, modelNames = "V")
+      # plot(cl, what = "classification")
+      
+      #print(model)
+      
+      # if(p$p.value < 0.05 & model == 2){
+      if(!is.na(model) & model > 1){
+        
         
         bimodal_markers <- c(bimodal_markers, m)
         
         if(verbose){
-          print(paste0("Evaluate bimodal markers ", paste0(bimodal_markers, collapse = " "), collapse = " "))
+          message(paste0(" - Evaluate bimodal markers ", paste0(bimodal_markers, collapse = " "), collapse = " "))
         }
         
         x <- tryCatch({
-          sink(tempfile())
-          out <-  normalmixEM(X, k = 2, fast = T, maxit = 5000)
-          closeAllConnections()
-          cluster <- apply(out$posterior, 1, function(row){ which.max(row) })
           
-          mu <- order(out$mu, decreasing = T)
-          temp <- cluster
-          temp[temp == mu[2]] <- "-"
-          temp[temp == mu[1]] <- "+"
-          r[m,] <- temp
           
-          p <- suppressWarnings(dip.test(X[temp == "-"]))
+          #print("************")
           
-          if(p$p.value < 0.05){
-            sink(tempfile())
-            out <- normalmixEM(X, k = 3, fast = F, maxit = 5000)
-            closeAllConnections()
-            #plot(out, which = 2)
-            cluster <- apply(out$posterior, 1, function(row){ which.max(row) })
-            mu <- order(out$mu, decreasing = T)
-            temp <- cluster
-            temp[temp == mu[3]] <- "-"
-            temp[temp == mu[2]] <- "+"
-            temp[temp == mu[1]] <- "+"
-            r[m,] <- temp
+          # sink(tempfile())
+          # # out <-  normalmixEM(X, k = 2, fast = T, maxit = 5000)
+          # 
+          # out <- Mclust(X, G = 2)
+          # 
+          # mod1 <- Mclust(iris[,1:4])
+          # mod1$classification
+          # mod1$parameters$mean
+          # 
+          # closeAllConnections()
+          # plot(out, whichplots = 2)
+          # cluster <- apply(out$posterior, 1, function(row){ which.max(row) })
+          # 
+          # mu <- order(out$mu, decreasing = T)
+          # temp <- cluster
+          # temp[temp == mu[2]] <- "-"
+          # temp[temp == mu[1]] <- "+"
+          # s
+          # r[m,] <- temp
+          # 
+          # p <- suppressWarnings(dip.test(X[temp == "-"]))
+          # 
+          # if(p$p.value < 0.05){
+          #   sink(tempfile())
+          #   #out <- normalmixEM(X, k = 3, fast = F, maxit = 5000)
+          #   out <- Mclust(X, G = 2)
+          #   closeAllConnections()
+          #   plot(out, whichplots = 2)
+          #   #plot(out, which = 2)
+          #   cluster <- apply(out$posterior, 1, function(row){ which.max(row) })
+          #   mu <- order(out$mu, decreasing = T)
+          #   temp <- cluster
+          #   temp[temp == mu[3]] <- "-"
+          #   temp[temp == mu[2]] <- "+"
+          #   temp[temp == mu[1]] <- "+"
+          #   r[m,] <- temp
+          # }
+          
+          #cl <- Mclust(X, G = model, verbose = T, modelNames = model_type)
+          # cl <- Mclust(X)
+          
+          cl <- Mclust(X, G = model, verbose = F, modelNames = type_model)
+          
+          # test <- Mclust(m["CD4", ], G = 2, verbose = T, modelNames = "V")
+          # test$parameters
+          # plot(cl, what = "classification", xlab = m)
+          # mclustICL(m["CD4", ], G = 1:3, modelNames = "V")
+          
+          temp <- cl$classification
+          means <- cl$parameters$mean
+          means <- sort(means)
+          # 
+          # print(table(temp))
+          # 
+          if(model == 2){
+            temp[temp == names(means)[1]] <- "-"
+            temp[temp == names(means)[2]] <- "+"
+            r[m, ] <- temp
+          }else{
+            temp[temp == names(means)[1]] <- "-"
+            temp[temp == names(means)[2]] <- "+"
+            temp[temp == names(means)[3]] <- "+"
+            r[m, ] <- temp
           }
+          
+          # icl <- mclustICL(X[temp == "-"], G = 1:2, modelNames = "V", verbose = F)
+          # model <- as.numeric(gsub("V,", "", names(summary(icl)[1])))
+          
+          # #if(dip.test(X[temp == "-"])$p.value < 0.05 & model == 2){
+          # if(!is.na(model) & model == 2){
+          #   cl <- Mclust(X, G = 3, verbose = F, modelNames = "V")
+          #   plot(cl, what = "classification", xlab = m)
+          #   temp <- cl$classification
+          #   means <- cl$parameters$mean
+          #   means <- sort(means)
+          #   temp[temp == names(means)[1]] <- "-"
+          #   temp[temp == names(means)[2]] <- "+"
+          #   temp[temp == names(means)[3]] <- "+"
+          #   r[m, ] <- temp
+          # }
         },
         error = function(e){
           expr_markers[markers, ] <- "*"
@@ -276,9 +369,9 @@ set_marker_expression <- function(exp_matrix, markers, expr_markers, gates, verb
       
       for(cc in 1:ncol(comb_markers)){
         w <- which(apply(r[bimodal_markers, , drop = F], 2, function(c){ names(c)<- NULL;identical(c, comb_markers[, cc])}))
-
+        
         if(verbose){
-          print(paste0("Evaluate unimodal markers ", paste0(not_bimodal_markers, collapse = " "), " in: ", paste0(rownames(comb_markers), comb_markers[, cc], collapse = "")))
+          message(paste0(" - Evaluate unimodal markers ", paste0(not_bimodal_markers, collapse = " "), " in: ", paste0(rownames(comb_markers), comb_markers[, cc], collapse = "")))
         }
         
         temp <- set_marker_expression(exp_matrix[not_bimodal_markers, w, drop=FALSE],
@@ -421,7 +514,7 @@ scGateMe <- function(exp_matrix,
                                                      Gate = paste0(colnames(new_gates2$gate_table)[-1], "*", collapse = "")))
   
   exp_matrix_2 <- exp_matrix[colnames(new_gates$gate_table)[-1], , drop = F]
-    
+  
   message("Determining the marker signature for each cell...")
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
   rownames(expr_markers) <- colnames(new_gates2$gate_table)[-1]
