@@ -279,9 +279,9 @@ set_marker_expression <- function(exp_matrix, markers, expr_markers, gates, verb
       return(expr_markers)
     }
 
-  ###################################  
-  ## Not ordered marker evaluation ##
-  ###################################
+  ######################################
+  ## Not sequential marker evaluation ##
+  ######################################
   }else{
     if(length(markers) > 0){
       for(m in markers){
