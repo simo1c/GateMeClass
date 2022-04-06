@@ -226,9 +226,9 @@ set_marker_expression <- function(exp_matrix, markers, expr_markers, gates, verb
   bimodal_markers <- c()
   not_bimodal_markers <- c()
   
-  ###############################
-  ## Ordered marker evaluation ##
-  ###############################
+  ##################################
+  ## Sequential marker evaluation ##
+  ##################################
   if(marker_seq_eval){
     for(m in markers){
       
