@@ -16,11 +16,11 @@ generate_set_values <- function(v, cell){
   for(m in v){
     switch(m,
            `+` = {
-             set <- list(c("+"))
+             set <- list(c("*", "+"))
              set_not <- list()
            },
            `-` = {
-             set <- list(c("-"))
+             set <- list(c("*", "-"))
              set_not <- list()
            },
            # `+|`={
@@ -78,21 +78,21 @@ generate_set_values <- function(v, cell){
 ## Read the gate table and generate the possbile marker signature of ceach cell type
 parse_gate_table <- function(gate_table, narrow_gate_table){
   
-  #gate_table <- gates
+  #gate_table <- gates[gates$Cell == celltype, , drop = F]
   
   if(any(duplicated(gate_table$Cell))){
     stop("Error! The gate table must contains uniquely defined cell types!")
   }
   
   if(narrow_gate_table){
-    gates2 <- gate_table$Gate
-    temp <- sapply(gates2, function(x){ str <- strsplit(x, "[+]|[-]|[*]"); return(str)})
-    names(temp) <- gates$Cell
+    gates2 <- gate_table
+    temp <- sapply(gates2$Gate, function(x){ str <- strsplit(x, "[+]|[-]|[*]"); return(str)})
+    names(temp) <- gates2$Cell
     markers <- unique(unlist(temp))
-    df_gates <- data.frame(matrix(nrow = nrow(gates), ncol = length(markers)))
-    rownames(df_gates) <- gates$Cell
+    df_gates <- data.frame(matrix(nrow = nrow(gates2), ncol = length(markers)))
+    rownames(df_gates) <- gates2$Cell
     colnames(df_gates) <- markers
-    gates2_exploded <- strsplit(gates2, split = "")
+    gates2_exploded <- strsplit(gates2$Gate, split = "")
     signs <- lapply(gates2_exploded, function(x){ x[x %in% c("+", "-", "*")]})
     names(signs) <- names(temp)
     
@@ -340,31 +340,9 @@ set_marker_expression <- function(exp_matrix, markers, expr_markers, gates, verb
         temp2 <- temp2[markers, ]
         return(temp2)
         
-        
       }else if(length(bimodal_markers) > 0 & length(not_bimodal_markers) == 0){
-        
-        
         if(marker_seq_eval & length(bimodal_markers) > 1){
           expr_markers[bimodal_markers, ] <- r[bimodal_markers, ]
-          # 
-          # int <- intersect(markers, bimodal_markers)
-          # first_bimodal <- int[1]
-          # not_bimodal_markers <- c(not_bimodal_markers, bimodal_markers[bimodal_markers != first_bimodal])
-          # bimodal_markers <- first_bimodal
-          # 
-          # r_temp <- r[bimodal_markers, ]
-          # comb_markers <-  r_temp[!duplicated(as.list(r_temp))]
-          # 
-          # expr_markers2 <- data.frame(as.matrix(rep(NA, length(not_bimodal_markers))))
-          # colnames(expr_markers2) <- "Test"        
-          # rownames(expr_markers2) <- not_bimodal_markers
-          # 
-          # 
-          # 
-          # 
-          # 
-          # temp2 <- rbind(expr_markers[bimodal_markers, ], expr_markers2[, -1])
-          # temp2 <- temp2[markers, ]
           return(expr_markers)
         }else{
           expr_markers[bimodal_markers, ] <- r[bimodal_markers, ]
@@ -458,9 +436,7 @@ cell_classification <- function(marker_table, gates){
 ## DA IMPLEMENTARE:
 ## 1) Possibilità di settare il parametro "hi", in questo caso "+" diventa il valore intermedio nel GMM con 3 
 ## componenti. Possibilità di settare il valore intermedio come "+" oppure come "-".
-## 2) Valutare se è necessario inserire "*" come valore possibile quando un marker è unimodale definitivamente.
-## 3) Gestire l'ordine dei marker quando non sono tutti presenti
-## 4) Restituire nei risultati la signature delle cellule "Unclassified"
+## 2) Restituire nei risultati la signature delle cellule "Unclassified"
 
 ## This is the core function for the classification of the single cells
 scGateMe <- function(exp_matrix,
@@ -468,6 +444,7 @@ scGateMe <- function(exp_matrix,
                      refine = F,
                      narrow_gate_table = T,
                      marker_seq_eval = F,
+                     combine_seq_eval_res = T,
                      verbose = T,
                      seed = 1){
   
@@ -488,33 +465,92 @@ scGateMe <- function(exp_matrix,
   # marker_seq_eval = T
   
   set.seed(seed)
-  message("Loading gate table...")
-  new_gates <- parse_gate_table(gates, narrow_gate_table)
-  message("Prioritizing gate table...")
-  new_gates2 <- prioritize_gate_table(new_gates)
-  new_gates2$extended_gate_table <- rbind(new_gates2$extended_gate_table,
-                                          data.frame(Cell = "Unclassified", 
-                                                     Gate = paste0(colnames(new_gates2$gate_table)[-1], "*", collapse = "")))
   
-  exp_matrix_2 <- exp_matrix[colnames(new_gates$gate_table)[-1], , drop = F]
+  if(marker_seq_eval){
     
-  message("Determining the marker signature for each cell...")
-  expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
-  rownames(expr_markers) <- colnames(new_gates2$gate_table)[-1]
+    res_all <- list()
+    
+    for(celltype in gates$Cell){
+      message(paste0("Loading gate table for ", celltype, "..."))
+      new_gates <- parse_gate_table(gates[gates$Cell == celltype, , drop = F], narrow_gate_table)
+      new_gates$extended_gate_table <- rbind(new_gates$extended_gate_table,
+                                             data.frame(Cell = "Unclassified", 
+                                                        Gate = paste0(colnames(new_gates$gate_table)[-1], "*", collapse = "")))
+      
+      exp_matrix_2 <- exp_matrix[colnames(new_gates$gate_table)[-1], , drop = F]
+      
+      message("Determining the marker signature for each cell...")
+      expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
+      rownames(expr_markers) <- colnames(new_gates$gate_table)[-1]
+      
+      expr_markers <- set_marker_expression(exp_matrix_2, colnames(new_gates$gate_table)[-1], expr_markers, new_gates$gate_table, verbose = verbose, marker_seq_eval = marker_seq_eval)
+      expr_markers <- expr_markers[colnames(new_gates$gate_table)[-1], ]
+      expr_markers <- as.data.frame(t(expr_markers))
+      cells <- cbind(rownames(expr_markers), expr_markers)
+      colnames(cells)[1] <- "Cell"
+      expr_markers <- apply(cells, 1, function(r){ gate <- paste(colnames(cells)[-1], r[-1], sep = "", collapse = ""); return(gate)})
+      new_cells <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
+      message("Classification of the cells...")
+      res <- cell_classification(new_cells, new_gates$extended_gate_table)
+      res_all <- c(res_all, res)
+      
+      if(length(gates$Cell) > 1){
+        message("------------------------------------------")
+      }
+    }
+    
+    res_all <- res_all[names(res_all) == "labels"]
+    names(res_all) <- gates$Cell
+    
+    if(length(res_all) > 1 & combine_seq_eval_res == T){
+      res_all_df <- matrix(as.character(unlist(res_all)), ncol=length(res_all), byrow=F)
+      colnames(res_all_df) <- gates$Cell
+
+      message("Combine all labels...")
+      res_all <- unlist(apply(res_all_df, 1, function(r){
+        r <- as.character(r)
+        t <- table(r)
+        l <- names(t)
+        ll <- l[l != "Unclassified"]
+        if(length(ll) >= 1){
+          return(paste(ll, collapse = " | "))
+        }else{
+          return("Unclassified")
+        }
+        
+      }))
+    }else{
+      res <- res_all$labels
+    }
+    
+    res <- list(labels = res_all, marker_table = gates)
+    
+  }else{
+    message("Loading gate table...")
+    new_gates <- parse_gate_table(gates, narrow_gate_table)
+    message("Prioritizing gate table...")
+    new_gates2 <- prioritize_gate_table(new_gates)
+    new_gates2$extended_gate_table <- rbind(new_gates2$extended_gate_table,
+                                            data.frame(Cell = "Unclassified", 
+                                                       Gate = paste0(colnames(new_gates2$gate_table)[-1], "*", collapse = "")))
+    
+    exp_matrix_2 <- exp_matrix[colnames(new_gates2$gate_table)[-1], , drop = F]
+    
+    message("Determining the marker signature for each cell...")
+    expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
+    rownames(expr_markers) <- colnames(new_gates2$gate_table)[-1]
+    
+    expr_markers <- set_marker_expression(exp_matrix_2, colnames(new_gates2$gate_table)[-1], expr_markers, new_gates2$gate_table, verbose = verbose, marker_seq_eval = marker_seq_eval)
+    expr_markers <- expr_markers[colnames(new_gates2$gate_table)[-1], ]
+    expr_markers <- as.data.frame(t(expr_markers))
+    cells <- cbind(rownames(expr_markers), expr_markers)
+    colnames(cells)[1] <- "Cell"
+    expr_markers <- apply(cells, 1, function(r){ gate <- paste(colnames(cells)[-1], r[-1], sep = "", collapse = ""); return(gate)})
+    new_cells <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
+    message("Classification of the cells...")
+    res <- cell_classification(new_cells, new_gates2$extended_gate_table)
+  }
   
-  expr_markers <- set_marker_expression(exp_matrix_2, colnames(new_gates2$gate_table)[-1], expr_markers, new_gates2$gate_table, verbose = verbose, marker_seq_eval = marker_seq_eval)
-  expr_markers <- expr_markers[colnames(new_gates2$gate_table)[-1], ]
-  expr_markers <- as.data.frame(t(expr_markers))
-  cells <- cbind(rownames(expr_markers), expr_markers)
-  colnames(cells)[1] <- "Cell"
-  expr_markers <- apply(cells, 1, function(r){ gate <- paste(colnames(cells)[-1], r[-1], sep = "", collapse = ""); return(gate)})
-  new_cells <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
-  
-  message("Classification of the cells...")
-  res <- cell_classification(new_cells, new_gates2$extended_gate_table)
-  
-  res_2 <- res
-  uncl <- 0
   uncl_prec <- length(res$labels[res$labels == "Unclassified"])
   
   ## Refinement of the unclassified cells using K-NN classification
