@@ -10,7 +10,7 @@ gates <- data.frame(read_excel("gates.xlsx"))
 colnames(gates) <- gsub("[.]", "-", colnames(gates))
 gates
 
-res <- scGateMe(m,
+res <- scGateMe(matrix,
                   gates, 
                   refine = F,
                   verbose = T,
