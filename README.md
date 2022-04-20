@@ -8,13 +8,12 @@ gates <- data.frame(read_excel("gates.xlsx"))
 colnames(gates) <- gsub("[.]", "-", colnames(gates))
 gates
 
-system.time(
-  res <- scGateMe(m,
+res <- scGateMe(m,
                   gates, 
                   refine = F,
                   verbose = T,
                   narrow_gate_table = T, 
                   seed = 1,
                   marker_seq_eval = F)
-)
+  
 ```
