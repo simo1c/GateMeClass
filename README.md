@@ -4,6 +4,8 @@ scGateMe is an R package for the classification of Flow Cytometry data
 Example:
 
 ```
+source("scGateMe.R")
+
 gates <- data.frame(read_excel("gates.xlsx"))
 colnames(gates) <- gsub("[.]", "-", colnames(gates))
 gates
