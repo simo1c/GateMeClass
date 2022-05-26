@@ -5,6 +5,7 @@ generate_set_values <- function(v, cell){
   
   sets_all <- list()
   sets_to_filter <- list()
+  sets_to_filter2 <- list()
   
   special1 <- grep("[\\|]", v)
   special2 <- grep("[\\^]", v)
@@ -16,57 +17,77 @@ generate_set_values <- function(v, cell){
   for(m in v){
     switch(m,
            `+` = {
-             set <- list(c("*", "+"))
+             set <- list(c("+"))
              set_not <- list()
+             set_not2 <- list()
            },
            # `++` = {
            #   set <- list(c("*", "+", "++"))
            #   set_not <- list()
            # },
            `-` = {
-             set <- list(c("*", "-"))
+             set <- list(c("-"))
              set_not <- list()
+             set_not2 <- list()
            },
-           # `+|`={
-           #   set <- list(c("+", "-"))
-           #   set_not <- list(c("-"))
-           # },
-           # `-|`={
-           #   set <- list(c("*","+", "-"))
-           #   set_not <- list(c("+"))
-           # },
-           # `+^`={
-           #   set <- list(c("*","+", "-"))   #### to check ######
-           #   # set_not <- list(c("int", "-"))
-           #   set_not <- list()
-           # },
-           # `-^`={
-           #   set <- list(c("*","+", "-"))   #### to check ######
-           #   set_not <- list(c("-"))
-           # },
+           `+|`={
+             set <- list(c("+", "-"))
+             set_not <- list(c("-"))
+             set_not2 <- list()
+           },
+           `-|`={
+             set <- list(c("+", "-"))
+             set_not <- list(c("+"))
+             set_not2 <- list()
+           },
+           `+^`={
+             set <- list(c("+", "-"))   #### to check ######
+             set_not <- list(c("+"))
+             set_not2 <- list(c("-"))
+             # set_not <- list()
+           },
+           `-^`={
+             set <- list(c("+", "-"))   #### to check ######
+             set_not <- list(c("-"))
+             set_not2 <- list(c("+"))
+           },
            `*`={
              # set <- list(c("*"))
              set <- list(c("*", "+", "-"))
              set_not <- list()
+             set_not2 <- list()
            }
     )
     sets_all <- c(sets_all, set)
     sets_to_filter <- c(sets_to_filter, set_not)
+    sets_to_filter2 <- c(sets_to_filter2, set_not2)
   }
   
   names(sets_all) <- names(v)
   sets_all <- do.call(expand.grid, sets_all)
   
   if(length(sets_to_filter) > 0){
-    special_to_filter <- grep("[\\|]", v)
+    special_to_filter <- grep("[\\|\\^]", v)
     names(sets_to_filter) <- names(v)[special_to_filter]
     sets_to_filter <- do.call(expand.grid, sets_to_filter)
+  }
+  
+  if(length(sets_to_filter2) > 0){
+    special_to_filter <- grep("[\\|\\^]", v)
+    names(sets_to_filter2) <- names(v)[special_to_filter]
+    sets_to_filter2 <- do.call(expand.grid, sets_to_filter2)
   }
   
   if(length(sets_to_filter) > 0){
     sets_all_filtered <- anti_join(sets_all, sets_to_filter, by = names(sets_to_filter))
   }else{
     sets_all_filtered <- sets_all
+  }
+  
+  if(length(sets_to_filter2) > 0){
+    sets_all_filtered <- anti_join(sets_all_filtered, sets_to_filter2, by = names(sets_to_filter2))
+  }else{
+    sets_all_filtered <- sets_all_filtered
   }
   
   sets_all_filtered$Cell <- cell
@@ -95,7 +116,7 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
   if(narrow_gate_table){
     
     gates2 <- gate_table
-    temp <- sapply(gates2$Gate, function(x){ str <- strsplit(x, "[+]+|[-]|[*]"); return(str)})
+    temp <- sapply(gates2$Gate, function(x){ str <- strsplit(x, "[-]|-[\\|\\^]|[+]|\\+[\\|\\^]|[*]"); return(str)})
     
     # print(temp)
     
@@ -105,18 +126,9 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
     rownames(df_gates) <- gates2$Cell
     colnames(df_gates) <- markers
     
-    
-    
     # gates2_exploded <- strsplit(gates2$Gate, split = "")
-    gates2_exploded <- strsplit(perl=T, gates2$Gate, '(?!\\++)');
-    
-    #print(gates2_exploded)
-    
-    
-    signs <- lapply(gates2_exploded, function(x){ x[x %in% c("+", "-", "*")]})
-    
-    # print(signs)
-    
+    gates2_exploded <- strsplit(perl=T, gates2$Gate, '(?![\\+\\||\\-\\||\\+\\^|\\-\\^])');
+    signs <- lapply(gates2_exploded, function(x){ x[x %in% c("-^", "+^", "-|", "+|", "+", "-", "*")]})
     names(signs) <- names(temp)
     
     l_temp <- 1:length(temp)
@@ -141,6 +153,12 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
   }
     
   df_list <- apply(gate_table, 1, function(v){
+    
+    # v <- as.character(gate_table[1,-1])
+    # names(v) <- colnames(gate_table[1,-1])
+    # cell <- gate_table[1,1]
+    
+    
     to_add <- generate_set_values(v[-1], v[1])
     return(to_add)
   })
@@ -302,28 +320,83 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
 #   }
 # }
 
-set_marker_expression_GMM <- function(X, trimodality, m, r){
+set_marker_expression_GMM <- function(X, gmm_criteria, mm, rr){
   
-  
-  # X <- m["CD45", ]
+  # 
+  # X <- m["CD123", sce2$labels %in% c("CD34+CD38+CD123-_HSPCs", "CD34+CD38+CD123+_HSPCs")]
+  # skewness(X)
   # plot(density(X))
-
-  s <- obsno.Mrss(X, m = 2, r = 1000, type = "r")
+  # 
+  # bic <- mclustBIC(X, G = 1:2, verbose = F)
+  # icl <- mclustICL(X, G = 1:2, verbose = F)
+  # 
+  # 
+  # 
+  # is.multimodal(test)
+  # 
+  # s <- obsno.Mrss(X, m = 2, r = 1000, type = "r")
+  # index <- as.numeric(gsub("Obs.  ", "", s[, 2]))
+  # test <- as.numeric(X[index])
+  # plot(density(test))
+  # 
+  # icl <- mclustBIC(test, G = 1:2, verbose = F)
+  # model_temp <- unlist(strsplit(names(summary(icl)[1]), ","))
+  # type_model <- model_temp[1]
+  # model <- as.numeric(model_temp[2])
+  # cl <- Mclust(test, G = model, verbose = F, modelNames = "E")
+  # plot(cl, what = "classification")
+  # 
+  # cl <- Mclust(X, G = 2, verbose = F)
+  # plot(cl, what = "classification")
+  # 
   
-  if(skewness(X) < 0){
-    index <- as.numeric(gsub("Obs.  ", "", s[, 1]))
+  if(length(X) >= 100){
+    rr <- ceiling(rr*length(X))
+    
+    if(rr < 2){
+      rr <- 100
+    }
+    
+    s <- obsno.Mrss(X, m = mm, r = rr, type = "r")
+    
+    if(skewness(X) < 0){
+      index <- as.numeric(gsub("Obs.  ", "", s[, 1]))
+    }else{
+      index <- as.numeric(gsub("Obs.  ", "", s[, 2]))
+    }
+    
+    test <- as.numeric(X[index])
+  }else if(X >= 2){
+    test <- X
   }else{
-    index <- as.numeric(gsub("Obs.  ", "", s[, 2]))
+    return(c("*"))
   }
-  
-  test <- as.numeric(X[index])
   
   # plot(density(test))
   # cl <- Mclust(test, G = 2, modelNames = "E")
   # plot(cl, what = "classification")
   
-  icl <- mclustICL(test, G = 1:2, verbose = F)
-  model_temp <- unlist(strsplit(names(summary(icl)[1]), ","))
+  
+  switch(gmm_criteria,
+         # best = {
+         #   bic <- mclustBIC(test, G = 1:2, verbose = F)
+         #   icl <- mclustICL(test, G = 1:2, verbose = F)
+         #   
+         #   if(summary(bic)[1] >= summary(icl)[1]){
+         #     crit <- mclustBIC(test, G = 1:2, verbose = F)
+         #   }else{
+         #     crit <- mclustICL(test, G = 1:2, verbose = F)
+         #   }
+         # },
+         BIC = {
+           crit <- mclustBIC(test, G = 1:2, verbose = F)
+         },
+         ICL = {
+           crit <- mclustICL(test, G = 1:2, verbose = F)
+         },
+  )
+  
+  model_temp <- unlist(strsplit(names(summary(crit)[1]), ","))
   type_model <- model_temp[1] 
   model <- as.numeric(model_temp[2])
   
@@ -335,20 +408,20 @@ set_marker_expression_GMM <- function(X, trimodality, m, r){
     means <- cl$parameters$mean
     means <- sort(means)
     
-    if(model == 2){
+    # if(model == 2){
       temp[temp == names(means)[1]] <- "-"
       temp[temp == names(means)[2]] <- "+"
-    }else{
-      temp[temp == names(means)[1]] <- "-"
+    #}else{
+      #temp[temp == names(means)[1]] <- "-"
       
-      if(trimodality == "strictly_pos"){
-        temp[temp == names(means)[2]] <- "-"
-      }else{
-        temp[temp == names(means)[2]] <- "+"
-      }
+      # if(trimodality == "strictly_pos"){
+      #   temp[temp == names(means)[2]] <- "-"
+      # }else{
+      #   temp[temp == names(means)[2]] <- "+"
+      # }
       
-      temp[temp == names(means)[3]] <- "+"
-    }
+      #temp[temp == names(means)[3]] <- "+"
+    #}
     return(temp)
   }else{
     temp <- rep("*", length(X)) 
@@ -362,17 +435,20 @@ set_marker_expression <- function(exp_matrix, markers,
                                   gates, 
                                   verbose, 
                                   marker_seq_eval, 
-                                  trimodality,
-                                  m,
-                                  r){
+                                  gmm_criteria,
+                                  mm,
+                                  rr){
 
 
- #  exp_matrix <- exp_matrix_2
- # markers <- colnames(new_gates$gate_table)[-1]
- #  # # expr_markers
- #  gates <- new_gates$gate_table
- #  # verbose = F
- #  marker_seq_eval = F
+#   exp_matrix <- exp_matrix_2
+#  markers <- colnames(new_gates$gate_table)[-1]
+#   # # expr_markers
+#   gates <- new_gates$gate_table
+#   # verbose = F
+#   marker_seq_eval = F
+#   mm <- 2
+# rr <- 0.01
+# gmm_criteria <- "BIC"
 
   ##################################
   ## Sequential marker evaluation ##
@@ -445,6 +521,8 @@ set_marker_expression <- function(exp_matrix, markers,
 
         for(m in first$markers){
 
+          # m <- "CD44"
+          
           X <- exp_matrix[m, first$indexes]
           
           
@@ -455,11 +533,16 @@ set_marker_expression <- function(exp_matrix, markers,
           
           t <- table(gates[, m])
           
-          marker_expr <- set_marker_expression_GMM(X, t, m, r)
+          marker_expr <- set_marker_expression_GMM(X, gmm_criteria, mm, rr)
 
           if(length(table(marker_expr)) > 1){
             bimodal_markers <- c(bimodal_markers, m)
 
+            # if(bimodal_markers == "CD44"){
+            #   stop()
+            # }
+            
+            
             if(verbose){
               message(paste0(" - ", paste0(bimodal_markers, collapse = " "), collapse = " "))
             }
@@ -474,6 +557,7 @@ set_marker_expression <- function(exp_matrix, markers,
           expr_markers[not_bimodal_markers, first$indexes] <- "*"
           next
         }else if(length(not_bimodal_markers) == 0 & length(bimodal_markers) > 0){
+          # print("**************")
           next
         }else{
           r_temp <- expr_markers[bimodal_markers, first$indexes]
@@ -506,11 +590,19 @@ cell_classification <- function(marker_table, gates){
   # gates <- gates[!duplicated(gates$Gate), ]
   # #########################################
   
-  rownames(gates) <- gates$Gate
-  labels <- gates[marker_table$Gate, "Cell"]
+  # rownames(gates) <- gates$Gate
+  
+  
+  df_gate <- marker_table
+  colnames(df_gate)[1] <- "Cell_ID"
+  
+  labels <- plyr::join(df_gate, gates, by='Gate')
+  # labels <- merge(df_gate, gates, by = "Gate", all.x = T)
+  labels <- labels$Cell
   labels[is.na(labels)] <- "Unclassified"
+  
   rownames(gates) <- NULL
-  marker_table$Cell_type <- labels
+  marker_table$Celltype <- labels
   
   cl_res <- list(labels = labels, marker_table = gates, cell_signatures = marker_table)
   return(cl_res)
@@ -584,10 +676,11 @@ cell_classification <- function(marker_table, gates){
 ## This is the core function for the classification of the single cells
 scGateMe <- function(exp_matrix,
                      gates, 
+                     gmm_criteria = "BIC",
                      refine = F,
                      k = NULL,
                      m = 2,
-                     r = floor(0.01*ncol(exp_matrix)),
+                     r = 0.01,
                      sampling = 1,
                      narrow_gate_table = T,
                      marker_seq_eval = F,
@@ -609,7 +702,7 @@ scGateMe <- function(exp_matrix,
   # narrow_gate_table = T
   # marker_seq_eval = F
   # #trimodality = "pos"
-  # sampling <- 1
+  # sampling <- 0.1
   # combine_seq_eval_res = F
   
   set.seed(seed)
@@ -732,8 +825,8 @@ scGateMe <- function(exp_matrix,
     new_gates <- parse_gate_table(gates, narrow_gate_table)
     
     ### Cells with the same gate are "Unclassified" (Check the classification function!!!!!!!)
-    not_dup <- !duplicated(new_gates$extended_gate_table$Gate)
-    new_gates$extended_gate_table <- new_gates$extended_gate_table[not_dup, ]
+    dup <- new_gates$extended_gate_table$Gate[duplicated(new_gates$extended_gate_table$Gate)]
+    new_gates$extended_gate_table <- new_gates$extended_gate_table[!new_gates$extended_gate_table$Gate %in% dup, ]
     
     # if(verbose){
     #   message("Prioritizing gate table...")
@@ -762,7 +855,7 @@ scGateMe <- function(exp_matrix,
                                           new_gates2$gate_table, 
                                           verbose = verbose, 
                                           marker_seq_eval = marker_seq_eval,
-                                          trimodality = trimodality,
+                                          gmm_criteria = gmm_criteria,
                                           m,
                                           r)
     
