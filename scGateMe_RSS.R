@@ -42,14 +42,16 @@ generate_set_values <- function(v, cell){
            },
            `+^`={
              set <- list(c("+", "-"))   #### to check ######
-             set_not <- list(c("+"))
-             set_not2 <- list(c("-"))
+             set_not <- list()
+             set_not2 <- list(c("+"), c("-"))
+             # set_not2 <- list(c("-"))
              # set_not <- list()
            },
            `-^`={
              set <- list(c("+", "-"))   #### to check ######
-             set_not <- list(c("-"))
-             set_not2 <- list(c("+"))
+             set_not <- list()
+             set_not2 <- list(c("-"), c("+"))
+             # set_not2 <- list(c("+"))
            },
            `*`={
              # set <- list(c("*"))
@@ -67,15 +69,15 @@ generate_set_values <- function(v, cell){
   sets_all <- do.call(expand.grid, sets_all)
   
   if(length(sets_to_filter) > 0){
-    special_to_filter <- grep("[\\|\\^]", v)
-    names(sets_to_filter) <- names(v)[special_to_filter]
-    sets_to_filter <- do.call(expand.grid, sets_to_filter)
+    special_to_filter <- grep("[\\|]", v)
+    sets_to_filter <- data.frame(matrix(as.character(sets_to_filter), ncol = 2))
+    colnames(sets_to_filter) <- names(v)[special_to_filter]
   }
   
   if(length(sets_to_filter2) > 0){
-    special_to_filter <- grep("[\\|\\^]", v)
-    names(sets_to_filter2) <- names(v)[special_to_filter]
-    sets_to_filter2 <- do.call(expand.grid, sets_to_filter2)
+    special_to_filter2 <- grep("[\\^]", v)
+    sets_to_filter2 <- data.frame(matrix(as.character(sets_to_filter2), ncol = length(special_to_filter2)))
+    colnames(sets_to_filter2) <- names(v)[special_to_filter2]
   }
   
   if(length(sets_to_filter) > 0){
@@ -157,7 +159,6 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
     # v <- as.character(gate_table[1,-1])
     # names(v) <- colnames(gate_table[1,-1])
     # cell <- gate_table[1,1]
-    
     
     to_add <- generate_set_values(v[-1], v[1])
     return(to_add)
