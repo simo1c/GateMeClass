@@ -54,8 +54,8 @@ generate_set_values <- function(v, cell){
              # set_not2 <- list(c("+"))
            },
            `*`={
-             # set <- list(c("*"))
-             set <- list(c("*", "+", "-"))
+             set <- list(c("*"))
+             # set <- list(c("*", "+", "-"))
              set_not <- list()
              set_not2 <- list()
            }
@@ -66,7 +66,7 @@ generate_set_values <- function(v, cell){
   }
   
   names(sets_all) <- names(v)
-  sets_all <- do.call(expand.grid, sets_all)
+  sets_all <- expand.grid(sets_all)
   
   if(length(sets_to_filter) > 0){
     special_to_filter <- grep("[\\|]", v)
@@ -94,12 +94,23 @@ generate_set_values <- function(v, cell){
   
   sets_all_filtered$Cell <- cell
   
+  # print(class(sets_all_filtered))
+  
   sets_all_filtered_temp <- sets_all_filtered[, -which(colnames(sets_all_filtered) == "Cell"), drop = F]
   markers <- colnames(sets_all_filtered_temp)
   
-  gate <- apply(sets_all_filtered_temp, 1, function(r){
-    paste0(markers, r, collapse = "")
-  })
+  # system.time(gate <- apply(sets_all_filtered_temp, 1, function(r){
+  #   # paste0(markers, r, collapse = "")
+  #   # names(r) <- NULL
+  #   # rle <- rle(r)
+  #   # rle <- paste(rle$values, rle$lengths, collapse = "", sep = "")
+  #   # return(rle)
+  #   paste0(r, collapse = "")
+  #   # stringi::stri_c(r, collapse = "")
+  # }))
+  
+  gate <- apply(sets_all_filtered_temp, 1, stringi::stri_c, collapse = "")
+  
   
   sets_all_filtered$Gate <- gate
   sets_all_filtered <- sets_all_filtered[, c("Cell", "Gate")]
@@ -109,7 +120,7 @@ generate_set_values <- function(v, cell){
 ## Read the gate table and generate the possbile marker signature of ceach cell type
 parse_gate_table <- function(gate_table, narrow_gate_table){
   
-  gate_table <- gates
+  # gate_table <- gates
   
   if(any(duplicated(gate_table$Cell))){
     stop("Error! The gate table must contains uniquely defined cell types!")
@@ -154,15 +165,15 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
     stop("Error! Cell names cannot contains special characters (e.g., *, ^)!")
   }
     
-  df_list <- apply(gate_table, 1, function(v){
+  system.time(df_list <- apply(gate_table, 1, function(v){
     
-    # v <- as.character(gate_table[1,-1])
-    # names(v) <- colnames(gate_table[1,-1])
-    # cell <- gate_table[1,1]
+    # v <- as.character(gate_table[2,-1])
+    # names(v) <- colnames(gate_table[2,-1])
+    # cell <- gate_table[2,1]
     
     to_add <- generate_set_values(v[-1], v[1])
     return(to_add)
-  })
+  }))
 
   extended_gate_table <- as.data.frame(rbindlist(df_list))
   to_delete <- paste0(colnames(gate_table[, -1]), "*", collapse = "")
@@ -623,7 +634,8 @@ set_marker_expression <- function(exp_matrix, markers,
 cell_classification <- function(marker_table, gates){
   
   # marker_table <- new_cells2
-  # gates <- new_cells
+  # gates <- new_gates2$extended_gate_table
+  
   # 
   # 
   # intersect(marker_table$Gate, gates$Gate)
@@ -638,10 +650,88 @@ cell_classification <- function(marker_table, gates){
   df_gate <- marker_table
   colnames(df_gate)[1] <- "Cell_ID"
   
-  labels <- plyr::join(df_gate, gates, by='Gate')
-  # labels <- merge(df_gate, gates, by = "Gate", all.x = T)
-  labels <- as.character(labels$Cell)
-  labels[is.na(labels)] <- "Unclassified"
+  
+  pos <- sapply(gates$Gate, function(g){
+    gs <- unlist(strsplit(g, split = ""))
+    w <- which(gs != "*")
+    w <- paste(w, collapse = "_", sep = "")
+    return(w)
+  })
+  
+  gates$Pos <- pos
+  
+  clean <- sapply(gates$Gate, function(g){
+    gs <- unlist(strsplit(g, split = ""))
+    w <- which(gs != "*")
+    clean_gs <- paste(gs[w], collapse = "", sep = "")
+    return(clean_gs)
+  })
+  
+  gates$Gate <- clean
+  
+  
+  labels <- rep("Unclassified", nrow(df_gate))
+  
+  for(i in 1:nrow(gates)){
+    
+    # i <- 1
+    
+    pos <- as.numeric(unlist(strsplit(gates$Pos[i], split = "_")))
+    
+    test <- sapply(df_gate$Gate, function(g){
+      x <- paste0(unlist(strsplit(g, split = ""))[pos], collapse = "")
+      return(x == gates$Gate[i])
+    })
+    
+    labels[test] <- gates$Cell[i]
+    
+  }
+  
+  
+
+  
+  
+  
+  # 
+  # gates$Gate <- clean
+  # 
+  # clean <- sapply(df_gate$Gate, function(g){
+  #   gs <- unlist(strsplit(g, split = ""))
+  #   # w <- which(gs != "*")
+  #   clean_gs <- paste(w, gs, collapse = "", sep = "")
+  # })
+  # 
+  # df_gate$Gate <- clean
+  # 
+  # l <- lapply(gates$Gate, function(g){
+  #   
+  #   # g <- gates$Gate[1]
+  #   
+  #   w <- str_which(df_gate$Gate, coll(g))
+  #   
+  #   
+  #   #w <- which(d)
+  #   return(w)
+  # })
+  
+  # labels <- rep("Unclassified", nrow(df_gate))
+  # 
+  # for(i in 1:length(l)){
+  # 
+  #   el <- l[i]
+  #   index <- unlist(el)
+  #   
+  #   if(length(index) > 0){
+  #     labels[index] <- names(el)
+  #     
+  #   }
+  #   
+  # }
+
+  # labels <- plyr::join(df_gate, gates, by='Gate')
+  # # labels <- merge(df_gate, gates, by = "Gate", all.x = T)
+  # labels <- as.character(labels$Cell)
+  # labels[is.na(labels)] <- "Unclassified"
   
   rownames(gates) <- NULL
   marker_table$Celltype <- labels
@@ -731,28 +821,29 @@ scGateMe <- function(exp_matrix,
                      verbose = T,
                      seed = 1){
   
-  gates <- new_gate_table
-  refine = F
-  n_clusters = 20
-  cluster_level_labels = T
-  plots_thr = F
-  seed = 1
-  clusters = NULL
-  # clusters <- res$labels_post_clustering
-  exp_matrix <- m
-  ignore_markers = NULL
-  verbose = T
-  narrow_gate_table = T
-  marker_seq_eval = F
-  #trimodality = "pos"
-  sampling <- 0.1
-  combine_seq_eval_res = F
-  mm = 2
-  rr = 0.01
-  gmm_criteria = "BIC"
-  train = F
+  # gates <- gate_table
+  # refine = F
+  # n_clusters = 20
+  # cluster_level_labels = T
+  # plots_thr = F
+  # seed = 1
+  # clusters = NULL
+  # # clusters <- res$labels_post_clustering
+  # exp_matrix <- m
+  # ignore_markers = NULL
+  # verbose = T
+  # narrow_gate_table = T
+  # marker_seq_eval = F
+  # #trimodality = "pos"
+  # sampling <- 0.1
+  # combine_seq_eval_res = F
+  # mm = 2
+  # rr = 0.01
+  # gmm_criteria = "BIC"
+  # train = F
+  # k = NULL
 
-  print(dim(exp_matrix))
+  # print(dim(exp_matrix))
   
   set.seed(seed)
   
@@ -885,9 +976,9 @@ scGateMe <- function(exp_matrix,
       # new_gates2 <- prioritize_gate_table(new_gates)
       
       new_gates2 <- new_gates
-      new_gates2$extended_gate_table <- rbind(new_gates2$extended_gate_table,
-                                              data.frame(Cell = "Unclassified", 
-                                                         Gate = paste0(colnames(new_gates2$gate_table)[-1], "*", collapse = "")))
+      # new_gates2$extended_gate_table <- rbind(new_gates2$extended_gate_table,
+      #                                         data.frame(Cell = "Unclassified", 
+      #                                                    Gate = paste0(rep("*", ncol(new_gates2$gate_table)), collapse = "")))
       
       exp_matrix_2 <- exp_matrix[colnames(new_gates2$gate_table)[-1], , drop = F]
       
@@ -967,24 +1058,25 @@ scGateMe <- function(exp_matrix,
     
     expr_markers <- expr_markers[colnames(new_gates2$gate_table)[-1], ]
     expr_markers <- as.data.frame(t(expr_markers))
+    
     cells <- cbind(rownames(expr_markers), expr_markers)
     colnames(cells)[1] <- "Cell"
     
-    markers <- colnames(cells)[-1]
+    # markers <- colnames(cells)[-1]
     
-    expr_markers <- apply(cells, 1, function(r){
-      return(paste0(markers, r[-1], collapse = ""))
-      # return(gate)
-    })
+    # expr_markers <- apply(cells, 1, function(r){
+    #   return(paste0(markers, r[-1], collapse = ""))
+    #   # return(gate)
+    # })
     
+    expr_markers <- apply(cells[,- 1], 1, stringi::stri_c, collapse = "")
     new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
-    
-    if(verbose){
-      message("Classification of the cells...")
-    }
-    
+
     if(!train){
+      message("Classification of the cells...")
       res <- cell_classification(new_cells2, new_gates2$extended_gate_table)
+    }else{
+      res <- list(cell_signatures = new_cells2)
     }
     
     # else{
@@ -1021,7 +1113,7 @@ scGateMe <- function(exp_matrix,
         message("Refinement of the labels using k-nn classification...")
       }
       
-      train <- t(exp_matrix_pre_sampling[, !res$labels %in% c("Unclassified")])
+      training_set <- t(exp_matrix_pre_sampling[, !res$labels %in% c("Unclassified")])
       control <- t(exp_matrix_pre_sampling[, res$labels %in% c("Unclassified")])
       
       if(is.null(k)){
@@ -1030,7 +1122,7 @@ scGateMe <- function(exp_matrix,
         k <- floor(sqrt(tt))
       }
       
-      knn_res <- knn(train,
+      knn_res <- knn(training_set,
                      control,
                      cl = factor(res$labels[!res$labels %in% c("Unclassified")]),
                      k = k,
@@ -1042,13 +1134,42 @@ scGateMe <- function(exp_matrix,
     }
   }
   
-    if(train){
-      res <- new_cells2
-    }else{
-      res <- list(labels = res$labels,
-                  marker_table = res$marker_table, 
-                  cell_signatures = res$cell_signatures)
-    }
+  not_na <- which(!is.na(res$cell_signatures))
+  signatures <- res$cell_signatures[not_na, ]
+  
+  markers <- colnames(new_gates$gate_table)[-1]
+  
+  gate_ext <- sapply(signatures$Gate, function(v){
+    split <- unlist(strsplit(v, ""))
+    sig <- stringi::stri_c(markers, split, collapse = "", sep = "")
+    return(sig)
+  })
+  
+  res$cell_signatures[not_na, "Gate"] <- gate_ext  
     
+    
+  if(train){
+    res <- res$cell_signatures
+  }else{
+    res <- list(labels = res$labels,
+                marker_table = res$marker_table, 
+                cell_signatures = res$cell_signatures)
+  }
+
   return(res)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
