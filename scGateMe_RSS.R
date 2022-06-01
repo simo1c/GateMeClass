@@ -829,18 +829,18 @@ scGateMe <- function(exp_matrix,
   # seed = 1
   # clusters = NULL
   # # clusters <- res$labels_post_clustering
-  # exp_matrix <- m
+  # exp_matrix <- reference
   # ignore_markers = NULL
   # verbose = T
   # narrow_gate_table = T
   # marker_seq_eval = F
   # #trimodality = "pos"
-  # sampling <- 0.1
+  # sampling <- 1
   # combine_seq_eval_res = F
   # mm = 2
   # rr = 0.01
   # gmm_criteria = "BIC"
-  # train = F
+  # train = T
   # k = NULL
 
   # print(dim(exp_matrix))
@@ -1134,8 +1134,10 @@ scGateMe <- function(exp_matrix,
     }
   }
   
-  not_na <- which(!is.na(res$cell_signatures))
-  signatures <- res$cell_signatures[not_na, ]
+  # not_na <- which(!is.na(res$cell_signatures))
+  # signatures <- res$cell_signatures[not_na, ]
+  
+  signatures <- res$cell_signatures
   
   markers <- colnames(new_gates$gate_table)[-1]
   
@@ -1145,9 +1147,8 @@ scGateMe <- function(exp_matrix,
     return(sig)
   })
   
-  res$cell_signatures[not_na, "Gate"] <- gate_ext  
-    
-    
+  res$cell_signatures[, "Gate"] <- gate_ext
+  
   if(train){
     res <- res$cell_signatures
   }else{
@@ -1219,40 +1220,60 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", thr = 0.75, 
   
   for(cell in unique(gates2$Cell)){
     
-    #cell <- "Monocytes"
+    # cell <- "CD8_T_cells"
     
     test <- gates2[gates2$Cell == cell, ]
+    sig <- c()
     
-    acc <- c()
-    
-    for(i in 1:100){
+    for(s in c("+", "-")){
       
-      message(paste0(cell, " iteration ", i))
+      # s <- "+"
       
-      test2 <- test[sample(1:nrow(test), ceiling(0.1 * nrow(test))), ]
+      acc <- c()
       
-      for(i in 2:nrow(test2)){
+      for(j in 1:50){
         
-        #i <- 2
+        # j <- 1
         
-        if(i == 2){
-          a <- paste(colnames(test2)[-1], test2[i, -1], sep = "")
-          b <-  paste(colnames(test2)[-1], test2[1, -1], sep = "")
-          prec <- LCS(a,b)
-        }else{
-          a <- paste(colnames(test2)[-1], test2[i, -1], sep = "")
-          b <- prec$LCS
-          prec <- LCS(a, b)
+        message(paste0(cell, " iteration ", j))
+        test2 <- test[sample(1:nrow(test), ceiling(0.1 * nrow(test))), ]
+        
+        
+        test2 <- test2[, -1]
+        
+        
+        for(i in 2:nrow(test2)){
+          
+          # i <- 2
+          
+          if(i == 2){
+            
+            w1 <- which(test2[i, -1] == s)
+            w2 <- which(test2[1, -1] == s)
+            
+            a <- paste(colnames(test2)[-1][w1], test2[i, -1][w1], sep = "")
+            b <-  paste(colnames(test2)[-1][w2], test2[1, -1][w2], sep = "")
+            prec <- LCS(a,b)
+            
+            
+          }else{
+            w1 <- which(test2[i, -1] == s)
+            a <- paste(colnames(test2)[-1], test2[i, -1][w1], sep = "")
+            b <- prec$LCS
+            prec <- LCS(a, b)
+          }
         }
+        
+        signature <- paste0(sort(prec$LCS), collapse = "")
+        n <- length(prec$LCS)
+        names(signature) <- n
+        acc <- c(acc, signature)
       }
       
-      signature <- paste0(sort(prec$LCS), collapse = "")
-      acc <- c(acc, signature)
+      acc <- table(acc)
+      acc <- acc[order(acc, decreasing = T)]
+      sig <- paste0(sig, names(acc[1]), sep = "")
     }
-    
-    acc <- table(acc)
-    acc <- acc[order(acc, decreasing = T)]
-    sig <- names(acc)[1]
     
     new_gate_table[cell, "Gate"] <- sig
     
