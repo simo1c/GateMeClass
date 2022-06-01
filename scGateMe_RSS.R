@@ -1160,13 +1160,14 @@ scGateMe <- function(exp_matrix,
   return(res)
 }
 
-scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", thr = 0.75, sampling){
+scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling){
   
   # reference <- m
   # labels <- sce2$labels
   # gmm_criteria = "BIC"
   # thr = 0.95
   # sampling = 0.1
+  # seed = 2
   
   n <- floor(ncol(reference) * sampling)
   s <- sample(1:ncol(reference), n)
@@ -1220,14 +1221,14 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", thr = 0.75, 
   
   for(cell in unique(gates2$Cell)){
     
-    # cell <- "CD8_T_cells"
+    # cell <- "Mature_B_cells"
     
     test <- gates2[gates2$Cell == cell, ]
     sig <- c()
     
     for(s in c("+", "-")){
       
-      # s <- "+"
+      # s <- "-"
       
       acc <- c()
       
@@ -1239,7 +1240,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", thr = 0.75, 
         test2 <- test[sample(1:nrow(test), ceiling(0.1 * nrow(test))), ]
         
         
-        test2 <- test2[, -1]
+        # test2 <- test2[, -1]
         
         
         for(i in 2:nrow(test2)){
@@ -1258,7 +1259,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", thr = 0.75, 
             
           }else{
             w1 <- which(test2[i, -1] == s)
-            a <- paste(colnames(test2)[-1], test2[i, -1][w1], sep = "")
+            a <- paste(colnames(test2)[-1][w1], test2[i, -1][w1], sep = "")
             b <- prec$LCS
             prec <- LCS(a, b)
           }
@@ -1267,7 +1268,10 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", thr = 0.75, 
         signature <- paste0(sort(prec$LCS), collapse = "")
         n <- length(prec$LCS)
         names(signature) <- n
-        acc <- c(acc, signature)
+        
+        if(signature != ""){
+          acc <- c(acc, signature)
+        }
       }
       
       acc <- table(acc)
