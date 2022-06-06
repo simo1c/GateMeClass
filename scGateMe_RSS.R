@@ -121,6 +121,7 @@ generate_set_values <- function(v, cell){
 parse_gate_table <- function(gate_table, narrow_gate_table){
   
   # gate_table <- gates
+  narrow_gate_table = T
   
   if(any(duplicated(gate_table$Cell))){
     stop("Error! The gate table must contains uniquely defined cell types!")
@@ -332,7 +333,15 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
 #   }
 # }
 
-set_marker_expression_GMM <- function(X, gmm_criteria, mm, rr){
+set_marker_expression_GMM <- function(X, indexes, gmm_criteria, mm, rr){
+  
+  
+  # X
+  # gmm_criteria = "BIC"
+  # mm = 2
+  # rr = 0.01
+  # indexes = first$indexes
+  
   
   # 
   # X <- m["CD123", sce2$labels %in% c("CD34+CD38+CD123-_HSPCs", "CD34+CD38+CD123+_HSPCs")]
@@ -416,13 +425,28 @@ set_marker_expression_GMM <- function(X, gmm_criteria, mm, rr){
     
     cl <- Mclust(test, G = model, verbose = F, modelNames = type_model)
     #temp <- cl$classification
-    temp <- predict.Mclust(cl, X)$classification
+    pred <- predict.Mclust(cl, X)
+    temp <- pred$classification
     means <- cl$parameters$mean
     means <- sort(means)
     
     # if(model == 2){
-      temp[temp == names(means)[1]] <- "-"
-      temp[temp == names(means)[2]] <- "+"
+    
+    temp[temp == names(means)[1]] <- "-"
+    temp[temp == names(means)[2]] <- "+"
+      
+    # pred_df <- data.frame(Pred = temp, pred$z)
+    # pred_df$indexes <- indexes
+    # colnames(pred_df)[c(2,3)] <- c("1", "2")
+    # 
+    # pred_df_minus <- pred_df[, c("Pred", names(means)[1], "indexes")]
+    # index_minus <- pred_df_minus[order(pred_df_minus[, names(means)[1]], decreasing = T), "indexes"][1:10]
+    # 
+    # pred_df_plus <- pred_df[, c("Pred", names(means)[2], "indexes")]
+    # index_plus <- pred_df_plus[order(pred_df_plus[, names(means)[2]], decreasing = T), "indexes"][1:10]
+    
+    # View(pred_df)
+      
     #}else{
       #temp[temp == names(means)[1]] <- "-"
       
@@ -452,15 +476,15 @@ set_marker_expression <- function(exp_matrix, markers,
                                   rr){
 
 
-#   exp_matrix <- exp_matrix_2
-#  markers <- colnames(new_gates$gate_table)[-1]
-#   # # expr_markers
-#   gates <- new_gates$gate_table
-#   # verbose = F
-#   marker_seq_eval = F
-#   mm <- 2
-# rr <- 0.01
-# gmm_criteria <- "BIC"
+  # exp_matrix <- exp_matrix_2
+  # markers <- colnames(new_gates$gate_table)[-1]
+  # # # expr_markers
+  # gates <- new_gates$gate_table
+  # # verbose = F
+  # marker_seq_eval = F
+  # mm <- 2
+  # rr <- 0.01
+  # gmm_criteria <- "BIC"
 
   ##################################
   ## Sequential marker evaluation ##
@@ -537,7 +561,7 @@ set_marker_expression <- function(exp_matrix, markers,
           
 
           
-          # m <- "CD44"
+          # m <- "CD3"
           
           X <- exp_matrix[m, first$indexes]
           
@@ -549,7 +573,7 @@ set_marker_expression <- function(exp_matrix, markers,
           
           t <- table(gates[, m])
           
-          marker_expr <- set_marker_expression_GMM(X, gmm_criteria, mm, rr)
+          marker_expr <- set_marker_expression_GMM(X, indexes = first$indexes, gmm_criteria, mm, rr)
           
 
 
@@ -601,9 +625,6 @@ set_marker_expression <- function(exp_matrix, markers,
           comb_list2 <- sapply(comb_list, paste0, collapse = "")
           l <- expr_markers[bimodal_markers, first$indexes, drop = F]
           l <- sapply(l, paste0, collapse = "")
-          
-          
-          
           
           to_add <- lapply(comb_list2, function(c){
             
@@ -823,7 +844,7 @@ scGateMe <- function(exp_matrix,
                      refine = F,
                      k = NULL,
                      mm = 2,
-                     rr = 0.1,
+                     rr = 0.01,
                      sampling = 1,
                      narrow_gate_table = T,
                      marker_seq_eval = F,
@@ -1170,17 +1191,26 @@ scGateMe <- function(exp_matrix,
   return(res)
 }
 
-scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling){
+scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, thr_pos = 0.75, thr_neg = 0.25, seed = 1){
   
   # reference <- m
-  # labels <- sce2$labels
+  # labels <- nr_t0$labels
   # gmm_criteria = "BIC"
   # thr = 0.95
   # sampling = 0.1
-  # seed = 2
+  # seed = 1
+  # thr_pos <- 0.8
+  # thr_neg <- 0.2
   
-  n <- floor(ncol(reference) * sampling)
-  s <- sample(1:ncol(reference), n)
+  set.seed(seed)
+  
+  s <- c()
+  
+  for(c in unique(labels)){
+    w <- which(labels == c)
+    n <- floor(length(w) * sampling)
+    s <- c(s, sample(w, n))
+  }
   
   # ms <- sample(1:32, 20)
   # reference <- reference[ms, s]
@@ -1200,11 +1230,11 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling){
                   k = NULL,
                   verbose = T,
                   narrow_gate_table = T, 
-                  seed = 1,
                   marker_seq_eval = F,
-                  combine_seq_eval_res = F)
+                  combine_seq_eval_res = F,
+                  seed = seed)
   
-  
+  message("-----------------------")
   cell_df <- res
   cell_df$labels <- labels
   cell_df <- cell_df[, c("Gate", "labels")]
@@ -1216,87 +1246,206 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling){
   
   # gate_table <- na.omit(gate_table)
   gate_table <- gate_table[gate_table$N > 0, ]
-  labels <- gate_table$Cell
+  # labels <- gate_table$Cell
+  
+  labels2 <- gate_table$Cell
   
   # gate_table <- gate_table[gate_table$Cell == "CD4_T_cells", ]
   gate_table$Cell <- paste(gate_table$Cell, as.character(1:nrow(gate_table)), sep = "_")
+  gate_table$Cell_2 <- labels2
   
   gates2 <- parse_gate_table(gate_table, T)
+  
+  #### Check order !!!!
+  gates2$gate_table <- gates2$gate_table[rep(seq_len(nrow(gates2$gate_table)), times = gate_table$N), ]
+  
   gates2 <- gates2$gate_table
-  gates2$Cell <- labels
+  gates2$Cell <- rep(gate_table$Cell_2, times = gate_table$N)
   # gate3 <- reshape2::melt(gates2, id.vars = "Cell")
   
   new_gate_table <- data.frame(Cell = unique(gates2$Cell), Gate = "")
   rownames(new_gate_table) <- new_gate_table$Cell
   
-  for(cell in unique(gates2$Cell)){
+  markers <- colnames(gates2[-1])
+  celltypes <- unique(gates2$Cell)
+  
+  
+  for(c in celltypes){
     
-    # cell <- "Mature_B_cells"
+    message(paste0(" - ", c))
     
-    test <- gates2[gates2$Cell == cell, ]
-    sig <- c()
+    # c <- "PMN"
     
-    for(s in c("+", "-")){
+    sig <- ""
+    
+    for(ma in markers){
       
-      # s <- "-"
+      # ma <- "CD4"
       
-      acc <- c()
+      gates3 <- gates2
+      gates3$Cell[gates3$Cell != c] <- "Other"
+      gates3$Cell <- factor(as.character(gates3$Cell), levels = c(c, "Other"))
+      df <- as.data.frame.matrix(table(gates3$Cell, gates3[, ma]))
+      df$Cell <- rownames(df)
       
-      for(j in 1:50){
-        
-        # j <- 1
-        
-        message(paste0(cell, " iteration ", j))
-        test2 <- test[sample(1:nrow(test), ceiling(0.1 * nrow(test))), ]
-        
-        
-        # test2 <- test2[, -1]
-        
-        
-        for(i in 2:nrow(test2)){
-          
-          # i <- 2
-          
-          if(i == 2){
-            
-            w1 <- which(test2[i, -1] == s)
-            w2 <- which(test2[1, -1] == s)
-            
-            a <- paste(colnames(test2)[-1][w1], test2[i, -1][w1], sep = "")
-            b <-  paste(colnames(test2)[-1][w2], test2[1, -1][w2], sep = "")
-            prec <- LCS(a,b)
-            
-            
-          }else{
-            w1 <- which(test2[i, -1] == s)
-            a <- paste(colnames(test2)[-1][w1], test2[i, -1][w1], sep = "")
-            b <- prec$LCS
-            prec <- LCS(a, b)
-          }
-        }
-        
-        signature <- paste0(sort(prec$LCS), collapse = "")
-        n <- length(prec$LCS)
-        names(signature) <- n
-        
-        if(signature != ""){
-          acc <- c(acc, signature)
-        }
+      
+      # df <- df + 1
+      star <- which(colnames(df) == "*")
+      
+      if(length(star) > 0){
+        df <- df[, -which(colnames(df) == "*")]
       }
       
-      acc <- table(acc)
-      acc <- acc[order(acc, decreasing = T)]
-      sig <- paste0(sig, names(acc[1]), sep = "")
+      df[, -3] <- df[, -3] + 1
+      
+      
+      # f <- fisher.test(df)
+      # 
+      # if(f$p.value < 0.05 & f$estimate > 1){
+      #   sig <- paste0(sig, ma, "-")
+      # }else if(f$p.value < 0.05 & f$estimate < 1){
+      #   sig <- paste0(sig, ma, "+")
+      # }
+      
+      df$Cell <- rownames(df)
+      
+      #df$Cell[df$Cell != "Monocytes"] <- "Other"
+      
+      colnames(df) <- c("neg", "pos", "Cell")
+      
+      
+      # df <- reshape2::melt(df, id.vars = "Cell")
+      # df$Other <- sum(df$value) - df$value
+      df$Cell <- factor(df$Cell, levels = c("Other", c))
+      # df$value[df$value == 0] <- 1
+      
+      model0 <- glm(
+        formula = cbind(pos, neg) ~ Cell,
+        family = binomial(link = 'logit'),
+        data = df
+      )
+      
+      emm1 <- emmeans(model0, specs = revpairwise ~ Cell)
+      emm1$contrasts %>%
+        summary(infer = TRUE, type = 'response') %>%
+        rbind() %>%
+        as.data.frame() -> c_results
+      
+      if(c_results$p.value < 0.05){
+        
+        p <- prop.test(df[c, "pos"], df[c, "pos"] + df[c, "neg"])
+        
+        if(c_results$odds.ratio > 1 & p$p.value < 0.05 & p$estimate > thr_pos){
+          sig <- paste0(sig, ma, "+")
+        }else if(c_results$odds.ratio < 1 & p$p.value < 0.05 & p$estimate < thr_neg){
+          sig <- paste0(sig, ma, "-")
+        }
+      }
     }
     
-    new_gate_table[cell, "Gate"] <- sig
+    new_gate_table[c, "Gate"] <- sig
     
+  
+
+    
+    # w_plus <- which(c_results$p.value < 0.05 & c_results$odds.ratio > 1 & c_results$odds.ratio > 2)
+    # w_minus <- which(c_results$p.value < 0.05 & c_results$odds.ratio < 1  & c_results$odds.ratio < 0.1)
+    # 
+    # if(length(w_minus) != length(celltypes) & length(w_plus) != length(celltypes)){
+    #   sig_plus <- rep(paste0(ma, "+"), length(w_plus))
+    #   sig_minus <- rep(paste0(ma, "-"), length(w_minus))
+    # 
+    #   new_gate_table[as.character(c_results$Cell[w_plus]), "Gate"] <- paste0(new_gate_table[as.character(c_results$Cell[w_plus]), "Gate"], as.character(sig_plus))
+    #   new_gate_table[as.character(c_results$Cell[w_minus]), "Gate"] <- paste0(new_gate_table[as.character(c_results$Cell[w_minus]), "Gate"], as.character(sig_minus))
+    # }
   }
   
+  # for(cell in unique(gates2$Cell)){
+  #   
+  #   # cell <- "Mature_B_cells"
+  #   
+  #   test <- gates2[gates2$Cell == cell, ]
+  #   sig <- c()
+  #   
+  #   acc <- c()
+  #   
+  #   for(s in c("+", "-")){
+  #     
+  #     # s <- "+"
+  #   
+  #     for(j in 1:100){
+  #       
+  #       # j <- 1
+  #       
+  #       message(paste0(cell, " iteration ", j))
+  #       
+  #       n <- ceiling(0.1 * nrow(test))
+  #       
+  #       #test2 <- test[sample(1:nrow(test), n), ]
+  #       
+  #       
+  #       if(n > 100){
+  #         test2 <- test[sample(1:nrow(test), 10), ]
+  #       }else{
+  #         test2 <- test
+  #       }
+  #       
+  #       # test2 <- test2[, -1]
+  #       
+  #       
+  #       for(i in 2:nrow(test2)){
+  #         
+  #         #i <- 2
+  #         
+  #         if(i == 2){
+  #           
+  #           w1 <- which(test2[i, -1] == s)
+  #           w2 <- which(test2[1, -1] == s)
+  #           
+  #           a <- paste(colnames(test2)[-1][w1], test2[i, -1][w1], sep = "")
+  #           b <-  paste(colnames(test2)[-1][w2], test2[1, -1][w2], sep = "")
+  #           prec <- LCS(a,b)
+  #           
+  #           
+  #         }else{
+  #           w1 <- which(test2[i, -1] == s)
+  #           a <- paste(colnames(test2)[-1][w1], test2[i, -1][w1], sep = "")
+  #           b <- prec$LCS
+  #           prec <- LCS(a, b)
+  #         }
+  #       }
+  #       
+  #       signature <- paste0(sort(prec$LCS), collapse = "")
+  #       # names(signature) <- n
+  #       
+  #       if(signature != ""){
+  #         acc <- unique(c(acc, prec$LCS))
+  #       }
+  #     }
+  #     
+  #     sig <- paste0(sort(acc), collapse = "")
+  #     
+  #     
+  #     # acc <- table(acc)
+  #     # ord <- order(acc, decreasing = T)
+  #     # acc <- acc[ord]
+  #     # acc
+  #     
+  #     # acc <- acc[order(acc, decreasing = T)]
+  #     # sig <- paste0(sig, names(acc[1]), sep = "")
+  #   }
+  #   
+  #   new_gate_table[cell, "Gate"] <- sig
+  #   
+  # }
+  
   rownames(new_gate_table) <- NULL
+  new_gate_table <- new_gate_table[new_gate_table$Gate != "", ]
   return(new_gate_table)
   
 }
+
+
 
 
 
