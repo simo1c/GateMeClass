@@ -669,18 +669,28 @@ cell_classification <- function(marker_table, gates){
   
   gates$Gate <- clean
   
+  gates$N <- sapply(gates$Gate, function (g){
+    return(sum(unlist(strsplit(g, split = "")) == "+"))
+  })
+  
+  gates <- gates[order(gates$N, decreasing = F), ]
   
   labels <- rep("Unclassified", nrow(df_gate))
   
   for(i in 1:nrow(gates)){
     
-    # i <- 1
-    
     pos <- as.numeric(unlist(strsplit(gates$Pos[i], split = "_")))
     
     test <- sapply(df_gate$Gate, function(g){
+      
+
+      
       x <- paste0(unlist(strsplit(g, split = ""))[pos], collapse = "")
+      
+      
       return(x == gates$Gate[i])
+      
+      
     })
     
     labels[test] <- gates$Cell[i]
@@ -813,7 +823,7 @@ scGateMe <- function(exp_matrix,
                      refine = F,
                      k = NULL,
                      mm = 2,
-                     rr = 0.01,
+                     rr = 0.1,
                      sampling = 1,
                      narrow_gate_table = T,
                      marker_seq_eval = F,
@@ -821,7 +831,7 @@ scGateMe <- function(exp_matrix,
                      verbose = T,
                      seed = 1){
   
-  # gates <- gate_table
+  # gates <- gate
   # refine = F
   # n_clusters = 20
   # cluster_level_labels = T
@@ -829,18 +839,18 @@ scGateMe <- function(exp_matrix,
   # seed = 1
   # clusters = NULL
   # # clusters <- res$labels_post_clustering
-  # exp_matrix <- reference
+  # exp_matrix <- m
   # ignore_markers = NULL
   # verbose = T
   # narrow_gate_table = T
   # marker_seq_eval = F
   # #trimodality = "pos"
-  # sampling <- 1
+  # sampling <- 0.1
   # combine_seq_eval_res = F
   # mm = 2
   # rr = 0.01
   # gmm_criteria = "BIC"
-  # train = T
+  # train = F
   # k = NULL
 
   # print(dim(exp_matrix))
