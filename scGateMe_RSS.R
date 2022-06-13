@@ -121,7 +121,7 @@ generate_set_values <- function(v, cell){
 parse_gate_table <- function(gate_table, narrow_gate_table){
   
   # gate_table <- gates
-  narrow_gate_table = T
+  # narrow_gate_table = T
   
   if(any(duplicated(gate_table$Cell))){
     stop("Error! The gate table must contains uniquely defined cell types!")
@@ -339,7 +339,7 @@ set_marker_expression_GMM <- function(X, indexes, gmm_criteria, mm, rr){
   # X
   # gmm_criteria = "BIC"
   # mm = 2
-  # rr = 0.01
+  # rr = 0.05
   # indexes = first$indexes
   
   
@@ -371,22 +371,45 @@ set_marker_expression_GMM <- function(X, indexes, gmm_criteria, mm, rr){
   # plot(cl, what = "classification")
   # 
   
+  # X <- m["CD3", ]
+  
   if(length(X) >= 100){
+    
     rr <- ceiling(rr*length(X))
     
     if(rr < 2){
       rr <- 100
     }
     
-    s <- obsno.Mrss(X, m = mm, r = rr, type = "r")
+    # s <- obsno.Mrss(X, m = mm, r = rr, type = "r")
+    
+    ############ Ranket Set Sampling (RSS) ##############
+    sample = X
+    cycles = length(sample) / 4
+    n_unit = 2
+    n <- length(sample)
+    samples <- cycles * n_unit
+    indexes <- matrix(sample(1:n, samples * n_unit), nrow = n_unit)
+    sel_samples <- matrix(sample[indexes], nrow = n_unit)
+    #####################################################
+    
+    
+    # if(skewness(X) < 0){
+    #   index <- as.numeric(gsub("Obs.  ", "", s[, 1]))
+    # }else{
+    #   index <- as.numeric(gsub("Obs.  ", "", s[, 2]))
+    # }
     
     if(skewness(X) < 0){
-      index <- as.numeric(gsub("Obs.  ", "", s[, 1]))
+      test <- apply(sel_samples, 2, min)
     }else{
-      index <- as.numeric(gsub("Obs.  ", "", s[, 2]))
+      test <- apply(sel_samples, 2, max)
     }
     
-    test <- as.numeric(X[index])
+    # test <- as.numeric(X[index])
+    
+    # plot(density(test))
+    
   }else if(length(X) >= 2){
     test <- X
   }else{
@@ -397,12 +420,11 @@ set_marker_expression_GMM <- function(X, indexes, gmm_criteria, mm, rr){
   # cl <- Mclust(test, G = 2, modelNames = "E")
   # plot(cl, what = "classification")
   
-  
   switch(gmm_criteria,
          # best = {
          #   bic <- mclustBIC(test, G = 1:2, verbose = F)
          #   icl <- mclustICL(test, G = 1:2, verbose = F)
-         #   
+         #
          #   if(summary(bic)[1] >= summary(icl)[1]){
          #     crit <- mclustBIC(test, G = 1:2, verbose = F)
          #   }else{
@@ -418,12 +440,17 @@ set_marker_expression_GMM <- function(X, indexes, gmm_criteria, mm, rr){
   )
   
   model_temp <- unlist(strsplit(names(summary(crit)[1]), ","))
-  type_model <- model_temp[1] 
+  type_model <- model_temp[1]
   model <- as.numeric(model_temp[2])
   
   if(!is.na(model) & model > 1){
     
-    cl <- Mclust(test, G = model, verbose = F, modelNames = type_model)
+    # cl <- Mclust(test, G = model, verbose = F, modelNames = type_model)
+    cl <- Mclust(test, G = 2, verbose = F, modelNames = "E")
+    
+    #plot(cl, what = "classification")
+    
+    
     #temp <- cl$classification
     pred <- predict.Mclust(cl, X)
     temp <- pred$classification
@@ -483,8 +510,8 @@ set_marker_expression <- function(exp_matrix, markers,
   # # verbose = F
   # marker_seq_eval = F
   # mm <- 2
-  # rr <- 0.01
-  # gmm_criteria <- "BIC"
+  # rr <- 0.05
+  # gmm_criteria <- "ICL"
 
   ##################################
   ## Sequential marker evaluation ##
@@ -543,6 +570,9 @@ set_marker_expression <- function(exp_matrix, markers,
   #   ## Not sequential marker evaluation ##
   #   ######################################
   # }else{
+      # 
+      # markers[1] <- "CD274"
+      # markers[8] <- "FS_A"
 
       queue <- list(list(indexes = 1:ncol(exp_matrix), markers = markers))
 
@@ -556,12 +586,20 @@ set_marker_expression <- function(exp_matrix, markers,
         first <- queue[[1]]
         queue <- queue[-1]
 
+        
+        # first$markers[1] <- "CD274"
+        # first$markers[8] <- "FS_A"
+      
+        
         for(m in first$markers){
 
+          # 
+          # if(m == "CD274"){
+          #   stop()
+          # }
+  
           
-
-          
-          # m <- "CD3"
+          #m <- "CD274"
           
           X <- exp_matrix[m, first$indexes]
           
@@ -571,13 +609,14 @@ set_marker_expression <- function(exp_matrix, markers,
           #   next
           # }
           
-          t <- table(gates[, m])
+          # t <- table(gates[, m])
           
           marker_expr <- set_marker_expression_GMM(X, indexes = first$indexes, gmm_criteria, mm, rr)
           
 
 
           if(length(table(marker_expr)) > 1){
+            
             bimodal_markers <- c(bimodal_markers, m)
 
             # if(bimodal_markers == "CD44"){
@@ -590,12 +629,19 @@ set_marker_expression <- function(exp_matrix, markers,
             }
 
             expr_markers[m, first$indexes] <- marker_expr
+            
+            
           }else{
             not_bimodal_markers <- c(not_bimodal_markers, m)
           }
+          
+          
+          # print(table(expr_markers["CD274", ], nr_t0$labels))
+          
         }
 
         if(length(not_bimodal_markers) > 0 & length(bimodal_markers) == 0){
+          
           expr_markers[not_bimodal_markers, first$indexes] <- "*"
           
 
@@ -844,7 +890,7 @@ scGateMe <- function(exp_matrix,
                      refine = F,
                      k = NULL,
                      mm = 2,
-                     rr = 0.01,
+                     rr = 0.05,
                      sampling = 1,
                      narrow_gate_table = T,
                      marker_seq_eval = F,
@@ -852,12 +898,12 @@ scGateMe <- function(exp_matrix,
                      verbose = T,
                      seed = 1){
   
-  # gates <- gate
+  # gates <- gate_table
   # refine = F
   # n_clusters = 20
   # cluster_level_labels = T
   # plots_thr = F
-  # seed = 1
+  # seed = 2
   # clusters = NULL
   # # clusters <- res$labels_post_clustering
   # exp_matrix <- m
@@ -866,12 +912,12 @@ scGateMe <- function(exp_matrix,
   # narrow_gate_table = T
   # marker_seq_eval = F
   # #trimodality = "pos"
-  # sampling <- 0.1
+  # sampling <- 1
   # combine_seq_eval_res = F
   # mm = 2
-  # rr = 0.01
+  # rr = 0.05
   # gmm_criteria = "BIC"
-  # train = F
+  # train = T
   # k = NULL
 
   # print(dim(exp_matrix))
@@ -1191,31 +1237,35 @@ scGateMe <- function(exp_matrix,
   return(res)
 }
 
-scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, thr_pos = 0.75, thr_neg = 0.25, seed = 1){
+scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, thr_pos = 0.75, thr_neg = 0.02, rr = 0.1, seed = 1){
   
   # reference <- m
-  # labels <- nr_t0$labels
+  # labels <- sce2$labels
   # gmm_criteria = "BIC"
   # thr = 0.95
-  # sampling = 0.1
-  # seed = 1
-  # thr_pos <- 0.8
-  # thr_neg <- 0.2
+  # sampling = 1
+  # seed = 300
+  # rr = 0.1
   
   set.seed(seed)
   
   s <- c()
   
-  for(c in unique(labels)){
-    w <- which(labels == c)
-    n <- floor(length(w) * sampling)
-    s <- c(s, sample(w, n))
+  if(sampling < 1){
+    for(c in unique(labels)){
+      w <- which(labels == c)
+      n <- floor(length(w) * sampling)
+      s <- c(s, sample(w, n))
+    }
+    
+    reference <- reference[, s]
+    labels <- labels[s] 
+    
   }
   
   # ms <- sample(1:32, 20)
   # reference <- reference[ms, s]
-  reference <- reference[, s]
-  labels <- labels[s] 
+
   
   markers <- rownames(reference)
   celltypes <- factor(unique(labels))
@@ -1224,7 +1274,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
   res <- scGateMe(reference,
                   train = T,
                   gate_table, 
-                  gmm_criteria = "BIC",
+                  gmm_criteria = gmm_criteria,
                   refine = F,
                   sampling = 1,
                   k = NULL,
@@ -1232,6 +1282,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
                   narrow_gate_table = T, 
                   marker_seq_eval = F,
                   combine_seq_eval_res = F,
+                  rr = rr,
                   seed = seed)
   
   message("-----------------------")
@@ -1245,7 +1296,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
   colnames(gate_table) <- c("Cell", "Gate", "N")
   
   # gate_table <- na.omit(gate_table)
-  gate_table <- gate_table[gate_table$N > 0, ]
+  gate_table <- gate_table[gate_table$N > 1, ]
   # labels <- gate_table$Cell
   
   labels2 <- gate_table$Cell
@@ -1269,79 +1320,200 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
   markers <- colnames(gates2[-1])
   celltypes <- unique(gates2$Cell)
   
+  # n_comparisons <- length(markers) * length(celltypes)
   
   for(c in celltypes){
-    
+  #   
     message(paste0(" - ", c))
+  #   
+  # c <- "Basophils"
+  #   
+  #   sig <- ""
     
-    # c <- "PMN"
-    
-    sig <- ""
-    
-    for(ma in markers){
+    #for(c2 in celltypes[celltypes != c]){
       
-      # ma <- "CD4"
+      # ma <- "CD274"
+      
+      # c2 <- "Monocytes"
       
       gates3 <- gates2
-      gates3$Cell[gates3$Cell != c] <- "Other"
-      gates3$Cell <- factor(as.character(gates3$Cell), levels = c(c, "Other"))
-      df <- as.data.frame.matrix(table(gates3$Cell, gates3[, ma]))
-      df$Cell <- rownames(df)
+      
+      gates3$Cell[gates3$Cell != c] <- "Other_type"
+      # gates3 <- gates3[gates3$Cell %in% c(c,c2), ]
+      
+      gates3$Cell <- factor(as.character(gates3$Cell), levels = c(c, "Other_type"))
+      
+      # gates3$Cell <- factor(as.character(gates3$Cell), levels = c(c, c2))
       
       
-      # df <- df + 1
-      star <- which(colnames(df) == "*")
+      data <- gates3
+      # data$Cell[data$Cell != c] <- "Other_type"
+      # data <- data[data$Cell == c, ]
       
-      if(length(star) > 0){
-        df <- df[, -which(colnames(df) == "*")]
+      s1 <- w1 <- which(data$Cell == c)
+      s2 <- w2 <- which(data$Cell != c)
+      
+      s <- 2000
+      
+      if(length(w1) > s){
+        s1 <- sample(w1, s)
       }
       
-      df[, -3] <- df[, -3] + 1
+      if(length(w2) > s){
+        s2 <- sample(w2, s)
+      } 
+
+      # s1 <- sample(w1, 2000)
+      # s2 <- sample(w2, 2000)
+      
+      #if(nrow(data) > 100){
+      data <- data[c(s1,s2), ]
+      #}
+      
+      data <- as.data.frame(lapply(data, factor))
+      
+      # data$Cell <- factor(data$Cell)
+      # data$FS_A <- factor(data$FS_A)
+      # data$SS_A <- factor(data$SS_A) 
+      # data$CD10 <- factor(data$CD10)
+      # data$HLA_DR <- factor(data$HLA_DR)
+      # data$CD14 <- factor(data$CD14)
+      # data$CD38 <- factor(data$CD38)
+      # data$CD279 <- factor(data$CD279)
+      # data$CD274 <- factor(data$CD274)
+      # data$CD45 <- factor(data$CD45)
+      # data$CD3 <- factor(data$CD3)
+      # data$CD16 <- factor(data$CD16)
+      # data$CD4 <- factor(data$CD4)
+      
+      b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
+      mas <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
+      # table(data$Cell, data$CD16)
       
       
-      # f <- fisher.test(df)
+      # rf_mod <- randomForest(Cell ~ ., data=data, ntree=100)
       # 
-      # if(f$p.value < 0.05 & f$estimate > 1){
-      #   sig <- paste0(sig, ma, "-")
-      # }else if(f$p.value < 0.05 & f$estimate < 1){
-      #   sig <- paste0(sig, ma, "+")
+      # imp <- data.frame(rf_mod$importance)
+      # imp <- imp[order(imp$MeanDecreaseGini, decreasing = T), , drop = F]
+      # 
+      # mas <- rownames(imp)
+      # 
+      # for(i in length(mas):1){
+      # 
+      #   if(sum(imp$MeanDecreaseGini[1:i-1]) / sum(imp$MeanDecreaseGini) >= 0.85){
+      #     mas <- mas[mas != rownames(imp)[i]]
+      #   }
       # }
       
-      df$Cell <- rownames(df)
       
-      #df$Cell[df$Cell != "Monocytes"] <- "Other"
-      
-      colnames(df) <- c("neg", "pos", "Cell")
+  
+
       
       
-      # df <- reshape2::melt(df, id.vars = "Cell")
-      # df$Other <- sum(df$value) - df$value
-      df$Cell <- factor(df$Cell, levels = c("Other", c))
-      # df$value[df$value == 0] <- 1
+      #to.remove<-c(which(data.frame(iris.rf$importance)$MeanDecreaseAccuracy==min(data.frame(iris.rf$importance)$MeanDecreaseAccuracy)))
       
-      model0 <- glm(
-        formula = cbind(pos, neg) ~ Cell,
-        family = binomial(link = 'logit'),
-        data = df
-      )
       
-      emm1 <- emmeans(model0, specs = revpairwise ~ Cell)
-      emm1$contrasts %>%
-        summary(infer = TRUE, type = 'response') %>%
-        rbind() %>%
-        as.data.frame() -> c_results
+      # varImpPlot(rf_mod)
       
-      if(c_results$p.value < 0.05){
+      
+      #control <- rfeControl(functions = rfFuncs, method = "repeatedcv")
+      
+
+      # cl <- makeCluster(detectCores())
+      # registerDoParallel(cl)
+
+      
+
+      # result_rfe1 <- caret::rfe(x = data[, -1],
+      #                    y = factor(data$Cell),
+      #                    sizes = c(1:12),
+      #                    rfeControl = rfeControl(functions = rfFuncs,
+      #                                            method = "repeatedcv"))
+      
+      #stopCluster(cl)
+
+      # mas <- result_rfe1$optVariables
+      
+      sig <- ""
+      
+      for(k in mas){
         
-        p <- prop.test(df[c, "pos"], df[c, "pos"] + df[c, "neg"])
+        # k <- "CD16"
         
-        if(c_results$odds.ratio > 1 & p$p.value < 0.05 & p$estimate > thr_pos){
-          sig <- paste0(sig, ma, "+")
-        }else if(c_results$odds.ratio < 1 & p$p.value < 0.05 & p$estimate < thr_neg){
-          sig <- paste0(sig, ma, "-")
+        t <- prop.table(table(data[data$Cell == c, k]))
+        
+        # print(k)
+        # print(t)
+        
+        max <- max(t)
+        
+        if(max >= 0.9){
+          sign <- names(t)[which.max(t)]
+          sig <- paste0(sig, k, sign)
         }
       }
-    }
+      
+      
+      
+    #   df <- as.data.frame.matrix(table(gates3$Cell, gates3[, ma]))
+    #   df$Cell <- rownames(df)
+    #   
+    #   
+    #   # df <- df + 1
+    #   star <- which(colnames(df) == "*")
+    #   
+    #   if(length(star) > 0){
+    #     df <- df[, -which(colnames(df) == "*")]
+    #   }
+    #   
+    #   df[, -3] <- df[, -3] + 1
+    #   df
+    #   
+    #   # f <- fisher.test(df)
+    #   # 
+    #   # if(f$p.value < 0.05 & f$estimate > 1){
+    #   #   sig <- paste0(sig, ma, "-")
+    #   # }else if(f$p.value < 0.05 & f$estimate < 1){
+    #   #   sig <- paste0(sig, ma, "+")
+    #   # }
+    #   
+    #   df$Cell <- rownames(df)
+    #   
+    #   #df$Cell[df$Cell != "Monocytes"] <- "Other"
+    #   
+    #   colnames(df) <- c("neg", "pos", "Cell")
+    #   
+    #   
+    #   # df <- reshape2::melt(df, id.vars = "Cell")
+    #   # df$Other <- sum(df$value) - df$value
+    #   df$Cell <- factor(df$Cell, levels = c("Other", c))
+    #   # df$value[df$value == 0] <- 1
+    #   
+    #   model0 <- glm(
+    #     formula = cbind(pos, neg) ~ Cell,
+    #     family = binomial(link = 'logit'),
+    #     data = df
+    #   )
+    #   
+    #   emm1 <- emmeans(model0, specs = revpairwise ~ Cell)
+    #   emm1$contrasts %>%
+    #     summary(infer = TRUE, type = 'response') %>%
+    #     rbind() %>%
+    #     as.data.frame() -> c_results
+    #   
+    #   c_results
+    #   
+    #   if(c_results$p.value < (0.05 / n_comparisons)){
+    #     
+    #     p <- prop.test(df[c, "pos"], df[c, "pos"] + df[c, "neg"])
+    #     
+    #     if(c_results$odds.ratio > 1 & p$p.value < 0.05 & p$estimate > thr_pos){
+    #       sig <- paste0(sig, ma, "+")
+    #     }else if(c_results$odds.ratio < 1 & p$p.value < 0.05 & p$estimate < thr_neg){
+    #       sig <- paste0(sig, ma, "-")
+    #     }
+    #   }
+    # #}
     
     new_gate_table[c, "Gate"] <- sig
     
