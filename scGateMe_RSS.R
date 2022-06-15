@@ -446,7 +446,7 @@ set_marker_expression_GMM <- function(X, indexes, gmm_criteria, mm, rr){
   if(!is.na(model) & model > 1){
     
     # cl <- Mclust(test, G = model, verbose = F, modelNames = type_model)
-    cl <- Mclust(test, G = 2, verbose = F, modelNames = "E")
+    cl <- Mclust(test, G = 2, verbose = F, modelNames = type_model)
     
     #plot(cl, what = "classification")
     
@@ -1250,18 +1250,19 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
   set.seed(seed)
   
   s <- c()
+  n <- min(table(labels))
   
-  if(sampling < 1){
-    for(c in unique(labels)){
-      w <- which(labels == c)
-      n <- floor(length(w) * sampling)
-      s <- c(s, sample(w, n))
-    }
+  #if(sampling < 1){
+    # for(c in unique(labels)){
+    #   w <- which(labels == c)
+    #   s <- c(s, sample(w, n))
+    # }
+    # 
+    # reference <- reference[, s]
+    # labels <- labels[s] 
     
-    reference <- reference[, s]
-    labels <- labels[s] 
-    
-  }
+  #}
+  
   
   # ms <- sample(1:32, 20)
   # reference <- reference[ms, s]
@@ -1322,12 +1323,49 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
   
   # n_comparisons <- length(markers) * length(celltypes)
   
+  marker_df <- data.frame(Marker = markers, Pos = NA, Neg = NA)
+  rownames(marker_df) <- marker_df$Marker
+  
   for(c in celltypes){
-  #   
+  
     message(paste0(" - ", c))
-  #   
-  # c <- "Basophils"
-  #   
+
+    # c <- "Monocytes"
+    sig <- c()
+    signs <- c()
+  
+    #for(c2 in celltypes[celltypes != c]){
+    
+      # c2 <- "CD4_T_cells"
+  
+    to_exclude_pos <- c()
+    to_exclude_neg <- c()
+    
+    for(k in markers){
+      
+      # k <- "HLA_DR"
+      
+      t <- prop.table(table(gates2[gates2$Cell == c, k]))
+      # t2 <- prop.table(table(gates2[gates2$Cell == c2, k]))
+      
+      
+      # print(k)
+      # print(t)
+      
+      max <- max(t)
+      
+      w <- names(which.max(t))
+      
+      # max2 <- max(t2)
+      
+      if(w == "+"){
+        to_exclude_pos <- c(to_exclude_pos, k)
+      }else{
+        to_exclude_neg <- c(to_exclude_neg, k)
+      }
+    }
+
+  
   #   sig <- ""
     
     #for(c2 in celltypes[celltypes != c]){
@@ -1338,6 +1376,8 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       
       gates3 <- gates2
       
+      # gates3 <- gates3[gates3$Cell %in% c(c, c2), ]
+      
       gates3$Cell[gates3$Cell != c] <- "Other_type"
       # gates3 <- gates3[gates3$Cell %in% c(c,c2), ]
       
@@ -1345,8 +1385,11 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       
       # gates3$Cell <- factor(as.character(gates3$Cell), levels = c(c, c2))
       
-      
       data <- gates3
+      
+      # data <- data[sample(1:nrow(data), 1000), ]
+      
+      
       # data$Cell[data$Cell != c] <- "Other_type"
       # data <- data[data$Cell == c, ]
       
@@ -1354,14 +1397,14 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       s2 <- w2 <- which(data$Cell != c)
       
       s <- 2000
-      
+
       if(length(w1) > s){
         s1 <- sample(w1, s)
       }
-      
+
       if(length(w2) > s){
         s2 <- sample(w2, s)
-      } 
+      }
 
       # s1 <- sample(w1, 2000)
       # s2 <- sample(w2, 2000)
@@ -1371,7 +1414,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       #}
       
       data <- as.data.frame(lapply(data, factor))
-      
+
       # data$Cell <- factor(data$Cell)
       # data$FS_A <- factor(data$FS_A)
       # data$SS_A <- factor(data$SS_A) 
@@ -1386,8 +1429,9 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       # data$CD16 <- factor(data$CD16)
       # data$CD4 <- factor(data$CD4)
       
-      b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
-      mas <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
+
+      # b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
+      # mas <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
       # table(data$Cell, data$CD16)
       
       
@@ -1400,15 +1444,72 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       # 
       # for(i in length(mas):1){
       # 
-      #   if(sum(imp$MeanDecreaseGini[1:i-1]) / sum(imp$MeanDecreaseGini) >= 0.85){
+      #   if(sum(imp$MeanDecreaseGini[1:i-1]) / sum(imp$MeanDecreaseGini) >= 0.9){
       #     mas <- mas[mas != rownames(imp)[i]]
       #   }
       # }
       
-      
-  
+      # for(c in colnames(data)){
+      #   
+      #   print(c)
+      #   print(table(data[, c]))
+      #   
+      # }
 
       
+      #data <- data[, colnames(data) != "CD235ab"]
+      
+      mas <- c()
+      
+      for(s in c("+", "-")){
+        
+        # s <- "+"
+        
+        if(s == "+"){
+          data2 <- data[, !colnames(data) %in% to_exclude_neg]
+        }else{
+          data2 <- data[, !colnames(data) %in% to_exclude_pos]
+        }
+        
+        nzv <- nearZeroVar(data2[, -1], saveMetrics = TRUE)
+        to_exclude <- rownames(nzv)[nzv$nzv == T]
+        
+        if(length(to_exclude) > 0){
+          data2 <- data2[, -which(colnames(data2) %in% to_exclude)]
+        }
+        
+        control <- trainControl(method = "repeatedcv")
+        # train the model
+        model <- train(Cell ~ ., data = data2, method = "treebag", trControl = control)
+        
+        # estimate variable importance
+        importance <- varImp(model, useModel = T)
+        plot(importance)
+        
+        imp <- importance$importance
+        
+        # mas <- rownames(imp[imp$Overall > 0, , drop = F])
+        
+        mm <- rownames(imp)
+        mm <- gsub("`", "", mm)
+        mm <- gsub("\\+", "", mm)
+        mm <- gsub("\\-", "", mm)
+        
+        imp <- imp$Overall
+        names(imp) <- mm
+        
+        # imp <- imp[order(imp[, 1], decreasing = T), ]
+        # cl <- Mclust(imp[, 1], G = 2, modelNames = "E", verbose = F)
+        # mas <- rownames(imp[cl$classification == "2", ])
+        
+        cl <- Mclust(imp, G = 2, modelNames = "E", verbose = F)
+        mas <- c(mas, names(imp[cl$classification == "2"]))
+      }
+      
+      
+
+      
+      # mas <- markers
       
       #to.remove<-c(which(data.frame(iris.rf$importance)$MeanDecreaseAccuracy==min(data.frame(iris.rf$importance)$MeanDecreaseAccuracy)))
       
@@ -1421,35 +1522,39 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
 
       # cl <- makeCluster(detectCores())
       # registerDoParallel(cl)
-
       
 
       # result_rfe1 <- caret::rfe(x = data[, -1],
       #                    y = factor(data$Cell),
-      #                    sizes = c(1:12),
-      #                    rfeControl = rfeControl(functions = rfFuncs,
-      #                                            method = "repeatedcv"))
-      
-      #stopCluster(cl)
-
+      #                    sizes = c(1:32),
+      #                    rfeControl = rfeControl(functions = rfFuncs, method = "boot"))
+      # 
+      # #stopCluster(cl)
+      # 
       # mas <- result_rfe1$optVariables
       
-      sig <- ""
+      #sig <- ""
+      # sig <- c()
       
       for(k in mas){
         
-        # k <- "CD16"
+        # k <- "CD3"
         
-        t <- prop.table(table(data[data$Cell == c, k]))
+        
+        t <- prop.table(table(gates2[gates2$Cell == c, k]))
+        # t2 <- prop.table(table(gates2[gates2$Cell == c2, k]))
+        
         
         # print(k)
         # print(t)
         
         max <- max(t)
+        # max2 <- max(t2)
         
-        if(max >= 0.9){
+        if(max > 0.9){
           sign <- names(t)[which.max(t)]
-          sig <- paste0(sig, k, sign)
+          signs <- c(signs, sign)
+          sig <- c(sig, k)
         }
       }
       
@@ -1515,10 +1620,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
     #   }
     # #}
     
-    new_gate_table[c, "Gate"] <- sig
-    
-  
-
+    # new_gate_table[c, "Gate"] <- sig
     
     # w_plus <- which(c_results$p.value < 0.05 & c_results$odds.ratio > 1 & c_results$odds.ratio > 2)
     # w_minus <- which(c_results$p.value < 0.05 & c_results$odds.ratio < 1  & c_results$odds.ratio < 0.1)
@@ -1530,7 +1632,52 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
     #   new_gate_table[as.character(c_results$Cell[w_plus]), "Gate"] <- paste0(new_gate_table[as.character(c_results$Cell[w_plus]), "Gate"], as.character(sig_plus))
     #   new_gate_table[as.character(c_results$Cell[w_minus]), "Gate"] <- paste0(new_gate_table[as.character(c_results$Cell[w_minus]), "Gate"], as.character(sig_minus))
     # }
+    #}
+    
+    to_exclude <- c()
+    for(s in unique(sig)){
+      w <- which(sig == s)
+      t <- table(signs[w])
+      if(length(t) > 1){
+        to_exclude <- c(to_exclude, s)
+      }
+    }
+    
+    if(length(to_exclude)){
+      sig <- sig[!sig %in% to_exclude]
+    }
+    
+    dup <- duplicated(sig)
+    
+    sig <- sig[!dup]
+    signs <- signs[!dup]
+    
+    
+    # for(i in 1:length(sig)){
+    #   if(signs[i] == "+"){
+    #     marker_df[sig[i], "Pos"] <- T
+    #   }else{
+    #     marker_df[sig[i], "Neg"] <- T
+    #   }
+    # }
+    
+    new_gate_table[c, "Gate"] <- paste0(sig, signs, collapse = "")
   }
+  
+  for(i in 1:nrow(marker_df)){
+    w <- which(is.na(marker_df[i, ]))
+    if(length(w) == 1){
+      if(w == 1){
+        to_remove <- paste0(rownames(marker_df)[i], "+")
+      }else{
+        to_remove <- paste0(rownames(marker_df)[i], "-")
+      }
+      new_gate_table$Gate <- gsub(to_remove, "", new_gate_table$Gate)
+    }
+  }
+  
+  
+  
   
   # for(cell in unique(gates2$Cell)){
   #   
