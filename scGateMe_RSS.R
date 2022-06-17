@@ -120,7 +120,7 @@ generate_set_values <- function(v, cell){
 ## Read the gate table and generate the possbile marker signature of ceach cell type
 parse_gate_table <- function(gate_table, narrow_gate_table){
   
-  # gate_table <- gates
+  # gate_table <- gate
   # narrow_gate_table = T
   
   if(any(duplicated(gate_table$Cell))){
@@ -147,13 +147,44 @@ parse_gate_table <- function(gate_table, narrow_gate_table){
     
     l_temp <- 1:length(temp)
     
-    for(j in l_temp){
-      el <- temp[j]
-      l_temp2 <- 1:length(unlist(el))
-      for(i in l_temp2){
-        df_gates[names(el), unlist(el)[i]] <- unlist(signs[names(el)])[i]
-      }
-    }
+  signs <- lapply(1:length(signs), function(i){
+      
+      el <- signs[[i]]
+      marker <- temp[[i]]
+      
+      tt <- rep(NA, length(markers))
+      names(tt) <- markers
+      
+      tt[temp[[i]]] <- el
+      
+      # el <- signs[[1]]
+      # temp[[1]]
+      # 
+      # if(length(el) < length(markers)){
+      #   el2 <- c(el, rep(NA,length(markers)- length(el) ))
+      # }else{
+      #   el2 <- el
+      # }
+      return(tt)
+      
+    })
+    
+    df_gates <- data.frame(matrix(unlist(signs), nrow=length(signs), ncol = length(markers), byrow=TRUE))
+    
+    colnames(df_gates) <- markers
+    rownames(df_gates) <- names(temp)
+    
+    # for(j in l_temp){
+    #   
+    #   j <- 1
+    #   
+    #   el <- temp[j]
+    #   l_temp2 <- 1:length(unlist(el))
+    #   
+    #   for(i in l_temp2){
+    #     df_gates[names(el), unlist(el)[i]] <- unlist(signs[names(el)])[i]
+    #   }
+    # }
     
     df_gates[is.na(df_gates)] <- "*"
     df_gates <- cbind(Cell = rownames(df_gates), df_gates)
@@ -898,27 +929,27 @@ scGateMe <- function(exp_matrix,
                      verbose = T,
                      seed = 1){
   
-  # gates <- gate_table
-  # refine = F
-  # n_clusters = 20
-  # cluster_level_labels = T
-  # plots_thr = F
-  # seed = 2
-  # clusters = NULL
-  # # clusters <- res$labels_post_clustering
-  # exp_matrix <- m
-  # ignore_markers = NULL
-  # verbose = T
-  # narrow_gate_table = T
-  # marker_seq_eval = F
-  # #trimodality = "pos"
-  # sampling <- 1
-  # combine_seq_eval_res = F
-  # mm = 2
-  # rr = 0.05
-  # gmm_criteria = "BIC"
-  # train = T
-  # k = NULL
+  gates <- gate
+  refine = F
+  n_clusters = 20
+  cluster_level_labels = T
+  plots_thr = F
+  seed = 2
+  clusters = NULL
+  # clusters <- res$labels_post_clustering
+  exp_matrix <- m
+  ignore_markers = NULL
+  verbose = T
+  narrow_gate_table = T
+  marker_seq_eval = F
+  #trimodality = "pos"
+  sampling <- 1
+  combine_seq_eval_res = F
+  mm = 2
+  rr = 0.05
+  gmm_criteria = "BIC"
+  train = T
+  k = NULL
 
   # print(dim(exp_matrix))
   
@@ -1239,14 +1270,14 @@ scGateMe <- function(exp_matrix,
 
 scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, thr_pos = 0.75, thr_neg = 0.02, rr = 0.1, seed = 1){
   
-  reference <- m
-  labels <- sce2$labels
-  gmm_criteria = "BIC"
-  thr = 0.95
-  sampling = 1
-  seed = 300
-  rr = 0.1
-  
+  # reference <- m
+  # labels <- sce2$labels
+  # gmm_criteria = "BIC"
+  # thr = 0.95
+  # sampling = 1
+  # seed = 300
+  # rr = 0.1
+  # 
   set.seed(seed)
   
   s <- c()
@@ -1292,27 +1323,37 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
   cell_df <- cell_df[, c("Gate", "labels")]
   cell_df <- na.omit(cell_df)
   
-  gate_table <- table(cell_df$labels, cell_df$Gate)
-  gate_table <- as.data.frame(data.table(gate_table))
-  colnames(gate_table) <- c("Cell", "Gate", "N")
+  # gate_table <- table(cell_df$labels, cell_df$Gate)
+  # gate_table <- as.data.frame(data.table(gate_table))
+  # colnames(gate_table) <- c("Cell", "Gate", "N")
+  # 
+  # table(labels)
+  # 
+  # # gate_table <- na.omit(gate_table)
+  # gate_table <- gate_table[gate_table$N > 1, ]
+  # # labels <- gate_table$Cell
+  # 
+  # labels2 <- gate_table$Cell
   
-  # gate_table <- na.omit(gate_table)
-  gate_table <- gate_table[gate_table$N > 1, ]
-  # labels <- gate_table$Cell
-  
-  labels2 <- gate_table$Cell
+  labels2 <- cell_df$labels
   
   # gate_table <- gate_table[gate_table$Cell == "CD4_T_cells", ]
-  gate_table$Cell <- paste(gate_table$Cell, as.character(1:nrow(gate_table)), sep = "_")
-  gate_table$Cell_2 <- labels2
+  # gate_table$Cell <- paste(gate_table$Cell, as.character(1:nrow(gate_table)), sep = "_")
+  # gate_table$Cell_2 <- labels2
+  
+  gate_table <- cell_df
+  gate_table$Cell <- paste(gate_table$labels, as.character(1:nrow(gate_table)), sep = "_")
   
   gates2 <- parse_gate_table(gate_table, T)
   
   #### Check order !!!!
-  gates2$gate_table <- gates2$gate_table[rep(seq_len(nrow(gates2$gate_table)), times = gate_table$N), ]
+  # gates2$gate_table <- gates2$gate_table[rep(seq_len(nrow(gates2$gate_table)), times = gate_table$N), ]
   
   gates2 <- gates2$gate_table
-  gates2$Cell <- rep(gate_table$Cell_2, times = gate_table$N)
+  # gates2$Cell <- rep(gate_table$Cell_2, times = gate_table$N)
+  
+  gates2$Cell <- sapply(strsplit(gates2$Cell,"_"), `[`, 1)
+  
   # gate3 <- reshape2::melt(gates2, id.vars = "Cell")
   
   new_gate_table <- data.frame(Cell = unique(gates2$Cell), Gate = "")
@@ -1327,19 +1368,22 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
   rownames(marker_df) <- marker_df$Marker
   
   data <- gates2 
-  data <- data[sample(1:nrow(data), 1000), ]
+  # data <- data[sample(1:nrow(data), 1000), ]
   data <- as.data.frame(lapply(data, factor))
-  b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
-  m_to_use <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
+  
+  # b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
+  # m_to_use <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
+  
+  m_to_use <- markers
   
   cell_markers <- vector("list", length(celltypes))
   names(cell_markers) <- celltypes
   
-  for(ii in 1:(length(celltypes)-1)){
+  for(i in 1:(length(celltypes)-1)){
   
-    # ii <- 11
+    # i <- 1
     
-    c <- celltypes[ii]
+    c <- celltypes[i]
     
     message(paste0(" - ", c))
 
@@ -1352,16 +1396,13 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
     for(j in (i+1):(length(celltypes))){
     
     # for(j in 1:length(celltypes)){
-        
-      if(ii == j){
-        next
-      }
       
-      # j <- 12
+
+      # j <- 24
       
       c2 <- celltypes[j]
       
-      print(c2)
+      message(paste0("    - ", c2))
       
       to_exclude <- c()
 
@@ -1381,7 +1422,7 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       s1 <- w1 <- which(data$Cell == c)
       s2 <- w2 <- which(data$Cell == c2)
       
-      s <- 50
+      s <- 100
 
       if(length(w1) > s){
         s1 <- sample(w1, s)
@@ -1439,136 +1480,121 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
       
       for(k in mas){
         
+        # k <- "CD16"
+        
         t <- prop.table(table(gates2[gates2$Cell == c, k]))
         # t2 <- prop.table(table(gates2[gates2$Cell == c2, k]))
         
         max <- max(t)
         # max2 <- max(t2)
         
-        if(max > 0.9){
+        if(max > 0.8){
           sign <- names(t)[which.max(t)]
           signs <- c(signs, sign)
           sig <- c(sig, k)
         }
       }
       
-      int_pos <- intersect(paste0(sig[signs == "+"], signs[signs == "+"]), cell_markers[[c]])
-      int_neg <- intersect(paste0(sig[signs == "-"], signs[signs == "-"]), cell_markers[[c]])
+      if(is.null(sig)){
+        next
+      }
+      
+      int_pos <- intersect(paste0(sig[1], signs[1]), cell_markers[[c]])
+      # int_neg <- intersect(paste0(sig[signs == "-"][1], signs[signs == "-"][1]), cell_markers[[c]])
       
       sel_pos <- NA
       sel_neg <- NA
       
-      if(length(int_pos) > 0 & length(int_neg) > 0){
+      if(length(signs) > 0){
+        sg <- signs[1]
+        if(sg == "+"){
+          sg <- "-"
+        }else{
+          sg <- "+"
+        }
+      }
+
+      if(length(int_pos) > 0){
         
-        int_c2 <- intersect(cell_markers[[c2]], gsub("\\+", "-", int_pos))
+        int_c2 <- intersect(cell_markers[[c2]], gsub(paste0("\\", signs[1]), sg, int_pos))
         
-        if(length(int_c2) < 2){
+        if(length(int_c2) == 0){
           if(is.null(cell_markers[[c2]])){
-            cell_markers[[c2]] <- gsub("\\+", "-", int_pos[1])
+            cell_markers[[c2]] <- gsub(paste0("\\", signs[1]), sg, int_pos[1])
           }else{
-            cell_markers[[c2]] <- c(cell_markers[[c2]], gsub("\\+", "-", int_pos[1]))
+            cell_markers[[c2]] <- c(cell_markers[[c2]], gsub(paste0("\\", signs[1]), sg, int_pos[1]))
           }
         }
-      }else if(length(int_pos) > 0 & length(int_neg) == 0){
-        int_c2 <- intersect(cell_markers[[c2]], gsub("\\+", "-", int_pos))
-        
-        if(length(int_c2) < 2){
-          if(is.null(cell_markers[[c2]])){
-            cell_markers[[c2]] <- gsub("\\+", "-", int_pos[1])
-          }else{
-            cell_markers[[c2]] <- c(cell_markers[[c2]], gsub("\\+", "-", int_pos[1]))
-          }
-        }
-      }else if(length(int_pos) == 0 & length(int_neg) > 0){
-        
-        int_c2 <- intersect(cell_markers[[c2]], gsub("\\-", "+", int_neg))
-        
-        if(length(int_c2) < 2){
-          if(is.null(cell_markers[[c2]])){
-            cell_markers[[c2]] <- gsub("\\-", "+", int_neg[1])
-          }else{
-            cell_markers[[c2]] <- c(cell_markers[[c2]], gsub("\\-", "+", int_neg[1]))
-          }
-        }
+      # }else if(length(int_pos) > 0 & length(int_neg) == 0){
+      #   int_c2 <- intersect(cell_markers[[c2]], gsub("\\+", "-", int_pos))
+      #   
+      #   if(length(int_c2) == 0){
+      #     if(is.null(cell_markers[[c2]])){
+      #       cell_markers[[c2]] <- gsub("\\+", "-", int_pos[1])
+      #     }else{
+      #       cell_markers[[c2]] <- c(cell_markers[[c2]], gsub("\\+", "-", int_pos[1]))
+      #     }
+      #   }
+      # }else if(length(int_pos) == 0 & length(int_neg) > 0){
+      #   
+      #   int_c2 <- intersect(cell_markers[[c2]], gsub("\\-", "+", int_neg))
+      #   
+      #   if(length(int_c2) == 0){
+      #     if(is.null(cell_markers[[c2]])){
+      #       cell_markers[[c2]] <- gsub("\\-", "+", int_neg[1])
+      #     }else{
+      #       cell_markers[[c2]] <- c(cell_markers[[c2]], gsub("\\-", "+", int_neg[1]))
+      #     }
+      #   }
       }else{
-        sel_pos <- which(signs == "+")[1]
-        sel_neg <- which(signs == "-")[1]
+        sel_pos <- 1
+        #sel_neg <- which(signs == "-")[1]
       }
       
       if(is.null(cell_markers[[c]])){
         
         if(!is.na(sel_pos)){
-          cell_markers[[c]] <- c(paste0(sig[sel_pos], "+"))
+          cell_markers[[c]] <- c(paste0(sig[sel_pos], signs[sel_pos]))
         }
         
-        if(!is.na(sel_neg)){
-          cell_markers[[c]] <- c(paste0(sig[sel_neg], "-"))
-        }
+        # if(!is.na(sel_neg)){
+        #   cell_markers[[c]] <- c(paste0(sig[sel_neg], "-"))
+        # }
         
       }else{
         
         if(!is.na(sel_pos)){
-          cell_markers[[c]] <- c(cell_markers[[c]], paste0(sig[sel_pos], "+"))
+          cell_markers[[c]] <- c(cell_markers[[c]], paste0(sig[sel_pos], signs[sel_pos]))
           
         }
         
-        if(!is.na(sel_neg)){
-          cell_markers[[c]] <- c(cell_markers[[c]], paste0(sig[sel_neg], "-"))
-          
-        }
+        # if(!is.na(sel_neg)){
+        #   cell_markers[[c]] <- c(cell_markers[[c]], paste0(sig[sel_neg], "-"))
+        #   
+        # }
       }
       
       if(is.null(cell_markers[[c2]])){
         
         if(!is.na(sel_pos)){
-          cell_markers[[c2]] <- c(paste0(sig[sel_pos], "-"))
+          cell_markers[[c2]] <- c(paste0(sig[sel_pos], sg))
         }
         
-        if(!is.na(sel_neg)){
-          cell_markers[[c2]] <- c(paste0(sig[sel_neg], "+"))
-        }
+        # if(!is.na(sel_neg)){
+        #   cell_markers[[c2]] <- c(paste0(sig[sel_neg], "+"))
+        # }
       }else{
         
         if(!is.na(sel_pos)){
-          cell_markers[[c2]] <- c(cell_markers[[c2]], paste0(sig[sel_pos], "-"))
+          cell_markers[[c2]] <- c(cell_markers[[c2]], paste0(sig[sel_pos], sg))
         }
         
-        if(!is.na(sel_neg)){
-          cell_markers[[c2]] <- c(cell_markers[[c2]], paste0(sig[sel_neg], "+"))
-        }
+        # if(!is.na(sel_neg)){
+        #   cell_markers[[c2]] <- c(cell_markers[[c2]], paste0(sig[sel_neg], "+"))
+        # }
       }
       
-      g_temp <- cell_markers
-      g_temp <- lapply(g_temp, unique)
-      g_temp <- lapply(g_temp, unique)
-      g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
-      
-      to_remove <- sapply(1:length(g_temp), function(i){
-        
-        ns <- names(g_temp[i])
-        el <- g_temp[[i]]
-        w <- which(duplicated(el))
-        to_remove <- el[w]
-      
-        l <- list(which(el == to_remove))
-        names(l) <- ns
-        
-        return(l)
-        
-      })
-      
-      for(i in 1:length(cell_markers)){
-      
-        ns <- names(cell_markers[i])
-        w <- -to_remove[[ns]]
-        
-        if(length(to_remove[[ns]])){
-          cell_markers[[ns]] <- cell_markers[[ns]][w]
-        }
-      }
-      
-      g <- sapply(lapply(cell_markers, unique), paste0, collapse = "")
-      new_gate_table <- data.frame(Cell = names(g), Gate = g)
+
       
         # pos <- c()
         # neg <- c()
@@ -1621,6 +1647,38 @@ scGateMe_train <- function(reference, labels, gmm_criteria = "BIC", sampling, th
     
     
   }
+  
+  g_temp <- cell_markers
+  g_temp <- lapply(g_temp, unique)
+  g_temp <- lapply(g_temp, unique)
+  g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
+  
+  to_remove <- sapply(1:length(g_temp), function(i){
+    
+    ns <- names(g_temp[i])
+    el <- g_temp[[i]]
+    w <- which(duplicated(el))
+    to_remove <- el[w]
+    
+    l <- list(which(el == to_remove))
+    names(l) <- ns
+    
+    return(l)
+    
+  })
+  
+  for(i in 1:length(cell_markers)){
+    
+    ns <- names(cell_markers[i])
+    w <- -to_remove[[ns]]
+    
+    if(length(to_remove[[ns]])){
+      cell_markers[[ns]] <- cell_markers[[ns]][w]
+    }
+  }
+  
+  g <- sapply(lapply(cell_markers, unique), paste0, collapse = "")
+  new_gate_table <- data.frame(Cell = names(g), Gate = g)
   
   for(i in 1:nrow(marker_df)){
     w <- which(is.na(marker_df[i, ]))
