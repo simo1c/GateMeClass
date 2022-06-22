@@ -651,7 +651,7 @@ scGateMe <- function(exp_matrix,
     exp_matrix_pre_sampling <- exp_matrix
   }
     
-  if(verbose & !train){
+  if(verbose){
     message("Parsing gate table...")
   }
   
@@ -764,7 +764,7 @@ scGateMe_train <- function(reference,
                            sampling_imp_vars = 1000,
                            thr_perc = -1, 
                            seed = 1,
-                           n_threads = 1){
+                           verbose = T){
   
   # reference <- m
   # labels <- lab
@@ -799,7 +799,7 @@ scGateMe_train <- function(reference,
   celltypes <- factor(unique(labels))
   gate_table <- data.frame(Cell = c("Unknown"), Gate = paste0(markers, "+", collapse = ""))
   
-  new_gates <- parse_gate_table(gate_table, narrow_gate_table, T)
+  new_gates <- parse_gate_table(gate_table, T, T)
   dup <- new_gates$extended_gate_table$Gate[duplicated(new_gates$extended_gate_table$Gate)]
   new_gates$extended_gate_table <- new_gates$extended_gate_table[!new_gates$extended_gate_table$Gate %in% dup, ]
   new_gates2 <- new_gates
@@ -1085,4 +1085,19 @@ scGateMe_train <- function(reference,
   return(new_gate_table)
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
