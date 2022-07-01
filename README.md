@@ -42,6 +42,7 @@ res <- scGateMe(m,
                 seed = 1)
   
 # Training and classification in a step:
+# Artificial example with the same dataset as reference and control set 
 colnames(m) <- sce2$labels # column names of the reference are the labels
 res <- scGateMe(m,
                 gates = gate,
