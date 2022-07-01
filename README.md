@@ -10,6 +10,7 @@ gates <- data.frame(read_excel("gates.xlsx"))
 colnames(gates) <- gsub("[.]", "-", colnames(gates))
 gates
 
+# Extracting the gate table
 gate <- scGateMe_train(m,
                        sce2$labels,
                        sampling = "all",
@@ -23,9 +24,10 @@ gate <- scGateMe_train(m,
                        
 gate
 
+# Classification with the extracted gate table
 res <- scGateMe(m,
                 gates = gate,
-                # reference = m, 
+                reference = NULL, 
                 sampling_feature_pre = 1000,
                 sampling_imp_vars = 1000,
                 imp_feature_thr = "GMM",
@@ -38,5 +40,24 @@ res <- scGateMe(m,
                 verbose = T,
                 narrow_gate_table = T, 
                 seed = 1)
+  
+# Training and classification in a step:
+colnames(m) <- sce2$labels # column names of the reference are the labels
+res <- scGateMe(m,
+                gates = gate,
+                reference = m, 
+                sampling_feature_pre = 1000,
+                sampling_imp_vars = 1000,
+                imp_feature_thr = "GMM",
+                sampling = "all",
+                thr_perc = -1,
+                gmm_parameterization = "V",
+                refine = T,
+                sampling = 0.25,
+                k = NULL,
+                verbose = T,
+                narrow_gate_table = T, 
+                seed = 1)
+  
   
 ```
