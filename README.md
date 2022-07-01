@@ -25,6 +25,12 @@ gate
 
 res <- scGateMe(m,
                 gates = gate,
+                # reference = m, 
+                sampling_feature_pre = 1000,
+                sampling_imp_vars = 1000,
+                imp_feature_thr = "GMM",
+                sampling = "all",
+                thr_perc = -1,
                 gmm_parameterization = "V",
                 refine = T,
                 sampling = 0.25,
