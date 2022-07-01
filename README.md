@@ -31,7 +31,7 @@ res <- scGateMe(m,                                   # dataset to classify
                 sampling_feature_pre = 1000,
                 sampling_imp_vars = 1000,
                 imp_feature_thr = "GMM",
-                sampling = "all",
+                sampling_train = "all",
                 thr_perc = -1,
                 gmm_parameterization = "V",
                 refine = T,                          # KNN algorithm to refine labels after classification
