@@ -40,7 +40,9 @@ res <- scGateMe(m,                                   # dataset to classify
                 verbose = T,                         # Show or not output program
                 narrow_gate_table = T,               # format of gate table 
                 seed = 1)
-  
+
+# ---------------------------------------------------------------------------------------------------------------
+
 # Training and classification in a step:
 # Artificial example with the same dataset as reference and control set 
 colnames(m) <- sce2$labels # column names of the reference are the labels
