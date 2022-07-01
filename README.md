@@ -12,7 +12,10 @@ gates
 
 gate <- scGateMe_train(m,
                        sce2$labels,
-                       gmm_criteria = "BIC",
+                       sampling = "all",
+                       Boruta = F,
+                       imp_feature_thr = "GMM",
+                       gmm_parameterization = "V",
                        sampling_feature_pre = 1000,
                        sampling_imp_vars = 1000,
                        thr_perc = -1,
@@ -21,9 +24,8 @@ gate <- scGateMe_train(m,
 gate
 
 res <- scGateMe(m,
-                train = F,
-                gates = gate, 
-                gmm_criteria = "BIC",
+                gates = gate,
+                gmm_parameterization = "V",
                 refine = T,
                 sampling = 0.25,
                 k = NULL,
