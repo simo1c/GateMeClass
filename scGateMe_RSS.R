@@ -208,7 +208,27 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
   return(list(gate_table = gate_table))
 }
 
-set_marker_expression_GMM <- function(X, indexes, mm){
+RSS_generate <- function(sample, cycles=1000, n_unit=2, p="min"){
+  
+  # sample <- m["TNFa", ]
+  # cycles = 1000
+  # n_unit = 10
+  # p = "max"
+
+  n <- length(sample)
+  samples <- cycles * n_unit
+  indexes <- matrix(sample(1:n, samples * n_unit), nrow = n_unit)
+  sel_samples <- matrix(sample[indexes], nrow = n_unit)
+  
+  if(p == "min"){
+    test <- apply(sel_samples, 2, min)
+  }else{
+    test <- apply(sel_samples, 2, max)
+  }
+  return(test)
+}
+
+set_marker_expression_GMM <- function(X, indexes, mm, gmm_parameterization){
   
   
   # X <- m["CD19", ]
@@ -246,19 +266,66 @@ set_marker_expression_GMM <- function(X, indexes, mm){
   # plot(cl, what = "classification")
   # 
   
-  # X <- m["CD3", ]
+  # X <- m[, sample(1:ncol(m), 218)]
+  # X <- X["CD3", ]
+  
   
   if(length(X) >= 100){
 
-    ############ Ranket Set Sampling (RSS) ##############
-    sample = X
-    cycles = floor(length(sample) / 4)
-    n_unit = 2
+    sample <- X
+    
+    if(skewness(X) < 0){
+      sk <- "min"
+    }else{
+      sk <- "max"
+    }
+    
+    
+
+    # units <- 2:10
+    # units_square <- units^2
+    # units <- units[floor(length(sample) / units_square) > 0]
+    # 
+    # if(length(units) > 0){
+    #   
+    #   
+    #   
+    #   
+    #   
+    #   
+    #   us <- sapply(units, function(u){
+    #     
+    #     
+    #     cycles <- floor(length(sample) / (u^2))
+    #     
+    # 
+    #     rss <- RSS_generate(sample, cycles=cycles, n_unit = u, p = sk)
+    # 
+    #     plot(density(rss), xlab = mm)
+    # 
+    # 
+    #     return(skewness(rss))
+    #   })
+    # 
+    #   #print(us)
+    #   
+    #   names(us) <- as.character(units)
+    #   u <- as.numeric(names(us)[which.min(abs(us))])
+    #   cycles <- floor(length(sample) / (u^2))
+    #   test <- RSS_generate(sample, cycles=cycles, n_unit = u, p = sk)
+    # }else{
+    #   test <- sample
+    # }
+
+    ############ Ranked Set Sampling (RSS) #########################
+    sample <- X
+    cycles <- floor(length(sample) / 4)
+    n_unit <- 2
     n <- length(sample)
     samples <- cycles * n_unit
     indexes <- matrix(sample(1:n, samples * n_unit), nrow = n_unit)
     sel_samples <- matrix(sample[indexes], nrow = n_unit)
-    #####################################################
+    ################################################################
     
     
     # if(skewness(X) < 0){
@@ -266,13 +333,13 @@ set_marker_expression_GMM <- function(X, indexes, mm){
     # }else{
     #   index <- as.numeric(gsub("Obs.  ", "", s[, 2]))
     # }
-    
+
     if(skewness(X) < 0){
       test <- apply(sel_samples, 2, min)
     }else{
       test <- apply(sel_samples, 2, max)
     }
-    
+
     # test <- as.numeric(X[index])
     
     # plot(density(test))
@@ -314,12 +381,16 @@ set_marker_expression_GMM <- function(X, indexes, mm){
   type_model <- model_temp[1]
   model <- as.numeric(model_temp[2])
   
+  model <- 2
+  
   if(!is.na(model) & model > 1){
     
     # cl <- Mclust(test, G = model, verbose = F, modelNames = type_model)
-    cl <- Mclust(test, G = 2, verbose = F, modelNames = type_model)
+    cl <- Mclust(test, G = model, verbose = F, modelNames = gmm_parameterization)
     
-    # plot(cl, what = "classification")
+    # plot(density(test), xlab = mm)
+    # plot(cl, what = "classification", xlab = mm,)
+    # plot(cl2, what = "classification", xlab = paste0(mm, "_E"))
     
     
     #temp <- cl$classification
@@ -368,7 +439,8 @@ set_marker_expression <- function(exp_matrix, markers,
                                   expr_markers, 
                                   gates, 
                                   verbose, 
-                                  mm){
+                                  mm,
+                                  gmm_parameterization){
 
 
   # exp_matrix <- exp_matrix_2
@@ -479,7 +551,7 @@ set_marker_expression <- function(exp_matrix, markers,
           
           # t <- table(gates[, m])
           
-          marker_expr <- set_marker_expression_GMM(X, indexes = first$indexes, mm)
+          marker_expr <- set_marker_expression_GMM(X, indexes = first$indexes, m, gmm_parameterization)
           
 
 
@@ -606,19 +678,56 @@ cell_classification <- function(marker_table, gates){
   labels <- rep("Unclassified", nrow(df_gate))
   multiple_cl <- rep(0, nrow(df_gate))
   
-  for(i in 1:nrow(gates)){
-    pos <- as.numeric(unlist(str_split(gates$Pos[i], pattern = "_")))
-    test <- sapply(df_gate$Gate, function(g){
-      x <- paste0(unlist(str_split(g, pattern = ""))[pos], collapse = "")
-      return(x == gates$Gate[i])
+  # for(i in 1:nrow(gates)){
+  #   
+  #   
+  #   i <- 1
+  #   
+  #   
+  #   pos <- as.numeric(unlist(str_split(gates$Pos[i], pattern = "_")))
+  #   test <- sapply(df_gate$Gate, function(g){
+  #     x <- paste0(unlist(str_split(g, pattern = ""))[pos], collapse = "")
+  #     return(x == gates$Gate[i])
+  #   })
+  #   
+  #   labels[test] <- gates$Cell[i]
+  #   multiple_cl[test] <- multiple_cl[test] + 1 
+  # }
+  
+  gates_split <- lapply(gates$Pos, function(g){
+    pos <- as.numeric(unlist(str_split(g, pattern = "_")))
+    return(pos)
+  })
+  
+  cell_split <- lapply(df_gate$Gate, function(g){
+    gate <- unlist(str_split(g, pattern = ""))
+    return(gate)
+  })
+  
+  for(i in 1:length(df_gate$Gate)){
+      
+    # i <- 1
+    
+    c_split <- cell_split[[i]]
+    
+    test <- sapply(1:length(gates$Gate), function(j){
+      index_split <- gates_split[[j]]
+      # x <- paste0(cell_split[[j]][index_split], collapse = "")
+      x <- stringi::stri_c(c_split[index_split], collapse = "", sep = "")
+      return(gates$Gate[j] == x)
     })
     
-    labels[test] <- gates$Cell[i]
-    multiple_cl[test] <- multiple_cl[test] + 1 
+    if(sum(test) > 1){
+      labels[i] <- "Unclassified"
+    }else if(sum(test) == 1){
+      labels[i] <- gates$Cell[test]
+    }
+    
+    # multiple_cl[test] <- multiple_cl[test] + 1
   }
   
-  ## Cells classified multiple times are markeed as "Unclassified"
-  labels[multiple_cl > 1] <- "Unclassified"
+  ## Cells classified multiple times are marked as "Unclassified"
+  # labels[multiple_cl > 1] <- "Unclassified"
   
   rownames(gates) <- NULL
   marker_table$Celltype <- labels
@@ -638,6 +747,7 @@ cell_classification <- function(marker_table, gates){
 scGateMe <- function(exp_matrix,
                      gates, 
                      reference = NULL,
+                     gmm_parameterization = "V",
                      sampling_feature_pre = 1000,
                      sampling_imp_vars = 1000,
                      refine = F,
@@ -660,13 +770,14 @@ scGateMe <- function(exp_matrix,
   # ignore_markers = NULL
   # verbose = T
   # narrow_gate_table = T
-  # sampling <- 0.25
+  # sampling <- 1
   # mm = 2
   # gmm_criteria = "BIC"
   # # train = T
   # k = NULL
   # reference <- NULL
   # labels <- colnames(m)
+  # gmm_parameterization = "E"
   
   set.seed(seed)
   
@@ -718,7 +829,8 @@ scGateMe <- function(exp_matrix,
                                         expr_markers, 
                                         new_gates2$gate_table, 
                                         verbose = verbose, 
-                                        mm)
+                                        mm,
+                                        gmm_parameterization = gmm_parameterization)
   
   expr_markers <- expr_markers[colnames(new_gates2$gate_table)[-1], ]
   expr_markers <- as.data.frame(t(expr_markers))
@@ -794,25 +906,70 @@ scGateMe <- function(exp_matrix,
 
 scGateMe_train <- function(reference,
                            labels, 
+                           Boruta = T,
+                           imp_feature_thr = "all",
+                           gmm_parameterization = "V",
+                           sampling = "all",
+                           sampling_feature_method = "all", ## or "class"
                            sampling_feature_pre = 1000,
                            sampling_imp_vars = 1000,
                            thr_perc = -1, 
                            seed = 1,
                            verbose = T){
-  
-  # reference <- m
-  # labels <- sce2$labels
-  # gmm_criteria = "BIC"
-  # sampling = 1
-  # seed = 1
-  # rr = 0.1
-  # sampling_feature_pre = 1000
-  # sampling_imp_vars = 1000
-  # thr_perc = -1
-  
+
+# reference <- m
+# labels <- lab
+# gmm_criteria = "BIC"
+# sampling = "all"
+# seed = 1
+# rr = 0.1
+# sampling_feature_pre = 1000
+# sampling_imp_vars = 1000
+# thr_perc = -1
+# verbose = T
+# sampling_feature_method ="all"
+# Boruta = T
+# imp_feature_thr = "all"
+
   # options(warn=1)
   set.seed(seed)
   
+  if(sampling == "all"){
+    if(nrow(reference) > sampling_feature_pre){
+      reference <- reference[sample(1:nrow(reference), sampling_feature_pre), ]
+    }
+  }else{
+    
+    # min <- min(table(labels))
+    # s <- as.numeric(sapply(unique(labels), function(l){
+    #   return(sample(which(as.character(labels) == l), min))
+    # }))
+    
+    
+    max <- max(table(labels))
+    w <- names(which.max(table(labels)))
+    s <- sample(which(labels == w), floor(0.3 * max))
+    
+    w2 <- names(which.min(table(labels)))
+    s2 <- which(labels == w2)
+    
+    test <- t(reference)
+    test <- data.frame(test)
+    test$class <- labels
+    test <- test[c(s, s2), ]
+    labels <- labels[c(s,s2)]
+    
+    m2 <- SMOTE(test[, -which(colnames(test) == "class")], as.character(labels), K = 5)
+    m2 <- m2$data
+    m <- m2[, -which(colnames(test) == "class")]
+    m <- t(as.matrix(m))
+    reference <- m
+    labels <- m2$class
+    
+    # reference <- reference[, s]
+    # labels <- labels[s]
+  }
+
   # s <- c()
   # n <- min(table(labels))
   # 
@@ -856,7 +1013,8 @@ scGateMe_train <- function(reference,
                                         expr_markers, 
                                         new_gates2$gate_table, 
                                         verbose = verbose, 
-                                        mm)
+                                        mm,
+                                        gmm_parameterization = gmm_parameterization)
   
   expr_markers <- expr_markers[colnames(new_gates2$gate_table)[-1], ]
   expr_markers <- as.data.frame(t(expr_markers))
@@ -905,26 +1063,43 @@ scGateMe_train <- function(reference,
   
   data <- gate_parsed
   
-  if(nrow(data) > sampling_feature_pre){
-    data <- data[sample(1:nrow(data), sampling_feature_pre), ]
+  if(sampling_feature_method == "all"){
+    if(nrow(data) > sampling_feature_pre){
+      data <- data[sample(1:nrow(data), sampling_feature_pre), ]
+    }
+  }else{
+    min <- min(table(data$Cell))
+    s <- as.numeric(sapply(unique(data$Cell), function(l){
+      return(sample(which(as.character(data$Cell) == l), min))
+    }))
+    data <- data[s, ]
   }
+  
+  # if(nrow(data) > sampling_feature_pre){
+  #   data <- data[sample(1:nrow(data), sampling_feature_pre), ]
+  # }
   
   data <- data.frame(lapply(data, factor), check.names = F)
   
-  ##### Si potrebbe rendere dinamico in modo da far usare qualsiasi metodo di feature selection
-  b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
-  m_to_use <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
-  m_to_use <- gsub("`", "", m_to_use)
-  #############################################################################################
+  if(Boruta){
+    ##### Si potrebbe rendere dinamico in modo da far usare qualsiasi metodo di feature selection
+    b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
+    m_to_use <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
+    m_to_use <- gsub("`", "", m_to_use)
+    #############################################################################################
+  }else{
+    m_to_use <- markers
+  }
   
   cell_markers <- vector("list", length(celltypes))
   names(cell_markers) <- celltypes
-  pairs <- as.matrix(comboGrid(celltypes, celltypes, repetition = F))
+  pairs <- as.matrix(comboGrid(as.character(celltypes), as.character(celltypes), repetition = F))
   
   for(i in 1:nrow(pairs)){
+    
     pair <- pairs[i, ]
     
-    pair <- pairs[1, ]
+    # pair <- pairs[1, ]
     
     c <- pair[1]
     c2 <- pair[2]
@@ -942,15 +1117,23 @@ scGateMe_train <- function(reference,
     s1 <- w1 <- which(data$Cell == c)
     s2 <- w2 <- which(data$Cell == c2)
     
-    if(length(w1) > sampling_imp_vars){
-      s1 <- sample(w1, sampling_imp_vars)
+    if(sampling_feature_method == "all"){
+      if(length(w1) > sampling_imp_vars){
+        s1 <- sample(w1, sampling_imp_vars)
+      }
+      
+      if(length(w2) > sampling_imp_vars){
+        s2 <- sample(w2, sampling_imp_vars)
+      }
+      
+      data <- data[c(s1,s2), ]
+    }else{
+      s <- as.numeric(sapply(unique(data$Cell), function(l){
+        return(sample(which(as.character(data$Cell) == l), min))
+      }))
+      data <- data[s, ]
     }
     
-    if(length(w2) > sampling_imp_vars){
-      s2 <- sample(w2, sampling_imp_vars)
-    }
-    
-    data <- data[c(s1,s2), ]
     data <- data.frame(lapply(data, factor), check.names = F)
     
     if(length(to_exclude) > 0){
@@ -969,10 +1152,10 @@ scGateMe_train <- function(reference,
     flag <- -1
     
     tryCatch({
-      control <- trainControl(method = "repeatedcv")
+      control <- trainControl(method = "repeatedcv", number = 5)
       model <- train(Cell ~ ., data = data, method = "rpart", trControl = control)
       importance <- varImp(model, useModel = F)
-      plot(importance)
+      # plot(importance)
       imp <- importance$importance
       mm <- rownames(imp)
       mm <- gsub("`", "", mm)
@@ -981,8 +1164,19 @@ scGateMe_train <- function(reference,
       imp <- imp[, 1]
       names(imp) <- mm
       imp <- imp[order(imp, decreasing = T)]
-      cl <- Mclust(imp, G = 2, modelNames = "E", verbose = F)
-      mas <- names(imp[cl$classification == "2"])
+      
+      if(imp_feature_thr == "all"){
+        mas <- names(imp[imp > 0])
+      }else if(imp_feature_thr == "median"){
+        mas <- names(imp[imp >= median(imp)])
+      }else if(imp_feature_thr == "GMM"){
+        cl <- Mclust(imp, G = 2, modelNames = "E", verbose = F)
+        mas <- names(imp[cl$classification == "2"])
+      }else{
+        messagae("Error! The specified value of parameter 'imp_feature_thr does not exist!'")
+        stop()
+      }
+      
       flag <- 1
     },
     error = function(e){
@@ -996,13 +1190,17 @@ scGateMe_train <- function(reference,
     
     sig <- c()
     signs <- c()
-    
+  
     for(k in mas){
+      
+      # k <- "CD3"
+      
       t <- prop.table(table(gate_parsed[gate_parsed$Cell == c, k]))
+      t
       max <- max(t)
       
       if(flag > 0){
-        if(max > thr_perc){
+        if(max >= thr_perc){
           sign <- names(t)[which.max(t)]
           signs <- c(signs, sign)
           sig <- c(sig, k)
@@ -1020,56 +1218,66 @@ scGateMe_train <- function(reference,
       next
     }
     
-    int_pos <- intersect(paste0(sig[1], signs[1]), cell_markers[[c]])
-    
-    sel_pos <- NA
-    sel_neg <- NA
-    
-    if(length(signs) > 0){
-      sg <- signs[1]
-      if(sg == "+"){
-        sg <- "-"
-      }else{
-        sg <- "+"
-      }
-    }
-    
-    if(length(int_pos) > 0){
+    if(length(unique(labels)) > 2){
+      int_pos <- intersect(paste0(sig[1], signs[1]), cell_markers[[c]])
       
-      int_c2 <- intersect(cell_markers[[c2]], gsub(paste0("\\", signs[1]), sg, int_pos))
+      sel_pos <- NA
+      sel_neg <- NA
       
-      if(length(int_c2) == 0){
-        if(is.null(cell_markers[[c2]])){
-          cell_markers[[c2]] <- gsub(paste0("\\", signs[1]), sg, int_pos[1])
+      if(length(signs) > 0){
+        sg <- signs[1]
+        if(sg == "+"){
+          sg <- "-"
         }else{
-          cell_markers[[c2]] <- c(cell_markers[[c2]], gsub(paste0("\\", signs[1]), sg, int_pos[1]))
+          sg <- "+"
+        }
+      }
+      
+      if(length(int_pos) > 0){
+        
+        int_c2 <- intersect(cell_markers[[c2]], gsub(paste0("\\", signs[1]), sg, int_pos))
+        
+        if(length(int_c2) == 0){
+          if(is.null(cell_markers[[c2]])){
+            cell_markers[[c2]] <- gsub(paste0("\\", signs[1]), sg, int_pos[1])
+          }else{
+            cell_markers[[c2]] <- c(cell_markers[[c2]], gsub(paste0("\\", signs[1]), sg, int_pos[1]))
+          }
+        }
+      }else{
+        sel_pos <- 1
+      }
+      
+      if(is.null(cell_markers[[c]])){
+        if(!is.na(sel_pos)){
+          cell_markers[[c]] <- c(paste0(sig[sel_pos], signs[sel_pos]))
+        }
+      }else{
+        if(!is.na(sel_pos)){
+          cell_markers[[c]] <- c(cell_markers[[c]], paste0(sig[sel_pos], signs[sel_pos]))
+          
+        }
+      }
+      
+      if(is.null(cell_markers[[c2]])){
+        if(!is.na(sel_pos)){
+          cell_markers[[c2]] <- c(paste0(sig[sel_pos], sg))
+        }
+      }else{
+        
+        if(!is.na(sel_pos)){
+          cell_markers[[c2]] <- c(cell_markers[[c2]], paste0(sig[sel_pos], sg))
         }
       }
     }else{
-      sel_pos <- 1
-    }
-    
-    if(is.null(cell_markers[[c]])){
-      if(!is.na(sel_pos)){
-        cell_markers[[c]] <- c(paste0(sig[sel_pos], signs[sel_pos]))
-      }
-    }else{
-      if(!is.na(sel_pos)){
-        cell_markers[[c]] <- c(cell_markers[[c]], paste0(sig[sel_pos], signs[sel_pos]))
-        
-      }
-    }
-    
-    if(is.null(cell_markers[[c2]])){
+      cell_markers[[c]] <- paste0(sig, signs, collapse = "")
+      sg <- ifelse(signs == "+", "-", "+")
+      x <- paste0(sig, sg)
+      y <- rep("|", length(x))
+      xy <- paste0(x, y, collapse = "")
+      cell_markers[[c2]] <- xy
+      cell_markers[[c2]] <- xy
       
-      if(!is.na(sel_pos)){
-        cell_markers[[c2]] <- c(paste0(sig[sel_pos], sg))
-      }
-    }else{
-      
-      if(!is.na(sel_pos)){
-        cell_markers[[c2]] <- c(cell_markers[[c2]], paste0(sig[sel_pos], sg))
-      }
     }
   }
   
