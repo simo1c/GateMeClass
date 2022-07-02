@@ -678,54 +678,67 @@ cell_classification <- function(marker_table, gates){
   labels <- rep("Unclassified", nrow(df_gate))
   multiple_cl <- rep(0, nrow(df_gate))
   
-  # for(i in 1:nrow(gates)){
-  #   
-  #   
-  #   i <- 1
-  #   
-  #   
-  #   pos <- as.numeric(unlist(str_split(gates$Pos[i], pattern = "_")))
-  #   test <- sapply(df_gate$Gate, function(g){
-  #     x <- paste0(unlist(str_split(g, pattern = ""))[pos], collapse = "")
-  #     return(x == gates$Gate[i])
-  #   })
-  #   
-  #   labels[test] <- gates$Cell[i]
-  #   multiple_cl[test] <- multiple_cl[test] + 1 
-  # }
-  
-  gates_split <- lapply(gates$Pos, function(g){
-    pos <- as.numeric(unlist(str_split(g, pattern = "_")))
-    return(pos)
-  })
-  
-  cell_split <- lapply(df_gate$Gate, function(g){
-    gate <- unlist(str_split(g, pattern = ""))
-    return(gate)
-  })
-  
-  for(i in 1:length(df_gate$Gate)){
-      
-    # i <- 1
+  ###  Optimized case case
+  if(length(table(gates$Pos)) == 1){
     
-    c_split <- cell_split[[i]]
+    index <- as.numeric(unlist(str_split(gates$Pos[1], pattern = "_")))
     
-    test <- sapply(1:length(gates$Gate), function(j){
-      index_split <- gates_split[[j]]
-      # x <- paste0(cell_split[[j]][index_split], collapse = "")
-      x <- stringi::stri_c(c_split[index_split], collapse = "", sep = "")
-      return(gates$Gate[j] == x)
+    gates_split <- sapply(1:length(gates$Gate), function(j){
+      gate_split <- unlist(str_split(gates$Gate[j], pattern = ""))
+      x <- stringi::stri_c(gate_split[index], collapse = "", sep = "")
+      return(x)
     })
     
-    if(sum(test) > 1){
-      labels[i] <- "Unclassified"
-    }else if(sum(test) == 1){
-      labels[i] <- gates$Cell[test]
-    }
+    cell_split <- sapply(1:length(df_gate$Gate), function(j){
+      gate_split <- unlist(str_split(df_gate$Gate[j], pattern = ""))
+      x <- stringi::stri_c(gate_split[index], collapse = "", sep = "")
+      return(x)
+    })
     
-    # multiple_cl[test] <- multiple_cl[test] + 1
+    for(i in 1:length(cell_split)){
+      
+      cell_gate <- cell_split[i]
+      
+      test <- sapply(1:length(gates_split), function(j){
+        return(gates_split[j] == cell_gate)
+      })
+      
+      if(sum(test) > 1){
+        labels[i] <- "Unclassified"
+      }else if(sum(test) == 1){
+        labels[i] <- gates$Cell[test]
+      }
+    }
+  }else{
+    gates_split <- lapply(gates$Pos, function(g){
+      pos <- as.numeric(unlist(str_split(g, pattern = "_")))
+      return(pos)
+    })
+    
+    cell_split <- lapply(df_gate$Gate, function(g){
+      gate <- unlist(str_split(g, pattern = ""))
+      return(gate)
+    })
+    
+    for(i in 1:length(df_gate$Gate)){
+      
+      c_split <- cell_split[[i]]
+      
+      test <- sapply(1:length(gates$Gate), function(j){
+        index_split <- gates_split[[j]]
+        # x <- paste0(cell_split[[j]][index_split], collapse = "")
+        x <- stringi::stri_c(c_split[index_split], collapse = "", sep = "")
+        return(gates$Gate[j] == x)
+      })
+      
+      if(sum(test) > 1){
+        labels[i] <- "Unclassified"
+      }else if(sum(test) == 1){
+        labels[i] <- gates$Cell[test]
+      }
+    }
   }
-  
+
   ## Cells classified multiple times are marked as "Unclassified"
   # labels[multiple_cl > 1] <- "Unclassified"
   
@@ -917,6 +930,8 @@ scGateMe_train <- function(reference,
                            imp_feature_thr = "all",
                            gmm_parameterization = "V",
                            sampling = "all",
+                           sampling_perc = 0.01,
+                           sampling_k = min(5, table(labels)-1),
                            sampling_feature_method = "all", ## or "class"
                            sampling_feature_pre = 1000,
                            sampling_imp_vars = 1000,
@@ -925,8 +940,8 @@ scGateMe_train <- function(reference,
                            verbose = T){
 
 # reference <- m
-# labels <- lab
-# gmm_criteria = "BIC"
+# labels <- sce2$labels
+# gmm_parameterization = "E"
 # sampling = "all"
 # seed = 1
 # rr = 0.1
@@ -935,8 +950,10 @@ scGateMe_train <- function(reference,
 # thr_perc = -1
 # verbose = T
 # sampling_feature_method ="all"
-# Boruta = T
+# Boruta = F
 # imp_feature_thr = "all"
+# sampling_perc = 0.01
+# sampling_k = 3
 
   # options(warn=1)
   set.seed(seed)
@@ -951,47 +968,33 @@ scGateMe_train <- function(reference,
     # s <- as.numeric(sapply(unique(labels), function(l){
     #   return(sample(which(as.character(labels) == l), min))
     # }))
+    message("scGateMe train - Executing SMOTE algorithm to balance the training set...")
+    new_reference <- reference
+    new_reference <- t(new_reference)
+    new_reference <- data.frame(new_reference)
+    new_reference$labels <- labels 
+      
+    new_labels <- labels
+    t_lab <- table(labels)
+    max <- max(t_lab)
+    w <- names(which.max(t_lab))
+    t_lab_perc <- t_lab / max
+    w_sample <- names(which(t_lab_perc < sampling_perc))
     
-    
-    max <- max(table(labels))
-    w <- names(which.max(table(labels)))
-    s <- sample(which(labels == w), floor(0.3 * max))
-    
-    w2 <- names(which.min(table(labels)))
-    s2 <- which(labels == w2)
-    
-    test <- t(reference)
-    test <- data.frame(test)
-    test$class <- labels
-    test <- test[c(s, s2), ]
-    labels <- labels[c(s,s2)]
-    
-    m2 <- SMOTE(test[, -which(colnames(test) == "class")], as.character(labels), K = 5)
-    m2 <- m2$data
-    m <- m2[, -which(colnames(test) == "class")]
-    m <- t(as.matrix(m))
-    reference <- m
-    labels <- m2$class
-    
-    # reference <- reference[, s]
-    # labels <- labels[s]
-  }
+    for(w2 in w_sample){
+      temp <- as.data.frame(t(reference[, labels %in% c(w, w2)]))
+      temp$labels <- labels[labels %in% c(w, w2)]
+      temp$labels <- factor(temp$labels)
 
-  # s <- c()
-  # n <- min(table(labels))
-  # 
-  # if(sampling < 1){
-  #   for(c in unique(labels)){
-  #     w <- which(labels == c)
-  #     s <- c(s, sample(w, n))
-  #   }
-  # 
-  #   reference <- reference[, s]
-  #   labels <- labels[s]
-  # }
-  
-  # ms <- sample(1:32, 20)
-  # reference <- reference[ms, s]
+      newData <- SMOTE(labels ~ ., temp, perc.over = 100, k = sampling_k, perc.under = 0)
+      new_reference <- rbind(new_reference, newData)
+    }
+    
+    labels <- new_reference$labels 
+    new_reference <- new_reference[, -which(colnames(new_reference) == "labels")]
+    new_reference <- t(new_reference)
+    reference <- new_reference
+  }
   
   markers <- rownames(reference)
   celltypes <- factor(unique(labels))
@@ -1162,7 +1165,7 @@ scGateMe_train <- function(reference,
       control <- trainControl(method = "repeatedcv", number = 5)
       model <- train(Cell ~ ., data = data, method = "rpart", trControl = control)
       importance <- varImp(model, useModel = F)
-      # plot(importance)
+      plot(importance)
       imp <- importance$importance
       mm <- rownames(imp)
       mm <- gsub("`", "", mm)
