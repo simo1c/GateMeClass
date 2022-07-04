@@ -13,7 +13,7 @@ gates
 # Extracting the gate table
 gate <- scGateMe_train(m,                            # reference dataset
                        sce2$labels,                  # labels of the dataset
-                       sampling = "none",             # Type of sampling ("all" or "class"), all = no sampling, class = use SMOTE sampling
+                       sampling = "none",            # Type of sampling ("all" or "class"), all = no sampling, class = use SMOTE sampling
                        imp_feature_thr = "GMM",      # Used only for dataset with two labels, criteria for marker selection by importance
                        gmm_parameterization = "V",   # Parameterization of GMM
                        sampling_feature_pre = 1000,  # Dataset size for Boruta
@@ -25,7 +25,7 @@ gate
 
 # Classification with the extracted gate table
 res <- scGateMe_classify(m,                                   # dataset to classify
-                         gate_table = gate,                        # gate table
+                         gate_table = gate,                   # gate table
                          reference = NULL,                    # reference dataset to use for creating the gate table
                          GMM_parameterization = "E",          # Parameterization of GMM
                          train_parameters = list(             # list of parameters for the training function
