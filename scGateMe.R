@@ -748,10 +748,414 @@ cell_classification <- function(marker_table, gates){
   return(cl_res)
 }
 
+scGateMe_train <- function(reference,
+                           labels, 
+                           imp_feature_thr = "all",
+                           GMM_parameterization = "V",
+                           sampling = "all",
+                           sampling_perc = 0.01,
+                           sampling_k = min(5, table(labels)-1),
+                           sampling_feature_method = "all",
+                           sampling_imp_vars = 1000,
+                           thr_perc = -1, 
+                           seed = 1,
+                           verbose = T){
 
-## DA IMPLEMENTARE:
-## 2) Ottimizzazione del codice (es., versione efficiente di paste)
-## 3) Nei risultati restituire la versione "leggibile" della gate table
+# reference <- m
+# labels <- lab
+# GMM_parameterization = "E"
+# sampling = "class"
+# seed = 1
+# rr = 0.1
+# sampling_feature_pre = 1000
+# sampling_imp_vars = 1000
+# thr_perc = -1
+# verbose = T
+# sampling_feature_method ="all"
+# Boruta = F
+# imp_feature_thr = "all"
+# sampling_perc = 0.01
+# sampling_k = 2
+  
+  # options(warn=1)
+  set.seed(seed)
+  
+  if(!is.null(reference)){
+    
+    old_names <- rownames(reference)
+    to_modify <- grep("^[0-9]", rownames(reference))
+    
+    if(length(to_modify) > 0){
+      rownames(reference)[to_modify] <- stringi::stri_c("P_", rownames(reference), sep = "")
+    }
+    
+    to_modify2 <- grep("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", rownames(reference))
+    
+    if(length(to_modify2) > 0){
+      rownames(reference) <- gsub("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", "_", rownames(reference))
+    }
+    
+    modified <- c(to_modify, to_modify2)
+    
+    if(length(modified) > 0){
+      
+      if(verbose){
+        message("scGateMe train - Renaming of markers: ", 
+                stringi::stri_c(old_names[modified], collapse = " ", sep = ""), 
+                " --> ", 
+                stringi::stri_c(rownames(reference)[modified], collapse = " ", sep = ""))
+      }
+    }
+  }else{
+    message("scGateMe train - Error! The expression matrix is mandatory!")
+    stop()
+  }
+  
+  if(sampling == "class"){
+    
+    # min <- min(table(labels))
+    # s <- as.numeric(sapply(unique(labels), function(l){
+    #   return(sample(which(as.character(labels) == l), min))
+    # }))
+    
+    if(verbose){
+      message("scGateMe train - Executing SMOTE algorithm to balance the training set...")
+    }
+    
+    new_reference <- reference
+    new_reference <- t(new_reference)
+    new_reference <- data.frame(new_reference)
+    new_reference$labels <- labels 
+      
+    new_labels <- labels
+    t_lab <- table(labels)
+    max <- max(t_lab)
+    w <- names(which.max(t_lab))
+    t_lab_perc <- t_lab / max
+    w_sample <- names(which(t_lab_perc < sampling_perc))
+    
+    for(w2 in w_sample){
+      temp <- as.data.frame(t(reference[, labels %in% c(w, w2)]))
+      temp$labels <- labels[labels %in% c(w, w2)]
+      temp$labels <- factor(temp$labels)
+
+      newData <- SMOTE(labels ~ ., temp, perc.over = 100, k = sampling_k, perc.under = 0)
+      new_reference <- rbind(new_reference, newData)
+    }
+    
+    labels <- new_reference$labels 
+    new_reference <- new_reference[, -which(colnames(new_reference) == "labels")]
+    new_reference <- t(new_reference)
+    reference <- new_reference
+  }
+  
+  markers <- rownames(reference)
+  celltypes <- factor(unique(labels))
+  gate_table <- data.frame(Cell = c("Unknown"), Gate = stringi::stri_c(markers, "+", collapse = "", sep = ""))
+  
+  new_gates <- parse_gate_table(gate_table, T, T)
+  dup <- new_gates$extended_gate_table$Gate[duplicated(new_gates$extended_gate_table$Gate)]
+  new_gates$extended_gate_table <- new_gates$extended_gate_table[!new_gates$extended_gate_table$Gate %in% dup, ]
+  new_gates2 <- new_gates
+  reference_2 <- reference[colnames(new_gates2$gate_table)[-1], , drop = F]
+  
+  if(verbose){
+    message("scGateMe train - Determining the marker signature of each cell...")
+  }
+  
+  expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
+  rownames(expr_markers) <- colnames(new_gates2$gate_table)[-1]
+  
+  reference_2 <- reference[colnames(new_gates2$gate_table)[-1], , drop = F]
+  expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
+  rownames(expr_markers) <- colnames(new_gates2$gate_table)[-1]
+  
+  ## Obtain the signature for the cells of the dataset to be annotated
+  expr_markers <- set_marker_expression(reference_2,
+                                        colnames(new_gates2$gate_table)[-1], 
+                                        expr_markers, 
+                                        new_gates2$gate_table, 
+                                        verbose = verbose, 
+                                        GMM_parameterization = GMM_parameterization)
+  
+  expr_markers <- expr_markers[colnames(new_gates2$gate_table)[-1], ]
+  expr_markers <- as.data.frame(t(expr_markers))
+  
+  cells <- cbind(rownames(expr_markers), expr_markers)
+  colnames(cells)[1] <- "Cell"
+  
+  expr_markers <- apply(cells[,- 1], 1, stringi::stri_c, collapse = "")
+  new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
+  
+  res <- list(cell_signatures = new_cells2)
+  
+  signatures <- res$cell_signatures
+  markers <- colnames(new_gates$gate_table)[-1]
+  
+  gate_ext <- sapply(signatures$Gate, function(v){
+    split <- unlist(str_split(v, ""))
+    sig <- stringi::stri_c(markers, split, collapse = "", sep = "")
+    return(sig)
+  })
+  
+  res$cell_signatures[, "Gate"] <- gate_ext
+  res <- res$cell_signatures
+  
+  if(verbose){
+    message("scGateMe train - Pairwise comparison between cell types...")
+  }
+  cell_df <- res
+  cell_df$labels <- labels
+  cell_df <- cell_df[, c("Gate", "labels")]
+  cell_df <- na.omit(cell_df)
+  
+  gate_table <- cell_df
+  gate_table$Cell <- stringi::stri_c(gate_table$labels, as.character(1:nrow(gate_table)), sep = "__")
+  
+  gate_parsed <- parse_gate_table(gate_table, T, F)
+  gate_parsed <- gate_parsed$gate_table
+  gate_parsed$Cell <- sapply(str_split(gate_parsed$Cell,"__"), `[`, 1)
+  
+  new_gate_table <- data.frame(Cell = unique(gate_parsed$Cell), Gate = "")
+  rownames(new_gate_table) <- new_gate_table$Cell
+  
+  markers <- colnames(gate_parsed[-1])
+  celltypes <- unique(gate_parsed$Cell)
+
+  marker_df <- data.frame(Marker = markers, Pos = NA, Neg = NA)
+  rownames(marker_df) <- marker_df$Marker
+  
+  data <- gate_parsed
+  data <- data.frame(lapply(data, factor), check.names = F)
+  
+  cell_markers <- vector("list", length(celltypes))
+  names(cell_markers) <- celltypes
+  pairs <- as.matrix(comboGrid(as.character(celltypes), as.character(celltypes), repetition = F))
+  
+  for(i in 1:nrow(pairs)){
+    
+    pair <- pairs[i, ]
+    
+    # pair <- pairs[1, ]
+    
+    c <- pair[1]
+    c2 <- pair[2]
+    
+    if(verbose){
+      message(stringi::stri_c(" - (", c,", ", c2, ")", sep = ""))
+    }
+    
+    to_exclude <- c()
+    
+    gates3 <- gate_parsed
+    gates3 <- gates3[gates3$Cell %in% c(c,c2), ]
+    
+    data <- gates3
+    data <- data[, c("Cell", markers)]
+    
+    s1 <- w1 <- which(data$Cell == c)
+    s2 <- w2 <- which(data$Cell == c2)
+    
+    if(length(w1) > sampling_imp_vars){
+      s1 <- sample(w1, sampling_imp_vars)
+    }
+    
+    if(length(w2) > sampling_imp_vars){
+      s2 <- sample(w2, sampling_imp_vars)
+    }
+      
+    data <- data[c(s1,s2), ]
+    data <- data.frame(lapply(data, factor), check.names = F)
+    
+    if(length(to_exclude) > 0){
+      data <- data[, !colnames(data) %in% to_exclude]
+    }
+    
+    mas <- c()
+    
+    nzv <- nearZeroVar(data[, -1], saveMetrics = TRUE)
+    to_exclude <- rownames(nzv)[nzv$nzv == T]
+    
+    if(length(to_exclude) > 0){
+      data <- data[, -which(colnames(data) %in% to_exclude)]
+    }
+    
+    flag <- -1
+    
+    tryCatch({
+      control <- trainControl(method = "repeatedcv", number = 5)
+      model <- train(Cell ~ ., data = data, method = "rpart", trControl = control)
+      importance <- varImp(model, useModel = F)
+      plot(importance)
+      imp <- importance$importance
+      mm <- rownames(imp)
+      mm <- gsub("`", "", mm)
+      mm <- gsub("\\+", "", mm)
+      mm <- gsub("\\-", "", mm)
+      imp <- imp[, 1]
+      names(imp) <- mm
+      imp <- imp[order(imp, decreasing = T)]
+      
+      if(imp_feature_thr == "all"){
+        mas <- names(imp[imp > 0])
+      }else if(imp_feature_thr == "median"){
+        mas <- names(imp[imp >= median(imp)])
+      }else if(imp_feature_thr == "GMM"){
+        cl <- Mclust(imp, G = 2, modelNames = "E", verbose = F)
+        mas <- names(imp[cl$classification == "2"])
+      }else{
+        messagae("Error! The specified value of parameter 'imp_feature_thr' does not exist!")
+        stop()
+      }
+      
+      flag <- 1
+    },
+    error = function(e){
+      message(e)
+      stop()
+    })
+    
+    if(flag < 0){
+      mas <- markers
+    }
+    
+    sig <- c()
+    signs <- c()
+  
+    for(k in mas){
+      
+      # k <- "CD3"
+      
+      t <- prop.table(table(gate_parsed[gate_parsed$Cell == c, k]))
+      t
+      max <- max(t)
+      
+      if(flag > 0){
+        if(max >= thr_perc){
+          sign <- names(t)[which.max(t)]
+          signs <- c(signs, sign)
+          sig <- c(sig, k)
+        }
+      }else{
+        if(max > 0.9){
+          sign <- names(t)[which.max(t)]
+          signs <- c(signs, sign)
+          sig <- c(sig, k)
+        }
+      }
+    }
+    
+    if(is.null(sig)){
+      next
+    }
+    
+    if(length(unique(labels)) > 2){
+      int_pos <- intersect(stringi::stri_c(sig[1], signs[1], sep = ""), cell_markers[[c]])
+      
+      sel_pos <- NA
+      sel_neg <- NA
+      
+      if(length(signs) > 0){
+        sg <- signs[1]
+        if(sg == "+"){
+          sg <- "-"
+        }else{
+          sg <- "+"
+        }
+      }
+      
+      if(length(int_pos) > 0){
+        
+        int_c2 <- intersect(cell_markers[[c2]], gsub(stringi::stri_c("\\", signs[1], sep = ""), sg, int_pos))
+        
+        if(length(int_c2) == 0){
+          if(is.null(cell_markers[[c2]])){
+            cell_markers[[c2]] <- gsub(stringi::stri_c("\\", signs[1], sep = ""), sg, int_pos[1])
+          }else{
+            cell_markers[[c2]] <- c(cell_markers[[c2]], gsub(stringi::stri_c("\\", signs[1], sep = ""), sg, int_pos[1]))
+          }
+        }
+      }else{
+        sel_pos <- 1
+      }
+      
+      if(is.null(cell_markers[[c]])){
+        if(!is.na(sel_pos)){
+          cell_markers[[c]] <- c(stringi::stri_c(sig[sel_pos], signs[sel_pos], sep = ""))
+        }
+      }else{
+        if(!is.na(sel_pos)){
+          cell_markers[[c]] <- c(cell_markers[[c]], stringi::stri_c(sig[sel_pos], signs[sel_pos], sep = ""))
+          
+        }
+      }
+      
+      if(is.null(cell_markers[[c2]])){
+        if(!is.na(sel_pos)){
+          cell_markers[[c2]] <- c(stringi::stri_c(sig[sel_pos], sg, sep = ""))
+        }
+      }else{
+        
+        if(!is.na(sel_pos)){
+          cell_markers[[c2]] <- c(cell_markers[[c2]], stringi::stri_c(sig[sel_pos], sg, sep = ""))
+        }
+      }
+    }else{
+      cell_markers[[c]] <- stringi::stri_c(sig, signs, collapse = "", sep = "")
+      sg <- ifelse(signs == "+", "-", "+")
+      x <- stringi::stri_c(sig, sg, sep = "")
+      y <- rep("|", length(x))
+      xy <- stringi::stri_c(x, y, collapse = "", sep = "")
+      cell_markers[[c2]] <- xy
+      cell_markers[[c2]] <- xy
+      
+    }
+  }
+  
+  g_temp <- cell_markers
+  g_temp <- lapply(g_temp, unique)
+  g_temp <- lapply(g_temp, unique)
+  g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
+  
+  to_remove <- sapply(1:length(g_temp), function(i){
+    ns <- names(g_temp[i])
+    el <- g_temp[[i]]
+    w <- which(duplicated(el))
+    to_remove <- el[w]
+    l <- list(which(el == to_remove))
+    names(l) <- ns
+    return(l)
+    
+  })
+  
+  for(i in 1:length(cell_markers)){
+    ns <- names(cell_markers[i])
+    w <- -to_remove[[ns]]
+    if(length(to_remove[[ns]])){
+      cell_markers[[ns]] <- cell_markers[[ns]][w]
+    }
+  }
+  
+  g <- sapply(lapply(cell_markers, unique), stringi::stri_c, collapse = "", sep = "")
+  new_gate_table <- data.frame(Cell = names(g), Gate = g)
+  
+  for(i in 1:nrow(marker_df)){
+    w <- which(is.na(marker_df[i, ]))
+    if(length(w) == 1){
+      if(w == 1){
+        to_remove <- stringi::stri_c(rownames(marker_df)[i], "+", sep = "")
+      }else{
+        to_remove <- stringi::stri_c(rownames(marker_df)[i], "-", sep = "")
+      }
+      new_gate_table$Gate <- gsub(to_remove, "", new_gate_table$Gate)
+    }
+  }
+  
+  rownames(new_gate_table) <- NULL
+  new_gate_table <- new_gate_table[new_gate_table$Gate != "", ]
+  return(new_gate_table)
+  
+}
 
 ## This is the core function for the classification of the single cells
 scGateMe_classify <- function(exp_matrix,
@@ -947,453 +1351,6 @@ scGateMe_classify <- function(exp_matrix,
   return(res)
 }
 
-scGateMe_train <- function(reference,
-                           labels, 
-                           imp_feature_thr = "all",
-                           GMM_parameterization = "V",
-                           sampling = "all",
-                           sampling_perc = 0.01,
-                           sampling_k = min(5, table(labels)-1),
-                           sampling_feature_method = "all",
-                           sampling_imp_vars = 1000,
-                           thr_perc = -1, 
-                           seed = 1,
-                           verbose = T){
-
-# reference <- m
-# labels <- lab
-# GMM_parameterization = "E"
-# sampling = "class"
-# seed = 1
-# rr = 0.1
-# sampling_feature_pre = 1000
-# sampling_imp_vars = 1000
-# thr_perc = -1
-# verbose = T
-# sampling_feature_method ="all"
-# Boruta = F
-# imp_feature_thr = "all"
-# sampling_perc = 0.01
-# sampling_k = 2
-  
-  # options(warn=1)
-  set.seed(seed)
-  
-  if(!is.null(reference)){
-    
-    old_names <- rownames(reference)
-    to_modify <- grep("^[0-9]", rownames(reference))
-    
-    if(length(to_modify) > 0){
-      rownames(reference)[to_modify] <- stringi::stri_c("P_", rownames(reference), sep = "")
-    }
-    
-    to_modify2 <- grep("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", rownames(reference))
-    
-    if(length(to_modify2) > 0){
-      rownames(reference) <- gsub("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", "_", rownames(reference))
-    }
-    
-    modified <- c(to_modify, to_modify2)
-    
-    if(length(modified) > 0){
-      
-      if(verbose){
-        message("scGateMe train - Renaming of markers: ", 
-                stringi::stri_c(old_names[modified], collapse = " ", sep = ""), 
-                " --> ", 
-                stringi::stri_c(rownames(reference)[modified], collapse = " ", sep = ""))
-      }
-    }
-  }else{
-    message("scGateMe train - Error! The expression matrix is mandatory!")
-    stop()
-  }
-  
-  if(sampling == "class"){
-    
-    # min <- min(table(labels))
-    # s <- as.numeric(sapply(unique(labels), function(l){
-    #   return(sample(which(as.character(labels) == l), min))
-    # }))
-    
-    if(verbose){
-      message("scGateMe train - Executing SMOTE algorithm to balance the training set...")
-    }
-    
-    new_reference <- reference
-    new_reference <- t(new_reference)
-    new_reference <- data.frame(new_reference)
-    new_reference$labels <- labels 
-      
-    new_labels <- labels
-    t_lab <- table(labels)
-    max <- max(t_lab)
-    w <- names(which.max(t_lab))
-    t_lab_perc <- t_lab / max
-    w_sample <- names(which(t_lab_perc < sampling_perc))
-    
-    for(w2 in w_sample){
-      temp <- as.data.frame(t(reference[, labels %in% c(w, w2)]))
-      temp$labels <- labels[labels %in% c(w, w2)]
-      temp$labels <- factor(temp$labels)
-
-      newData <- SMOTE(labels ~ ., temp, perc.over = 100, k = sampling_k, perc.under = 0)
-      new_reference <- rbind(new_reference, newData)
-    }
-    
-    labels <- new_reference$labels 
-    new_reference <- new_reference[, -which(colnames(new_reference) == "labels")]
-    new_reference <- t(new_reference)
-    reference <- new_reference
-  }
-  
-  markers <- rownames(reference)
-  celltypes <- factor(unique(labels))
-  gate_table <- data.frame(Cell = c("Unknown"), Gate = stringi::stri_c(markers, "+", collapse = "", sep = ""))
-  
-  new_gates <- parse_gate_table(gate_table, T, T)
-  dup <- new_gates$extended_gate_table$Gate[duplicated(new_gates$extended_gate_table$Gate)]
-  new_gates$extended_gate_table <- new_gates$extended_gate_table[!new_gates$extended_gate_table$Gate %in% dup, ]
-  new_gates2 <- new_gates
-  reference_2 <- reference[colnames(new_gates2$gate_table)[-1], , drop = F]
-  
-  if(verbose){
-    message("scGateMe train - Determining the marker signature of each cell...")
-  }
-  
-  expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
-  rownames(expr_markers) <- colnames(new_gates2$gate_table)[-1]
-  
-  reference_2 <- reference[colnames(new_gates2$gate_table)[-1], , drop = F]
-  expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
-  rownames(expr_markers) <- colnames(new_gates2$gate_table)[-1]
-  
-  ## Obtain the signature for the cells of the dataset to be annotated
-  expr_markers <- set_marker_expression(reference_2,
-                                        colnames(new_gates2$gate_table)[-1], 
-                                        expr_markers, 
-                                        new_gates2$gate_table, 
-                                        verbose = verbose, 
-                                        GMM_parameterization = GMM_parameterization)
-  
-  expr_markers <- expr_markers[colnames(new_gates2$gate_table)[-1], ]
-  expr_markers <- as.data.frame(t(expr_markers))
-  
-  cells <- cbind(rownames(expr_markers), expr_markers)
-  colnames(cells)[1] <- "Cell"
-  
-  expr_markers <- apply(cells[,- 1], 1, stringi::stri_c, collapse = "")
-  new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
-  
-  res <- list(cell_signatures = new_cells2)
-  
-  signatures <- res$cell_signatures
-  markers <- colnames(new_gates$gate_table)[-1]
-  
-  gate_ext <- sapply(signatures$Gate, function(v){
-    split <- unlist(str_split(v, ""))
-    sig <- stringi::stri_c(markers, split, collapse = "", sep = "")
-    return(sig)
-  })
-  
-  res$cell_signatures[, "Gate"] <- gate_ext
-  res <- res$cell_signatures
-  
-  if(verbose){
-    message("scGateMe train - Pairwise comparison between cell types...")
-  }
-  cell_df <- res
-  cell_df$labels <- labels
-  cell_df <- cell_df[, c("Gate", "labels")]
-  cell_df <- na.omit(cell_df)
-  
-  gate_table <- cell_df
-  gate_table$Cell <- stringi::stri_c(gate_table$labels, as.character(1:nrow(gate_table)), sep = "__")
-  
-  gate_parsed <- parse_gate_table(gate_table, T, F)
-  gate_parsed <- gate_parsed$gate_table
-  gate_parsed$Cell <- sapply(str_split(gate_parsed$Cell,"__"), `[`, 1)
-  
-  new_gate_table <- data.frame(Cell = unique(gate_parsed$Cell), Gate = "")
-  rownames(new_gate_table) <- new_gate_table$Cell
-  
-  markers <- colnames(gate_parsed[-1])
-  celltypes <- unique(gate_parsed$Cell)
-
-  marker_df <- data.frame(Marker = markers, Pos = NA, Neg = NA)
-  rownames(marker_df) <- marker_df$Marker
-  
-  data <- gate_parsed
-  
-  # if(sampling_feature_method == "all"){
-  #   if(nrow(data) > sampling_feature_pre){
-  #     data <- data[sample(1:nrow(data), sampling_feature_pre), ]
-  #   }
-  # }else{
-  #   min <- min(table(data$Cell))
-  #   s <- as.numeric(sapply(unique(data$Cell), function(l){
-  #     return(sample(which(as.character(data$Cell) == l), min))
-  #   }))
-  #   data <- data[s, ]
-  # }
-  
-  # if(nrow(data) > sampling_feature_pre){
-  #   data <- data[sample(1:nrow(data), sampling_feature_pre), ]
-  # }
-  
-  data <- data.frame(lapply(data, factor), check.names = F)
-  
-  # if(Boruta){
-  #   ##### Si potrebbe rendere dinamico in modo da far usare qualsiasi metodo di feature selection
-  #   b <- Boruta(Cell ~ ., data = data, getImp=getImpFerns)
-  #   m_to_use <- names(b$finalDecision)[b$finalDecision  == "Confirmed"]
-  #   m_to_use <- gsub("`", "", m_to_use)
-  #   #############################################################################################
-  # }else{
-  #   m_to_use <- markers
-  # }
-  
-  m_to_use <- markers
-  
-  cell_markers <- vector("list", length(celltypes))
-  names(cell_markers) <- celltypes
-  pairs <- as.matrix(comboGrid(as.character(celltypes), as.character(celltypes), repetition = F))
-  
-  for(i in 1:nrow(pairs)){
-    
-    pair <- pairs[i, ]
-    
-    # pair <- pairs[1, ]
-    
-    c <- pair[1]
-    c2 <- pair[2]
-    
-    if(verbose){
-      message(stringi::stri_c(" - (", c,", ", c2, ")", sep = ""))
-    }
-    
-    to_exclude <- c()
-    
-    gates3 <- gate_parsed
-    gates3 <- gates3[gates3$Cell %in% c(c,c2), ]
-    
-    data <- gates3
-    data <- data[, c("Cell", m_to_use)]
-    
-    s1 <- w1 <- which(data$Cell == c)
-    s2 <- w2 <- which(data$Cell == c2)
-    
-    #if(sampling_feature_method == "all"){
-      
-    if(length(w1) > sampling_imp_vars){
-      s1 <- sample(w1, sampling_imp_vars)
-    }
-    
-    if(length(w2) > sampling_imp_vars){
-      s2 <- sample(w2, sampling_imp_vars)
-    }
-      
-    data <- data[c(s1,s2), ]
-      
-    # }else{
-    #   s <- as.numeric(sapply(unique(data$Cell), function(l){
-    #     return(sample(which(as.character(data$Cell) == l), min))
-    #   }))
-    #   data <- data[s, ]
-    # }
-    
-    data <- data.frame(lapply(data, factor), check.names = F)
-    
-    if(length(to_exclude) > 0){
-      data <- data[, !colnames(data) %in% to_exclude]
-    }
-    
-    mas <- c()
-    
-    nzv <- nearZeroVar(data[, -1], saveMetrics = TRUE)
-    to_exclude <- rownames(nzv)[nzv$nzv == T]
-    
-    if(length(to_exclude) > 0){
-      data <- data[, -which(colnames(data) %in% to_exclude)]
-    }
-    
-    flag <- -1
-    
-    tryCatch({
-      control <- trainControl(method = "repeatedcv", number = 5)
-      model <- train(Cell ~ ., data = data, method = "rpart", trControl = control)
-      importance <- varImp(model, useModel = F)
-      plot(importance)
-      imp <- importance$importance
-      mm <- rownames(imp)
-      mm <- gsub("`", "", mm)
-      mm <- gsub("\\+", "", mm)
-      mm <- gsub("\\-", "", mm)
-      imp <- imp[, 1]
-      names(imp) <- mm
-      imp <- imp[order(imp, decreasing = T)]
-      
-      if(imp_feature_thr == "all"){
-        mas <- names(imp[imp > 0])
-      }else if(imp_feature_thr == "median"){
-        mas <- names(imp[imp >= median(imp)])
-      }else if(imp_feature_thr == "GMM"){
-        cl <- Mclust(imp, G = 2, modelNames = "E", verbose = F)
-        mas <- names(imp[cl$classification == "2"])
-      }else{
-        messagae("Error! The specified value of parameter 'imp_feature_thr does not exist!'")
-        stop()
-      }
-      
-      flag <- 1
-    },
-    error = function(e){
-      message(e)
-      stop()
-    })
-    
-    if(flag < 0){
-      mas <- m_to_use
-    }
-    
-    sig <- c()
-    signs <- c()
-  
-    for(k in mas){
-      
-      # k <- "CD3"
-      
-      t <- prop.table(table(gate_parsed[gate_parsed$Cell == c, k]))
-      t
-      max <- max(t)
-      
-      if(flag > 0){
-        if(max >= thr_perc){
-          sign <- names(t)[which.max(t)]
-          signs <- c(signs, sign)
-          sig <- c(sig, k)
-        }
-      }else{
-        if(max > 0.9){
-          sign <- names(t)[which.max(t)]
-          signs <- c(signs, sign)
-          sig <- c(sig, k)
-        }
-      }
-    }
-    
-    if(is.null(sig)){
-      next
-    }
-    
-    if(length(unique(labels)) > 2){
-      int_pos <- intersect(stringi::stri_c(sig[1], signs[1], sep = ""), cell_markers[[c]])
-      
-      sel_pos <- NA
-      sel_neg <- NA
-      
-      if(length(signs) > 0){
-        sg <- signs[1]
-        if(sg == "+"){
-          sg <- "-"
-        }else{
-          sg <- "+"
-        }
-      }
-      
-      if(length(int_pos) > 0){
-        
-        int_c2 <- intersect(cell_markers[[c2]], gsub(stringi::stri_c("\\", signs[1], sep = ""), sg, int_pos))
-        
-        if(length(int_c2) == 0){
-          if(is.null(cell_markers[[c2]])){
-            cell_markers[[c2]] <- gsub(stringi::stri_c("\\", signs[1], sep = ""), sg, int_pos[1])
-          }else{
-            cell_markers[[c2]] <- c(cell_markers[[c2]], gsub(stringi::stri_c("\\", signs[1], sep = ""), sg, int_pos[1]))
-          }
-        }
-      }else{
-        sel_pos <- 1
-      }
-      
-      if(is.null(cell_markers[[c]])){
-        if(!is.na(sel_pos)){
-          cell_markers[[c]] <- c(stringi::stri_c(sig[sel_pos], signs[sel_pos], sep = ""))
-        }
-      }else{
-        if(!is.na(sel_pos)){
-          cell_markers[[c]] <- c(cell_markers[[c]], stringi::stri_c(sig[sel_pos], signs[sel_pos], sep = ""))
-          
-        }
-      }
-      
-      if(is.null(cell_markers[[c2]])){
-        if(!is.na(sel_pos)){
-          cell_markers[[c2]] <- c(stringi::stri_c(sig[sel_pos], sg, sep = ""))
-        }
-      }else{
-        
-        if(!is.na(sel_pos)){
-          cell_markers[[c2]] <- c(cell_markers[[c2]], stringi::stri_c(sig[sel_pos], sg, sep = ""))
-        }
-      }
-    }else{
-      cell_markers[[c]] <- stringi::stri_c(sig, signs, collapse = "", sep = "")
-      sg <- ifelse(signs == "+", "-", "+")
-      x <- stringi::stri_c(sig, sg, sep = "")
-      y <- rep("|", length(x))
-      xy <- stringi::stri_c(x, y, collapse = "", sep = "")
-      cell_markers[[c2]] <- xy
-      cell_markers[[c2]] <- xy
-      
-    }
-  }
-  
-  g_temp <- cell_markers
-  g_temp <- lapply(g_temp, unique)
-  g_temp <- lapply(g_temp, unique)
-  g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
-  
-  to_remove <- sapply(1:length(g_temp), function(i){
-    ns <- names(g_temp[i])
-    el <- g_temp[[i]]
-    w <- which(duplicated(el))
-    to_remove <- el[w]
-    l <- list(which(el == to_remove))
-    names(l) <- ns
-    return(l)
-    
-  })
-  
-  for(i in 1:length(cell_markers)){
-    ns <- names(cell_markers[i])
-    w <- -to_remove[[ns]]
-    if(length(to_remove[[ns]])){
-      cell_markers[[ns]] <- cell_markers[[ns]][w]
-    }
-  }
-  
-  g <- sapply(lapply(cell_markers, unique), stringi::stri_c, collapse = "", sep = "")
-  new_gate_table <- data.frame(Cell = names(g), Gate = g)
-  
-  for(i in 1:nrow(marker_df)){
-    w <- which(is.na(marker_df[i, ]))
-    if(length(w) == 1){
-      if(w == 1){
-        to_remove <- stringi::stri_c(rownames(marker_df)[i], "+", sep = "")
-      }else{
-        to_remove <- stringi::stri_c(rownames(marker_df)[i], "-", sep = "")
-      }
-      new_gate_table$Gate <- gsub(to_remove, "", new_gate_table$Gate)
-    }
-  }
-  
-  rownames(new_gate_table) <- NULL
-  new_gate_table <- new_gate_table[new_gate_table$Gate != "", ]
-  return(new_gate_table)
-  
-}
 
 
 
