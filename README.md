@@ -25,7 +25,7 @@ gate
 
 # Classification with the extracted gate table
 res <- scGateMe_classify(m,                                   # dataset to classify
-                         gates = gate,                        # gate table
+                         gate_table = gate,                        # gate table
                          reference = NULL,                    # reference dataset to use for creating the gate table
                          GMM_parameterization = "E",          # Parameterization of GMM
                          train_parameters = list(             # list of parameters for the training function
@@ -45,7 +45,7 @@ res <- scGateMe_classify(m,                                   # dataset to class
 # Artificial example with the same dataset as reference and control set 
 colnames(m) <- sce2$labels # column names of the reference are the labels
 res <- scGateMe_classify(m,
-                         gates = NULL,
+                         gate_table = NULL,
                          reference = m, 
                          train_parameters = list(
                            reference = m,
