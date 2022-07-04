@@ -752,8 +752,10 @@ scGateMe_train <- function(reference,
                            labels, 
                            imp_feature_thr = "all",
                            GMM_parameterization = "V",
-                           sampling = "all",
+                           sampling = "none",
                            sampling_perc = 0.01,
+                           perc.over = 100,
+                           perc.under = 0,
                            sampling_k = min(5, table(labels)-1),
                            sampling_feature_method = "all",
                            sampling_imp_vars = 1000,
@@ -812,12 +814,6 @@ scGateMe_train <- function(reference,
   }
   
   if(sampling == "class"){
-    
-    # min <- min(table(labels))
-    # s <- as.numeric(sapply(unique(labels), function(l){
-    #   return(sample(which(as.character(labels) == l), min))
-    # }))
-    
     if(verbose){
       message("scGateMe train - Executing SMOTE algorithm to balance the training set...")
     }
