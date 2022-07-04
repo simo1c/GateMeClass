@@ -130,7 +130,6 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
   }
   
   if(narrow_gate_table){
-    
     temp <- sapply(gate_table$Gate, function(x){
       str <- strsplit(x, "[-]|-[\\|\\^]|[+]|\\+[\\|\\^]|[*]")
       str[[1]] <- stri_remove_empty(str[[1]])
@@ -763,7 +762,7 @@ scGateMe_train <- function(reference,
                            verbose = T){
 
 # reference <- m
-# labels <- lab
+# labels <- sce2$labels
 # GMM_parameterization = "E"
 # sampling = "class"
 # seed = 1
@@ -793,7 +792,7 @@ scGateMe_train <- function(reference,
     to_modify2 <- grep("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", rownames(reference))
     
     if(length(to_modify2) > 0){
-      rownames(reference) <- gsub("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", "_", rownames(reference)[to_modify2])
+      rownames(reference)[to_modify2] <- gsub("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", "_", rownames(reference)[to_modify2])
     }
     
     modified <- c(to_modify, to_modify2)
@@ -901,6 +900,7 @@ scGateMe_train <- function(reference,
   if(verbose){
     message("scGateMe train - Pairwise comparison between cell types...")
   }
+  
   cell_df <- res
   cell_df$labels <- labels
   cell_df <- cell_df[, c("Gate", "labels")]
@@ -1161,7 +1161,7 @@ scGateMe_classify <- function(exp_matrix,
                               narrow_gate_table = T,
                               verbose = T,
                               seed = 1){
-  
+
   # gate_table <- gate
   # refine = F
   # cluster_level_labels = T
@@ -1187,13 +1187,13 @@ scGateMe_classify <- function(exp_matrix,
     to_modify <- grep("^[0-9]", rownames(exp_matrix))
     
     if(length(to_modify) > 0){
-      rownames(exp_matrix)[to_modify] <- stringi::stri_c("P_", rownames(exp_matrix), sep = "")
+      rownames(exp_matrix)[to_modify] <- stringi::stri_c("P_", rownames(exp_matrix)[to_modify], sep = "")
     }
     
     to_modify2 <- grep("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", rownames(exp_matrix))
     
     if(length(to_modify2) > 0){
-      rownames(exp_matrix) <- gsub("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", "_", rownames(exp_matrix))
+      rownames(exp_matrix)[to_modify2] <- gsub("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", "_", rownames(exp_matrix)[to_modify2])
     }
     
     modified <- c(to_modify, to_modify2)
@@ -1212,11 +1212,19 @@ scGateMe_classify <- function(exp_matrix,
   }
   
   if(!is.null(gate_table)){
-    for(i in 1:length(old_names[modified])){
-      x <- old_names[modified][i]
-      gate_table$Gate <- gsub(x, rownames(exp_matrix)[modified][i], gate_table$Gate)
+    temp <- sapply(gate_table$Gate, function(x){
+      str <- strsplit(x, "[-]|-[\\|\\^]|[+]|\\+[\\|\\^]|[*]")
+      str[[1]] <- stri_remove_empty(str[[1]])
+      return(str)
+    })
+    
+    if(length(setdiff(unique(unlist(temp)), rownames(exp_matrix))) > 0){
+      for(i in 1:length(old_names[modified])){
+        x <- old_names[modified][i]
+        gate_table$Gate <- gsub(x, rownames(exp_matrix)[modified][i], gate_table$Gate)
+      }
     }
-  }else if(is.null(gate_table) & is.null(reference)){
+  }else{
     message("scGateMe classify - Error! Please, specify a gate table or a reference dataset!")
     stop()
   }
