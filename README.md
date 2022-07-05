@@ -26,11 +26,9 @@ gate
 # Classification with the extracted gate table
 res <- scGateMe_classify(m,                                   # dataset to classify
                          gate_table = gate,                   # gate table
-                         reference = NULL,                    # reference dataset to use for creating the gate table
                          GMM_parameterization = "E",          # Parameterization of GMM
                          train_parameters = list(             # list of parameters for the training function
-                           reference = m,
-                           labels = colnames(m)
+                           reference = NULL
                          ),
                          refine = T,                          # KNN algorithm to refine labels after classification
                          sampling = 0.25,                     # Sampling to classify a subset of the dataset
@@ -46,7 +44,6 @@ res <- scGateMe_classify(m,                                   # dataset to class
 colnames(m) <- sce2$labels # column names of the reference are the labels
 res <- scGateMe_classify(m,
                          gate_table = NULL,
-                         reference = m, 
                          train_parameters = list(
                            reference = m,
                            labels = colnames(m)
