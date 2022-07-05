@@ -1224,9 +1224,6 @@ scGateMe_classify <- function(exp_matrix,
         gate_table$Gate <- gsub(x, rownames(exp_matrix)[modified][i], gate_table$Gate)
       }
     }
-  }else{
-    message("scGateMe classify - Error! Please, specify a gate table or a reference dataset!")
-    stop()
   }
   
   if(sampling < 1){
