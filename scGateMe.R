@@ -192,26 +192,6 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
   return(list(gate_table = gate_table))
 }
 
-# RSS_generate <- function(sample, cycles=1000, n_unit=2, p="min"){
-#   
-#   # sample <- m["TNFa", ]
-#   # cycles = 1000
-#   # n_unit = 10
-#   # p = "max"
-# 
-#   n <- length(sample)
-#   samples <- cycles * n_unit
-#   indexes <- matrix(sample(1:n, samples * n_unit), nrow = n_unit)
-#   sel_samples <- matrix(sample[indexes], nrow = n_unit)
-#   
-#   if(p == "min"){
-#     test <- apply(sel_samples, 2, min)
-#   }else{
-#     test <- apply(sel_samples, 2, max)
-#   }
-#   return(test)
-# }
-
 set_marker_expression_GMM <- function(X, indexes, mm, GMM_parameterization){
   
   # X <- m["CD19", ]
@@ -290,7 +270,6 @@ set_marker_expression <- function(exp_matrix, markers,
     queue <- queue[-1]
 
     for(m in first$markers){
-
       X <- exp_matrix[m, first$indexes]
       marker_expr <- set_marker_expression_GMM(X, indexes = first$indexes, m, GMM_parameterization)
       
@@ -335,8 +314,7 @@ set_marker_expression <- function(exp_matrix, markers,
       queue <- c(queue, to_add)
     }
   }
-    return(expr_markers)
-  #}
+  return(expr_markers)
 }
 
 ## This function performs the cell classification
@@ -398,7 +376,6 @@ cell_classification <- function(marker_table, gates){
     })
     
     for(i in 1:length(cell_split)){
-      
       cell_gate <- cell_split[i]
       
       test <- sapply(1:length(gates_split), function(j){
@@ -480,9 +457,9 @@ scGateMe_train <- function(reference,
                            verbose = T){
 
 # reference <- m
-# labels <- lab
+# labels <- colnames(m)
 # GMM_parameterization = "E"
-# sampling = "none"
+# sampling = "class"
 # seed = 1
 # rr = 0.1
 # sampling_feature_pre = 1000
@@ -629,13 +606,10 @@ scGateMe_train <- function(reference,
   pairs <- as.matrix(comboGrid(as.character(celltypes), as.character(celltypes), repetition = F))
   
   for(i in 1:nrow(pairs)){
-    
     sig <- c()
     signs <- c()
+    
     pair <- pairs[i, ]
-    
-    # pair <- pairs[1, ]
-    
     c <- pair[1]
     c2 <- pair[2]
     
@@ -701,7 +675,6 @@ scGateMe_train <- function(reference,
         messagae("Error! The specified value of parameter 'imp_feature_thr' does not exist!")
         stop()
       }
-      
       flag <- 1
     },
     error = function(e){
@@ -736,9 +709,6 @@ scGateMe_train <- function(reference,
     }
     
     if(!is.null(sig)){
-    
-      # if(length(unique(labels)) > 2){
-        
       top_marker <- stringi::stri_c(sig[1], signs[1], sep = "")
       int_pos <- top_marker %in% cell_markers[[c]]
       sg <- ifelse(signs[1] == "+", "-", "+")
@@ -756,17 +726,6 @@ scGateMe_train <- function(reference,
         cell_markers[[c2]] <- c(cell_markers[[c2]], top_marker_opp)
       }
     }
-    
-    
-    # }else{
-    #   cell_markers[[c]] <- stringi::stri_c(sig, signs, collapse = "", sep = "")
-    #   sg <- ifelse(signs == "+", "-", "+")
-    #   x <- stringi::stri_c(sig, sg, sep = "")
-    #   y <- rep("|", length(x))
-    #   xy <- stringi::stri_c(x, y, collapse = "", sep = "")
-    #   cell_markers[[c2]] <- xy
-    #   cell_markers[[c2]] <- xy
-    # }
   }
 
   g <- sapply(cell_markers, stringi::stri_c, collapse = "", sep = "")
@@ -839,9 +798,6 @@ scGateMe_classify <- function(exp_matrix,
         gate_table$Gate <- gsub(x, rownames(exp_matrix)[modified][i], gate_table$Gate)
       }
     }
-  }else{
-    message("scGateMe classify - Error! Please, specify a gate table or a reference dataset!")
-    stop()
   }
   
   if(sampling < 1){
@@ -882,6 +838,11 @@ scGateMe_classify <- function(exp_matrix,
       stop()
     }
   }else{
+    if(is.null(gate_table)){
+      message("scGateMe classify - Error! Please, specify a gate table or a reference dataset!")
+      stop()
+    }
+    
     if(verbose){
       message("scGateMe classify - Parsing gate table...")
     }
