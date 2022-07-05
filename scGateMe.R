@@ -809,7 +809,7 @@ scGateMe_classify <- function(exp_matrix,
     exp_matrix_pre_sampling <- exp_matrix
   }
   
-  if(!is.null(train_parameters$reference)){
+  if(!is.null(train_parameters$reference) & is.null(gate_table)){
     reference <- train_parameters$reference
     old_names <- rownames(reference)
     check <- check_marker_names(rownames(reference))
