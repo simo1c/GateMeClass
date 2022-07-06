@@ -166,15 +166,10 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
       # cell <- v[1]
       # v <- v[-1] 
       # names(v) <- colnames(gate_table)[-1]
-      
       # print(class(v))
       # print(cell)
       
       to_add <- generate_set_values(v[-1], v[1])
-      
-      # to_add <- generate_set_values(v, cell)
-      
-      
       return(to_add)
     })
     
@@ -188,13 +183,11 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
   return(list(gate_table = gate_table))
 }
 
-set_marker_expression_GMM <- function(X, indexes, mm, GMM_parameterization){
+set_marker_expression_GMM <- function(X, GMM_parameterization){
   
-  # X <- m["CD19", ]
-  # gmm_criteria = "BIC"
-  # mm = 2
-  # rr = 0.05
+  # X <- m["CD45", ]
   # indexes = first$indexes
+  # GMM_parameterization = "E"
   
   if(length(X) >= 100){
 
@@ -230,17 +223,19 @@ set_marker_expression_GMM <- function(X, indexes, mm, GMM_parameterization){
   cl <- Mclust(test, G = 2, verbose = F, modelNames = GMM_parameterization)
   pred <- predict.Mclust(cl, X)
   temp <- pred$classification
+  
   means <- cl$parameters$mean
   means <- sort(means)
   temp[temp == names(means)[1]] <- "-"
   temp[temp == names(means)[2]] <- "+"
+  
   return(temp)
 }
 
 ## This function set the marker signature of each cell
-set_marker_expression <- function(exp_matrix, markers,
+set_marker_expression <- function(exp_matrix, 
+                                  markers,
                                   expr_markers, 
-                                  # gates, 
                                   verbose, 
                                   GMM_parameterization){
 
@@ -255,6 +250,9 @@ set_marker_expression <- function(exp_matrix, markers,
   # rr <- 0.05
   # gmm_criteria <- "ICL"
 
+  ## GMM probabilities initialization
+  # prob <- rep(1, ncol(exp_matrix))
+
   queue <- list(list(indexes = 1:ncol(exp_matrix), markers = markers))
 
   while(length(queue) > 0){
@@ -267,8 +265,7 @@ set_marker_expression <- function(exp_matrix, markers,
 
     for(m in first$markers){
       X <- exp_matrix[m, first$indexes]
-      marker_expr <- set_marker_expression_GMM(X, indexes = first$indexes, m, GMM_parameterization)
-      
+      marker_expr <- set_marker_expression_GMM(X, GMM_parameterization)
       if(length(table(marker_expr)) > 1){
         bimodal_markers <- c(bimodal_markers, m)
 
@@ -440,21 +437,19 @@ check_marker_names <- function(marker_names){
 # This is the train module of scGateMe
 scGateMe_train <- function(reference,
                            labels, 
-                           imp_feature_thr = "all",
                            GMM_parameterization = "V",
                            sampling = "none",
                            sampling_perc = 0.01,
                            perc.over = 100,
                            perc.under = 0,
                            sampling_k = min(5, table(labels)-1),
-                           sampling_feature_method = "all",
                            sampling_imp_vars = 1000,
                            thr_perc = -1, 
                            seed = 1,
                            verbose = T){
 
 # reference <- m
-# labels <- lab
+# labels <- sce2$labels
 # GMM_parameterization = "E"
 # sampling = "class"
 # seed = 1
@@ -523,10 +518,6 @@ scGateMe_train <- function(reference,
   
   markers <- rownames(reference)
   celltypes <- factor(unique(labels))
-  
-  # gate_table <- data.frame(Cell = c("Unknown"), Gate = stri_c(markers, "+", collapse = "", sep = ""))
-  
-  # new_gates <- parse_gate_table(gate_table, T, T)
   reference_2 <- reference[markers, , drop = F]
   
   if(verbose){
@@ -653,24 +644,10 @@ scGateMe_train <- function(reference,
       # plot(importance)
       imp <- importance$importance
       mm <- rownames(imp)
-      mm <- gsub("`", "", mm)
-      mm <- gsub("\\+", "", mm)
-      mm <- gsub("\\-", "", mm)
       imp <- imp[, 1]
       names(imp) <- mm
       imp <- imp[order(imp, decreasing = T)]
-      
-      if(imp_feature_thr == "all"){
-        mas <- names(imp[imp > 0])
-      }else if(imp_feature_thr == "median"){
-        mas <- names(imp[imp >= median(imp)])
-      }else if(imp_feature_thr == "GMM"){
-        cl <- Mclust(imp, G = 2, modelNames = "E", verbose = F)
-        mas <- names(imp[cl$classification == "2"])
-      }else{
-        messagae("Error! The specified value of parameter 'imp_feature_thr' does not exist!")
-        stop()
-      }
+      mas <- names(imp)
       flag <- 1
     },
     error = function(e){
@@ -682,32 +659,15 @@ scGateMe_train <- function(reference,
       mas <- markers
     }
     
-    for(k in mas){
-      
-      # k <- "CD14"
-      
-      t <- prop.table(table(gate_parsed[gate_parsed$Cell == c, k]))
-      max <- max(t)
-      
-      if(flag > 0){
-        if(max >= thr_perc){
-          sign <- names(t)[which.max(t)]
-          signs <- c(signs, sign)
-          sig <- c(sig, k)
-        }
-      }else{
-        if(max > 0.9){
-          sign <- names(t)[which.max(t)]
-          signs <- c(signs, sign)
-          sig <- c(sig, k)
-        }
-      }
-    }
+    t <- prop.table(table(gate_parsed[gate_parsed$Cell == c, mas[1]]))
+    w <- which.max(t)
+    sig <- mas[1]
+    signs <- names(t)[w]
     
     if(!is.null(sig)){
-      top_marker <- stri_c(sig[1], signs[1], sep = "")
+      top_marker <- stri_c(sig, signs, sep = "")
       int_pos <- top_marker %in% cell_markers[[c]]
-      sg <- ifelse(signs[1] == "+", "-", "+")
+      sg <- ifelse(signs == "+", "-", "+")
       
       # Top discriminant marker is not present in gate table
       if(!int_pos){
@@ -715,7 +675,7 @@ scGateMe_train <- function(reference,
       }
       
       ## Check if the top marker is present in c2 
-      top_marker_opp <- gsub(stri_c("\\", signs[1], sep = ""), sg, top_marker)
+      top_marker_opp <- gsub(stri_c("\\", signs, sep = ""), sg, top_marker)
       int_c2 <- top_marker_opp %in% cell_markers[[c2]]
       
       if(!int_c2){
@@ -724,6 +684,7 @@ scGateMe_train <- function(reference,
     }
   }
 
+  cell_markers <- lapply(cell_markers, sort, decreasing = F)
   g <- sapply(cell_markers, stri_c, collapse = "", sep = "")
   new_gate_table <- data.frame(Cell = names(g), Gate = g)
   rownames(new_gate_table) <- NULL
@@ -746,7 +707,7 @@ scGateMe_classify <- function(exp_matrix,
                               verbose = T,
                               seed = 1){
   
-  # gate_table <- NULL
+  # gate_table <- gate
   # refine = T
   # seed = 1
   # exp_matrix <- m
@@ -758,7 +719,7 @@ scGateMe_classify <- function(exp_matrix,
   # labels <- colnames(m)
   # GMM_parameterization = "V"
   # train_parameters = list(
-  #   reference = exp_matrix,
+  #   reference = NULL,
   #   labels = colnames(exp_matrix)
   # )
 
@@ -898,29 +859,40 @@ scGateMe_classify <- function(exp_matrix,
     res <- res_temp
   }
   
-  uncl_prec <- length(res$labels[res$labels == "Unclassified"])
+  uncl <- res$labels == "Unclassified"
+  not_uncl <- !uncl
+  
+  uncl_prec <- length(res$labels[uncl])
   
   ## Refinement of the unclassified cells using K-NN classification
   if(refine & uncl_prec > 0 & uncl_prec < ncol(exp_matrix_pre_sampling)){
     if(verbose){
-      message("scGateMe classify - Refinement of the labels using K-NN classification...")
+      message("scGateMe classify - Refinement of the labels using k-NN classification...")
     }
-    
-    training_set <- t(exp_matrix_pre_sampling[, !res$labels %in% c("Unclassified")])
-    control <- t(exp_matrix_pre_sampling[, res$labels %in% c("Unclassified")])
     
     if(is.null(k)){
       t <- table(res$labels)
       tt <- t[which.min(t)]
       k <- floor(sqrt(tt))
+      if(k %% 2 == 0){
+        k <- k+1
+      }
     }
     
-    knn_res <- knn(training_set,
-                   control,
-                   cl = factor(res$labels[!res$labels %in% c("Unclassified")]),
-                   k = k,
-                   l = 0,
-                   prob = T)
+    train_labels <- factor(res$labels[not_uncl])
+    training_set <- data.frame(labels = train_labels, t(exp_matrix_pre_sampling[, not_uncl]))
+    control <- t(exp_matrix_pre_sampling[, res$labels == "Unclassified"])
+    
+    ctrl <- trainControl(method="none")
+    knnFit <- train(labels ~ ., data = training_set, method = "knn", trControl = ctrl, tuneGrid = expand.grid(k = k))
+    knn_res <- knnPredict <- predict(knnFit, newdata = control)
+    
+    # Class R package:
+    # system.time(knn_res <- knn(training_set[, -1],
+    #                control,
+    #                cl = factor(res$labels[!res$labels %in% c("Unclassified")]),
+    #                k = k,
+    #                prob = T))
     
     res$labels[res$labels == "Unclassified"] <- as.character(knn_res)
     res$cell_signatures[res$cell_signatures$Celltype == "Unclassified", "Celltype"] <- as.character(knn_res)
@@ -941,20 +913,5 @@ scGateMe_classify <- function(exp_matrix,
   
   return(res)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
