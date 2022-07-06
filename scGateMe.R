@@ -21,10 +21,6 @@ generate_set_values <- function(v, cell){
              set_not <- list()
              set_not2 <- list()
            },
-           # `++` = {
-           #   set <- list(c("*", "+", "++"))
-           #   set_not <- list()
-           # },
            `-` = {
              set <- list(c("-"))
              set_not <- list()
@@ -41,14 +37,14 @@ generate_set_values <- function(v, cell){
              set_not2 <- list()
            },
            `+^`={
-             set <- list(c("+", "-"))   #### to check ######
+             set <- list(c("+", "-"))
              set_not <- list()
              set_not2 <- list(c("+"), c("-"))
              # set_not2 <- list(c("-"))
              # set_not <- list()
            },
            `-^`={
-             set <- list(c("+", "-"))   #### to check ######
+             set <- list(c("+", "-"))
              set_not <- list()
              set_not2 <- list(c("-"), c("+"))
              # set_not2 <- list(c("+"))
@@ -96,7 +92,7 @@ generate_set_values <- function(v, cell){
   sets_all_filtered$Cell <- cell
   sets_all_filtered_temp <- sets_all_filtered[, -which(colnames(sets_all_filtered) == "Cell"), drop = F]
   markers <- colnames(sets_all_filtered_temp)
-  gate <- apply(sets_all_filtered_temp, 1, stringi::stri_c, collapse = "")
+  gate <- apply(sets_all_filtered_temp, 1, stri_c, collapse = "")
   sets_all_filtered$Gate <- gate
   sets_all_filtered <- sets_all_filtered[, c("Cell", "Gate")]
   
@@ -183,7 +179,7 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
     })
     
     extended_gate_table <- as.data.frame(rbindlist(df_list))
-    to_delete <- stringi::stri_c(colnames(gate_table[, -1]), "*", collapse = "")
+    to_delete <- stri_c(colnames(gate_table[, -1]), "*", collapse = "")
     extended_gate_table <- extended_gate_table[extended_gate_table$Gate != to_delete, ]
     
     return(list(gate_table = gate_table, extended_gate_table = extended_gate_table))
@@ -244,7 +240,7 @@ set_marker_expression_GMM <- function(X, indexes, mm, GMM_parameterization){
 ## This function set the marker signature of each cell
 set_marker_expression <- function(exp_matrix, markers,
                                   expr_markers, 
-                                  gates, 
+                                  # gates, 
                                   verbose, 
                                   GMM_parameterization){
 
@@ -277,7 +273,7 @@ set_marker_expression <- function(exp_matrix, markers,
         bimodal_markers <- c(bimodal_markers, m)
 
         if(verbose){
-          message(stringi::stri_c(" - ", stringi::stri_c(bimodal_markers, collapse = " ", sep = ""), collapse = " ", sep =))
+          message(stri_c(" - ", stri_c(bimodal_markers, collapse = " ", sep = ""), collapse = " ", sep =))
         }
 
         expr_markers[m, first$indexes] <- marker_expr
@@ -297,9 +293,9 @@ set_marker_expression <- function(exp_matrix, markers,
       comb_markers <-  r_temp[!duplicated(as.list(r_temp))]
       comb_list <- as.list(comb_markers)
       names(comb_list) <- NULL
-      comb_list2 <- sapply(comb_list, stringi::stri_c, collapse = "", sep = "")
+      comb_list2 <- sapply(comb_list, stri_c, collapse = "", sep = "")
       l <- expr_markers[bimodal_markers, first$indexes, drop = F]
-      l <- sapply(l, stringi::stri_c, collapse = "", sep = "")
+      l <- sapply(l, stri_c, collapse = "", sep = "")
       
       to_add <- lapply(comb_list2, function(c){
         w <- which(sapply(l, function(c2){ 
@@ -329,7 +325,7 @@ cell_classification <- function(marker_table, gates){
   pos <- sapply(gates$Gate, function(g){
     gs <- unlist(str_split(g, pattern = ""))
     w <- which(gs != "*")
-    w <- stringi::stri_c(w, collapse = "_", sep = "")
+    w <- stri_c(w, collapse = "_", sep = "")
     return(w)
   })
   
@@ -338,7 +334,7 @@ cell_classification <- function(marker_table, gates){
   clean <- sapply(gates$Gate, function(g){
     gs <- unlist(str_split(g, pattern = ""))
     w <- which(gs != "*")
-    clean_gs <- stringi::stri_c(gs[w], collapse = "", sep = "")
+    clean_gs <- stri_c(gs[w], collapse = "", sep = "")
     return(clean_gs)
   })
   
@@ -365,13 +361,13 @@ cell_classification <- function(marker_table, gates){
     
     gates_split <- sapply(1:length(gates$Gate), function(j){
       gate_split <- unlist(str_split(gates$Gate[j], pattern = ""))
-      x <- stringi::stri_c(gate_split[index], collapse = "", sep = "")
+      x <- stri_c(gate_split[index], collapse = "", sep = "")
       return(x)
     })
     
     cell_split <- sapply(1:length(df_gate$Gate), function(j){
       gate_split <- unlist(str_split(df_gate$Gate[j], pattern = ""))
-      x <- stringi::stri_c(gate_split[index], collapse = "", sep = "")
+      x <- stri_c(gate_split[index], collapse = "", sep = "")
       return(x)
     })
     
@@ -405,7 +401,7 @@ cell_classification <- function(marker_table, gates){
       
       test <- sapply(1:length(gates$Gate), function(j){
         index_split <- gates_split[[j]]
-        x <- stringi::stri_c(c_split[index_split], collapse = "", sep = "")
+        x <- stri_c(c_split[index_split], collapse = "", sep = "")
         return(gates$Gate[j] == x)
       })
       
@@ -428,7 +424,7 @@ check_marker_names <- function(marker_names){
   to_modify <- grep("^[0-9]", marker_names)
   
   if(length(to_modify) > 0){
-    marker_names[to_modify] <- stringi::stri_c("P_", marker_names[to_modify], sep = "")
+    marker_names[to_modify] <- stri_c("P_", marker_names[to_modify], sep = "")
   }
   
   to_modify2 <- grep("[\\+]|[\\-]|[\\|]|[\\^]|[\\*]", marker_names)
@@ -441,6 +437,7 @@ check_marker_names <- function(marker_names){
   return(list(marker_names = marker_names, modified = modified))
 }
 
+# This is the train module of scGateMe
 scGateMe_train <- function(reference,
                            labels, 
                            imp_feature_thr = "all",
@@ -457,7 +454,7 @@ scGateMe_train <- function(reference,
                            verbose = T){
 
 # reference <- m
-# labels <- colnames(m)
+# labels <- lab
 # GMM_parameterization = "E"
 # sampling = "class"
 # seed = 1
@@ -470,8 +467,9 @@ scGateMe_train <- function(reference,
 # imp_feature_thr = "all"
 # sampling_perc = 0.01
 # sampling_k = 2
+# perc.over = 100
+# perc.under = 0
   
-  # options(warn=1)
   set.seed(seed)
   
   if(!is.null(reference)){
@@ -482,9 +480,8 @@ scGateMe_train <- function(reference,
     if(length(check$modified) > 0){
       if(verbose){
         message("scGateMe train - Renaming markers of reference dataset: ", 
-                stringi::stri_c(old_names[check$modified], collapse = " ", sep = ""), 
-                " --> ", 
-                stringi::stri_c(rownames(reference)[check$modified], collapse = " ", sep = ""))
+                stri_c(old_names[check$modified], collapse = " ", sep = ""), " --> ", 
+                stri_c(rownames(reference)[check$modified], collapse = " ", sep = ""))
       }
     }
   }else{
@@ -514,7 +511,7 @@ scGateMe_train <- function(reference,
       temp$labels <- labels[labels %in% c(w, w2)]
       temp$labels <- factor(temp$labels)
 
-      newData <- SMOTE(labels ~ ., temp, perc.over = 100, k = sampling_k, perc.under = 0)
+      newData <- SMOTE(labels ~ ., temp, perc.over = perc.over, k = sampling_k, perc.under = perc.under)
       new_reference <- rbind(new_reference, newData)
     }
     
@@ -526,47 +523,46 @@ scGateMe_train <- function(reference,
   
   markers <- rownames(reference)
   celltypes <- factor(unique(labels))
-  gate_table <- data.frame(Cell = c("Unknown"), Gate = stringi::stri_c(markers, "+", collapse = "", sep = ""))
   
-  new_gates <- parse_gate_table(gate_table, T, T)
-  reference_2 <- reference[colnames(new_gates$gate_table)[-1], , drop = F]
+  # gate_table <- data.frame(Cell = c("Unknown"), Gate = stri_c(markers, "+", collapse = "", sep = ""))
+  
+  # new_gates <- parse_gate_table(gate_table, T, T)
+  reference_2 <- reference[markers, , drop = F]
   
   if(verbose){
     message("scGateMe train - Determining the marker signature of each cell...")
   }
   
   expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
-  rownames(expr_markers) <- colnames(new_gates$gate_table)[-1]
+  rownames(expr_markers) <- markers
   
-  reference_2 <- reference[colnames(new_gates$gate_table)[-1], , drop = F]
+  reference_2 <- reference[markers, , drop = F]
   expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
-  rownames(expr_markers) <- colnames(new_gates$gate_table)[-1]
+  rownames(expr_markers) <- markers
   
   ## Obtain the signature for the cells of the dataset to be annotated
   expr_markers <- set_marker_expression(reference_2,
-                                        colnames(new_gates$gate_table)[-1], 
+                                        markers, 
                                         expr_markers, 
-                                        new_gates$gate_table, 
+                                        # new_gates$gate_table, 
                                         verbose = verbose, 
                                         GMM_parameterization = GMM_parameterization)
   
-  expr_markers <- expr_markers[colnames(new_gates$gate_table)[-1], ]
+  expr_markers <- expr_markers[markers, ]
   expr_markers <- as.data.frame(t(expr_markers))
   
   cells <- cbind(rownames(expr_markers), expr_markers)
   colnames(cells)[1] <- "Cell"
   
-  expr_markers <- apply(cells[,- 1], 1, stringi::stri_c, collapse = "")
+  expr_markers <- apply(cells[,- 1], 1, stri_c, collapse = "")
   new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
   
   res <- list(cell_signatures = new_cells2)
-  
   signatures <- res$cell_signatures
-  markers <- colnames(new_gates$gate_table)[-1]
-  
+
   gate_ext <- sapply(signatures$Gate, function(v){
     split <- unlist(str_split(v, ""))
-    sig <- stringi::stri_c(markers, split, collapse = "", sep = "")
+    sig <- stri_c(markers, split, collapse = "", sep = "")
     return(sig)
   })
   
@@ -583,7 +579,7 @@ scGateMe_train <- function(reference,
   cell_df <- na.omit(cell_df)
   
   gate_table <- cell_df
-  gate_table$Cell <- stringi::stri_c(gate_table$labels, as.character(1:nrow(gate_table)), sep = "__")
+  gate_table$Cell <- stri_c(gate_table$labels, as.character(1:nrow(gate_table)), sep = "__")
   
   gate_parsed <- parse_gate_table(gate_table, T, F)
   gate_parsed <- gate_parsed$gate_table
@@ -614,7 +610,7 @@ scGateMe_train <- function(reference,
     c2 <- pair[2]
     
     if(verbose){
-      message(stringi::stri_c(" - (", c,", ", c2, ")", sep = ""))
+      message(stri_c(" - (", c,", ", c2, ")", sep = ""))
     }
     
     to_exclude <- c()
@@ -709,7 +705,7 @@ scGateMe_train <- function(reference,
     }
     
     if(!is.null(sig)){
-      top_marker <- stringi::stri_c(sig[1], signs[1], sep = "")
+      top_marker <- stri_c(sig[1], signs[1], sep = "")
       int_pos <- top_marker %in% cell_markers[[c]]
       sg <- ifelse(signs[1] == "+", "-", "+")
       
@@ -719,7 +715,7 @@ scGateMe_train <- function(reference,
       }
       
       ## Check if the top marker is present in c2 
-      top_marker_opp <- gsub(stringi::stri_c("\\", signs[1], sep = ""), sg, top_marker)
+      top_marker_opp <- gsub(stri_c("\\", signs[1], sep = ""), sg, top_marker)
       int_c2 <- top_marker_opp %in% cell_markers[[c2]]
       
       if(!int_c2){
@@ -728,7 +724,7 @@ scGateMe_train <- function(reference,
     }
   }
 
-  g <- sapply(cell_markers, stringi::stri_c, collapse = "", sep = "")
+  g <- sapply(cell_markers, stri_c, collapse = "", sep = "")
   new_gate_table <- data.frame(Cell = names(g), Gate = g)
   rownames(new_gate_table) <- NULL
   new_gate_table <- new_gate_table[new_gate_table$Gate != "", ]
@@ -736,7 +732,7 @@ scGateMe_train <- function(reference,
   return(new_gate_table)
 }
 
-## This is the core function for the classification of the single cells
+## This is the classification module of scGateMe
 scGateMe_classify <- function(exp_matrix,
                               gate_table = NULL, 
                               GMM_parameterization = "V",
@@ -750,7 +746,7 @@ scGateMe_classify <- function(exp_matrix,
                               verbose = T,
                               seed = 1){
   
-  # gate_table <- gate
+  # gate_table <- NULL
   # refine = T
   # seed = 1
   # exp_matrix <- m
@@ -758,13 +754,14 @@ scGateMe_classify <- function(exp_matrix,
   # narrow_gate_table = T
   # sampling <- 0.25
   # k = NULL
-  # reference <- NULL
+  # # reference <- NULL
   # labels <- colnames(m)
   # GMM_parameterization = "V"
   # train_parameters = list(
-  #   reference = NULL
+  #   reference = exp_matrix,
+  #   labels = colnames(exp_matrix)
   # )
-  
+
   set.seed(seed)
   
   if(!is.null(exp_matrix)){
@@ -775,9 +772,8 @@ scGateMe_classify <- function(exp_matrix,
     if(length(check$modified) > 0){
       if(verbose){
         message("scGateMe classify - Renaming markers of the dataset: ", 
-                stringi::stri_c(old_names[check$modified], collapse = " ", sep = ""), 
-                " --> ", 
-                stringi::stri_c(rownames(exp_matrix)[check$modified], collapse = " "), sep = "")
+                stri_c(old_names[check$modified], collapse = " ", sep = ""), " --> ", 
+                stri_c(rownames(exp_matrix)[check$modified], collapse = " "), sep = "")
       }
     }
   }else{
@@ -793,9 +789,9 @@ scGateMe_classify <- function(exp_matrix,
     })
     
     if(length(setdiff(unique(unlist(temp)), rownames(exp_matrix))) > 0){
-      for(i in 1:length(old_names[modified])){
-        x <- old_names[modified][i]
-        gate_table$Gate <- gsub(x, rownames(exp_matrix)[modified][i], gate_table$Gate)
+      for(i in 1:length(old_names[check$modified])){
+        x <- old_names[check$modified][i]
+        gate_table$Gate <- gsub(x, rownames(exp_matrix)[check$modified][i], gate_table$Gate)
       }
     }
   }
@@ -814,13 +810,13 @@ scGateMe_classify <- function(exp_matrix,
     old_names <- rownames(reference)
     check <- check_marker_names(rownames(reference))
     rownames(reference) <- check$marker_names
+    markers <- check$marker_names
     
     if(length(check$modified) > 0){
       if(verbose){
         message("scGateMe classify - Renaming markers of reference dataset: ", 
-                stringi::stri_c(old_names[check$modified], collapse = " ", sep = ""), 
-                " --> ", 
-                stringi::stri_c(rownames(reference)[check$modified], collapse = " "), sep = "")
+                stri_c(old_names[check$modified], collapse = " ", sep = ""), " --> ", 
+                stri_c(rownames(reference)[check$modified], collapse = " "), sep = "")
       }
     }
     
@@ -833,6 +829,7 @@ scGateMe_classify <- function(exp_matrix,
       train_parameters$verbose <- verbose
       gate_table <- do.call("scGateMe_train", train_parameters)
       new_gates <- parse_gate_table(gate_table, T, T)
+      markers <- colnames(new_gates$gate_table)[-1]
     }else{
       message("Error! No common markers between actual and reference datasets!")
       stop()
@@ -847,36 +844,37 @@ scGateMe_classify <- function(exp_matrix,
       message("scGateMe classify - Parsing gate table...")
     }
     new_gates <- parse_gate_table(gate_table, narrow_gate_table, T)
+    markers <- colnames(new_gates$gate_table)[-1]
   }
   
-  exp_matrix_2 <- exp_matrix[colnames(new_gates$gate_table)[-1], , drop = F]
+  exp_matrix_2 <- exp_matrix[markers, , drop = F]
   
   if(verbose){
     message("scGateMe classify - Determining the marker signature of each cell...")
   }
   
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
-  rownames(expr_markers) <- colnames(new_gates$gate_table)[-1]
+  rownames(expr_markers) <- markers
   
-  exp_matrix_2 <- exp_matrix[colnames(new_gates$gate_table)[-1], , drop = F]
+  exp_matrix_2 <- exp_matrix[markers, , drop = F]
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
-  rownames(expr_markers) <- colnames(new_gates$gate_table)[-1]
+  rownames(expr_markers) <- markers
   
   ## Obtain the signature for the cells of the dataset to be annotated
   expr_markers <- set_marker_expression(exp_matrix_2,
-                                        colnames(new_gates$gate_table)[-1], 
+                                        markers, 
                                         expr_markers, 
-                                        new_gates$gate_table, 
+                                        # new_gates$gate_table, 
                                         verbose = verbose, 
                                         GMM_parameterization = GMM_parameterization)
   
-  expr_markers <- expr_markers[colnames(new_gates$gate_table)[-1], ]
+  expr_markers <- expr_markers[markers, ]
   expr_markers <- as.data.frame(t(expr_markers))
   
   cells <- cbind(rownames(expr_markers), expr_markers)
   colnames(cells)[1] <- "Cell"
   
-  expr_markers <- apply(cells[,- 1, drop = F], 1, stringi::stri_c, collapse = "")
+  expr_markers <- apply(cells[,- 1, drop = F], 1, stri_c, collapse = "")
   new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
   
   if(verbose){
@@ -929,11 +927,10 @@ scGateMe_classify <- function(exp_matrix,
   }
   
   signatures <- res$cell_signatures
-  markers <- colnames(new_gates$gate_table)[-1]
-  
+
   gate_ext <- sapply(signatures$Gate, function(v){
     split <- unlist(str_split(v, ""))
-    sig <- stringi::stri_c(markers, split, collapse = "", sep = "")
+    sig <- stri_c(markers, split, collapse = "", sep = "")
     return(sig)
   })
   
