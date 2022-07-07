@@ -10,7 +10,7 @@ colnames(gates) <- gsub("[.]", "-", colnames(gates))
 gates
 
 # Extracting the gate table
-gate <- scGateMe_train(m,                            # reference dataset
+gate <- GateMeClass_train(m,                         # reference dataset
                        sce2$labels,                  # labels of the dataset
                        sampling = "none",            # Type of sampling ("all" or "class"), all = no sampling, class = use SMOTE sampling
                        imp_feature_thr = "GMM",      # Used only for dataset with two labels, criteria for marker selection by importance
@@ -23,7 +23,7 @@ gate <- scGateMe_train(m,                            # reference dataset
 gate
 
 # Classification with the extracted gate table
-res <- scGateMe_classify(m,                                   # dataset to classify
+res <- GateMeClass_annotate(m,                                # dataset to classify
                          gate_table = gate,                   # gate table
                          GMM_parameterization = "E",          # Parameterization of GMM
                          train_parameters = list(             # list of parameters for the training function
@@ -41,7 +41,7 @@ res <- scGateMe_classify(m,                                   # dataset to class
 # Training and classification in a step:
 # Artificial example with the same dataset as reference and control set 
 colnames(m) <- sce2$labels # column names of the reference are the labels
-res <- scGateMe_classify(m,
+res <- GateMeClass_annotate(m,
                          gate_table = NULL,
                          train_parameters = list(
                            reference = m,
