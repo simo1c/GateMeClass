@@ -695,7 +695,7 @@ GateMeClass_train <- function(reference,
 ## This is the classification module of GateMeClass
 GateMeClass_annotate <- function(exp_matrix,
                                  gate_table = NULL, 
-                                 GMM_parameterization = "V",
+                                 GMM_parameterization = NULL,
                                  train_parameters = list(
                                    reference = NULL
                                  ),
