@@ -434,19 +434,18 @@ check_marker_names <- function(marker_names){
   return(list(marker_names = marker_names, modified = modified))
 }
 
-# This is the train module of scGateMe
-scGateMe_train <- function(reference,
-                           labels, 
-                           GMM_parameterization = "V",
-                           sampling = "none",
-                           sampling_perc = 0.01,
-                           perc.over = 100,
-                           perc.under = 0,
-                           sampling_k = min(5, table(labels)-1),
-                           sampling_imp_vars = 1000,
-                           thr_perc = -1, 
-                           seed = 1,
-                           verbose = T){
+# This is the train module of GateMeClass
+GateMeClass_train <- function(reference,
+                              labels, 
+                              GMM_parameterization = NULL,
+                              sampling = "class",
+                              sampling_perc = 0.01,
+                              perc.over = 100,
+                              perc.under = 0,
+                              sampling_k = min(5, table(labels)-1),
+                              sampling_imp_vars = 1000,
+                              seed = 1,
+                              verbose = T){
 
 # reference <- m
 # labels <- sce2$labels
@@ -474,19 +473,19 @@ scGateMe_train <- function(reference,
     
     if(length(check$modified) > 0){
       if(verbose){
-        message("scGateMe train - Renaming markers of reference dataset: ", 
+        message("GateMeClass train - Renaming markers of reference dataset: ", 
                 stri_c(old_names[check$modified], collapse = " ", sep = ""), " --> ", 
                 stri_c(rownames(reference)[check$modified], collapse = " ", sep = ""))
       }
     }
   }else{
-    message("scGateMe train - Error! The expression matrix is mandatory!")
+    message("GateMeClass train - Error! The expression matrix is mandatory!")
     stop()
   }
   
   if(sampling == "class"){
     if(verbose){
-      message("scGateMe train - Executing SMOTE algorithm to balance the training set...")
+      message("GateMeClass train - Executing SMOTE algorithm to balance the training set...")
     }
     
     new_reference <- reference
@@ -521,7 +520,7 @@ scGateMe_train <- function(reference,
   reference_2 <- reference[markers, , drop = F]
   
   if(verbose){
-    message("scGateMe train - Determining the marker signature of each cell...")
+    message("GateMeClass train - Determining the marker signature of each cell...")
   }
   
   expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
@@ -561,7 +560,7 @@ scGateMe_train <- function(reference,
   res <- res$cell_signatures
   
   if(verbose){
-    message("scGateMe train - Pairwise comparison between cell types...")
+    message("GateMeClass train - Pairwise comparison between cell types...")
   }
   
   cell_df <- res
@@ -693,19 +692,19 @@ scGateMe_train <- function(reference,
   return(new_gate_table)
 }
 
-## This is the classification module of scGateMe
-scGateMe_classify <- function(exp_matrix,
-                              gate_table = NULL, 
-                              GMM_parameterization = "V",
-                              train_parameters = list(
-                                reference = NULL
-                              ),
-                              refine = F,
-                              k = NULL,
-                              sampling = 1,
-                              narrow_gate_table = T,
-                              verbose = T,
-                              seed = 1){
+## This is the classification module of GateMeClass
+GateMeClass_annotate <- function(exp_matrix,
+                                 gate_table = NULL, 
+                                 GMM_parameterization = "V",
+                                 train_parameters = list(
+                                   reference = NULL
+                                 ),
+                                 refine = F,
+                                 k = NULL,
+                                 sampling = 1,
+                                 narrow_gate_table = T,
+                                 verbose = T,
+                                 seed = 1){
   
   # gate_table <- gate
   # refine = T
@@ -732,13 +731,13 @@ scGateMe_classify <- function(exp_matrix,
     
     if(length(check$modified) > 0){
       if(verbose){
-        message("scGateMe classify - Renaming markers of the dataset: ", 
+        message("GateMeClass annotate - Renaming markers of the dataset: ", 
                 stri_c(old_names[check$modified], collapse = " ", sep = ""), " --> ", 
                 stri_c(rownames(exp_matrix)[check$modified], collapse = " "), sep = "")
       }
     }
   }else{
-    message("scGateMe classify - Error! The expression matrix is mandatory!")
+    message("GateMeClass annotate - Error! The expression matrix is mandatory!")
     stop()
   }
   
@@ -775,7 +774,7 @@ scGateMe_classify <- function(exp_matrix,
     
     if(length(check$modified) > 0){
       if(verbose){
-        message("scGateMe classify - Renaming markers of reference dataset: ", 
+        message("GateMeClass annotate - Renaming markers of reference dataset: ", 
                 stri_c(old_names[check$modified], collapse = " ", sep = ""), " --> ", 
                 stri_c(rownames(reference)[check$modified], collapse = " "), sep = "")
       }
@@ -788,7 +787,7 @@ scGateMe_classify <- function(exp_matrix,
       train_parameters$reference <- reference
       train_parameters$seed <- seed
       train_parameters$verbose <- verbose
-      gate_table <- do.call("scGateMe_train", train_parameters)
+      gate_table <- do.call("GateMeClass_train", train_parameters)
       new_gates <- parse_gate_table(gate_table, T, T)
       markers <- colnames(new_gates$gate_table)[-1]
     }else{
@@ -797,12 +796,12 @@ scGateMe_classify <- function(exp_matrix,
     }
   }else{
     if(is.null(gate_table)){
-      message("scGateMe classify - Error! Please, specify a gate table or a reference dataset!")
+      message("GateMeClass annotate - Error! Please, specify a gate table or a reference dataset!")
       stop()
     }
     
     if(verbose){
-      message("scGateMe classify - Parsing gate table...")
+      message("GateMeClass annotate - Parsing gate table...")
     }
     new_gates <- parse_gate_table(gate_table, narrow_gate_table, T)
     markers <- colnames(new_gates$gate_table)[-1]
@@ -811,7 +810,7 @@ scGateMe_classify <- function(exp_matrix,
   exp_matrix_2 <- exp_matrix[markers, , drop = F]
   
   if(verbose){
-    message("scGateMe classify - Determining the marker signature of each cell...")
+    message("GateMeClass annotate - Determining the marker signature of each cell...")
   }
   
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
@@ -839,7 +838,7 @@ scGateMe_classify <- function(exp_matrix,
   new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
   
   if(verbose){
-    message("scGateMe classify - Cell annotation...")
+    message("GateMeClass annotate - Cell annotation...")
   }
   
   res <- cell_classification(new_cells2, new_gates$extended_gate_table)
@@ -867,7 +866,7 @@ scGateMe_classify <- function(exp_matrix,
   ## Refinement of the unclassified cells using K-NN classification
   if(refine & uncl_prec > 0 & uncl_prec < ncol(exp_matrix_pre_sampling)){
     if(verbose){
-      message("scGateMe classify - Refinement of the labels using k-NN classification...")
+      message("GateMeClass annotate - Refinement of the labels using k-NN classification...")
     }
     
     if(is.null(k)){
@@ -913,5 +912,20 @@ scGateMe_classify <- function(exp_matrix,
   
   return(res)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
