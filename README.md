@@ -1,4 +1,4 @@
-# GateMeClass: Gate Mining and classification of flow and mass cytometry data
+# GateMeClass: Gate Mining and Classification of flow and mass cytometry data
 
 Example:
 
