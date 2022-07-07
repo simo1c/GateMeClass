@@ -1,5 +1,4 @@
-# scGateMe
-scGateMe is an R package for the classification of flow and mass cytometry data
+# GateMeClass: Gate Mining and classification of flow and mass cytometry data
 
 Example:
 
