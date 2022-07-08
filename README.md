@@ -38,7 +38,7 @@ res <- GateMeClass_annotate(m,                                # dataset to class
 
 # ---------------------------------------------------------------------------------------------------------------
 
-# Training and classification in a step:
+# Training and classification in one step:
 # Artificial example with the same dataset as reference and control set 
 colnames(m) <- sce2$labels # column names of the reference are the labels
 res <- GateMeClass_annotate(m,
