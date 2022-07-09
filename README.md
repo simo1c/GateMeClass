@@ -3,7 +3,7 @@
 Example:
 
 ```
-source("scGateMe.R")
+source("GateMeClass.R")
 
 gates <- data.frame(read_excel("gates.xlsx"))
 colnames(gates) <- gsub("[.]", "-", colnames(gates))
