@@ -13,9 +13,7 @@ gates
 gate <- GateMeClass_train(m,                         # reference dataset
                        sce2$labels,                  # labels of the dataset
                        sampling = "none",            # Type of sampling ("all" or "class"), all = no sampling, class = use SMOTE sampling
-                       imp_feature_thr = "GMM",      # Used only for dataset with two labels, criteria for marker selection by importance
                        gmm_parameterization = "V",   # Parameterization of GMM
-                       sampling_feature_pre = 1000,  # Dataset size for Boruta
                        sampling_imp_vars = 1000,     # Dataset size for regression tree
                        thr_perc = -1,                # minimum percentage of + and - cells for a marker to be chosed 
                        seed = 1)
