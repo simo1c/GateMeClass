@@ -220,14 +220,45 @@ set_marker_expression_GMM <- function(X, GMM_parameterization){
     return(c("*"))
   }
   
+  # test <- m["CD8", ]
+  # GMM_parameterization <- "V"
+  # X <- test
+  
+  # top <- mclustBIC(test, G = 2)
+  # model_temp <- unlist(str_split(names(summary(top)[1]), ","))
+  # type_model <- model_temp[1]
+
   cl <- Mclust(test, G = 2, verbose = F, modelNames = GMM_parameterization)
+  
+  max <- which.max(cl$parameters$mean)
+  min <- which.min(cl$parameters$mean)
+  
+  min_cl <- min(test[cl$classification == min])
+  max_cl <- max(test[cl$classification == max])
+  
+  
   pred <- predict.Mclust(cl, X)
   temp <- pred$classification
   
-  means <- cl$parameters$mean
-  means <- sort(means)
-  temp[temp == names(means)[1]] <- "-"
-  temp[temp == names(means)[2]] <- "+"
+  temp <- ifelse(temp == max, "+", "-")
+  
+  temp[X < min_cl] <- "-"
+  temp[X > max_cl] <- "+"
+  
+  
+  
+  
+  # temp[temp == names(means)[1]] <- "-"
+  # temp[temp == names(means)[2]] <- "+"
+  # 
+  # test <- m["CD3", ]
+  # X <- test
+  
+  # 
+  # cl = normalmixEM(test, k = 2, verb = F, fast = T)
+  # max <- which.max(cl$mu)
+  # cl <- apply(cl$posterior, 1, which.max)
+  # temp <- ifelse(cl == max, "+", "-")
   
   return(temp)
 }
@@ -482,7 +513,7 @@ GateMeClass_train <- function(reference = NULL,
                               verbose = T){
 
 # reference <- m
-# labels <- sce2$labels
+# labels <- lab
 # GMM_parameterization = "V"
 # sampling = "class"
 # seed = 1
@@ -639,7 +670,7 @@ GateMeClass_train <- function(reference = NULL,
     
     pair <- pairs[i, ]
     
-    # pair <- pairs[263, ]
+    # pair <- pairs[1, ]
     
     
     c <- pair[1]
@@ -690,7 +721,7 @@ GateMeClass_train <- function(reference = NULL,
       control <- trainControl(method = "repeatedcv", number = 5)
       model <- train(Cell ~ ., data = data, method = "rpart", trControl = control)
       importance <- varImp(model, useModel = F)
-      # plot(importance)
+      plot(importance)
       imp <- importance$importance
       mm <- rownames(imp)
       imp <- imp[, 1]
@@ -749,28 +780,28 @@ GateMeClass_train <- function(reference = NULL,
     }
   }
 
-  g_temp <- cell_markers
-  g_temp <- lapply(g_temp, unique)
-  g_temp <- lapply(g_temp, unique)
-  g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
-  
-  to_remove <- sapply(1:length(g_temp), function(i){
-    ns <- names(g_temp[i])
-    el <- g_temp[[i]]
-    w <- which(duplicated(el))
-    to_remove <- el[w]
-    l <- list(which(el == to_remove))
-    names(l) <- ns
-    return(l)
-  })
-  
-  for(i in 1:length(cell_markers)){
-    ns <- names(cell_markers[i])
-    w <- -to_remove[[ns]]
-    if(length(to_remove[[ns]])){
-      cell_markers[[ns]] <- cell_markers[[ns]][w]
-    }
-  }
+  # g_temp <- cell_markers
+  # g_temp <- lapply(g_temp, unique)
+  # g_temp <- lapply(g_temp, unique)
+  # g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
+  # 
+  # to_remove <- sapply(1:length(g_temp), function(i){
+  #   ns <- names(g_temp[i])
+  #   el <- g_temp[[i]]
+  #   w <- which(duplicated(el))
+  #   to_remove <- el[w]
+  #   l <- list(which(el == to_remove))
+  #   names(l) <- ns
+  #   return(l)
+  # })
+  # 
+  # for(i in 1:length(cell_markers)){
+  #   ns <- names(cell_markers[i])
+  #   w <- -to_remove[[ns]]
+  #   if(length(to_remove[[ns]])){
+  #     cell_markers[[ns]] <- cell_markers[[ns]][w]
+  #   }
+  # }
   
   cell_markers <- lapply(cell_markers, sort, decreasing = F)
   g <- sapply(cell_markers, stri_c, collapse = "", sep = "")
