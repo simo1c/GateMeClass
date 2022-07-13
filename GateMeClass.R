@@ -11,7 +11,7 @@ generate_set_values <- function(v, cell){
   special2 <- grep("[\\^]", v)
   
   if(length(special1) == 1 | length(special2) == 1){
-    stop("Error! Special characters (^, |) must be set in more than 2 markers!")
+    stop("Special characters (^, |) must be set in more than 2 markers!")
   }
   
   for(m in v){
@@ -102,12 +102,12 @@ generate_set_values <- function(v, cell){
 ## Read the gate table and generate the possbile marker signature of ceach cell type
 parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table){
   
-  # gate_table <- gates
+  # gate_table <- gate
   # narrow_gate_table = T
   # extended_gate_table = T
   
   if(any(duplicated(gate_table$Cell))){
-    stop("Error! The gate table must contains uniquely defined cell types!")
+    stop("The gate table must contains uniquely defined cell types!")
   }
   
   if(narrow_gate_table){
@@ -152,7 +152,7 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
   celltypes <- gate_table$Cell
   
   if(length(grep("[\\*|\\||\\^]", celltypes)) > 0){
-    stop("Error! Cell names cannot contains special characters (e.g., *, ^)!")
+    stop("Cell names cannot contains special characters (e.g., *, ^)!")
   }
     
   if(extended_gate_table){
@@ -314,7 +314,7 @@ set_marker_expression <- function(exp_matrix,
 cell_classification <- function(marker_table, gates){
   
   # marker_table <- new_cells2
-  # gates <- new_gates2$extended_gate_table
+  # gates <- new_gates$extended_gate_table
   
   df_gate <- marker_table
   colnames(df_gate)[1] <- "Cell_ID"
@@ -394,19 +394,53 @@ cell_classification <- function(marker_table, gates){
     
     for(i in 1:length(df_gate$Gate)){
       
+      # i <- 1
+      
       c_split <- cell_split[[i]]
       
       test <- sapply(1:length(gates$Gate), function(j){
         index_split <- gates_split[[j]]
         x <- stri_c(c_split[index_split], collapse = "", sep = "")
-        return(gates$Gate[j] == x)
+        y <- gates$Gate[j] == x
+        names(y) <- paste0(gates[j, c("N", "N2")], collapse = "_")
+        return(y)
       })
       
-      if(sum(test) > 1){
-        labels[i] <- "Unclassified"
-      }else if(sum(test) == 1){
+      if(sum(test) == 1){
         labels[i] <- gates$Cell[test]
+      }else if(sum(test) > 1){
+        
+        w <- which(test == T)
+        
+        tmp1 <- as.numeric(sapply(strsplit(names(w),"_"), `[`, 1))
+        tmp2 <- as.numeric(sapply(strsplit(names(w),"_"), `[`, 2))
+        
+        w_max_tmp1 <- which(tmp1 == max(tmp1))
+        
+        if(length(w_max_tmp1) == 1){
+          
+          ind <- w[w_max_tmp1]
+          labels[i] <- gates$Cell[ind]
+          
+        }else{
+          
+          w_max_tmp2 <- which(tmp2[w_max_tmp1] == max(tmp2[w_max_tmp1]))
+          
+          if(length(w_max_tmp2) == 1){
+            ind <- w[w_max_tmp2]
+            labels[i] <- gates$Cell[ind]
+          }else{
+            labels[i] <- "Unclassified"
+          }
+        }
       }
+      
+      # if(sum(test) > 1){
+      #   labels[i] <- "Unclassified"
+      # }else if(sum(test) == 1){
+      #   labels[i] <- gates$Cell[test]
+      # }
+      
     }
   }
   
@@ -435,8 +469,8 @@ check_marker_names <- function(marker_names){
 }
 
 # This is the train module of GateMeClass
-GateMeClass_train <- function(reference,
-                              labels, 
+GateMeClass_train <- function(reference = NULL,
+                              labels = NULL, 
                               GMM_parameterization = NULL,
                               sampling = "class",
                               sampling_perc = 0.01,
@@ -449,7 +483,7 @@ GateMeClass_train <- function(reference,
 
 # reference <- m
 # labels <- sce2$labels
-# GMM_parameterization = "E"
+# GMM_parameterization = "V"
 # sampling = "class"
 # seed = 1
 # rr = 0.1
@@ -460,7 +494,7 @@ GateMeClass_train <- function(reference,
 # sampling_feature_method ="all"
 # imp_feature_thr = "all"
 # sampling_perc = 0.01
-# sampling_k = 2
+# sampling_k = 5
 # perc.over = 100
 # perc.under = 0
   
@@ -479,13 +513,20 @@ GateMeClass_train <- function(reference,
       }
     }
   }else{
-    message("GateMeClass train - Error! The expression matrix is mandatory!")
-    stop()
+    stop("The expression matrix is mandatory!")
+  }
+  
+  if(is.null(labels)){
+    stop("The labels of the reference are mandatory!")
+  }
+  
+  if(is.null(GMM_parameterization)){
+    stop("The parameter 'GMM_parameterization' is mandatory!")
   }
   
   if(sampling == "class"){
     if(verbose){
-      message("GateMeClass train - Executing SMOTE algorithm to balance the training set...")
+      message("GateMeClass train - Executing oversampling to balance the training set...")
     }
     
     new_reference <- reference
@@ -592,12 +633,21 @@ GateMeClass_train <- function(reference,
   pairs <- as.matrix(comboGrid(as.character(celltypes), as.character(celltypes), repetition = F))
   
   for(i in 1:nrow(pairs)){
+    
     sig <- c()
     signs <- c()
     
     pair <- pairs[i, ]
+    
+    # pair <- pairs[263, ]
+    
+    
     c <- pair[1]
     c2 <- pair[2]
+    
+    # c <- "Plasmacytoid_DC_cells"
+    # c2 <- "NK_cells"
+    
     
     if(verbose){
       message(stri_c(" - (", c,", ", c2, ")", sep = ""))
@@ -628,7 +678,7 @@ GateMeClass_train <- function(reference,
     mas <- c()
     
     nzv <- nearZeroVar(data[, -1], saveMetrics = TRUE)
-    to_exclude <- rownames(nzv)[nzv$nzv == T]
+    to_exclude <- rownames(nzv)[nzv$zeroVar == T]
     
     if(length(to_exclude) > 0){
       data <- data[, -which(colnames(data) %in% to_exclude)]
@@ -650,8 +700,7 @@ GateMeClass_train <- function(reference,
       flag <- 1
     },
     error = function(e){
-      message(e)
-      stop()
+      stop(e)
     })
     
     if(flag < 0){
@@ -659,30 +708,70 @@ GateMeClass_train <- function(reference,
     }
     
     t <- prop.table(table(gate_parsed[gate_parsed$Cell == c, mas[1]]))
-    w <- which.max(t)
-    sig <- mas[1]
-    signs <- names(t)[w]
+    w1 <- names(t)[which.max(t)]
     
-    if(!is.null(sig)){
-      top_marker <- stri_c(sig, signs, sep = "")
-      int_pos <- top_marker %in% cell_markers[[c]]
-      sg <- ifelse(signs == "+", "-", "+")
+    t2 <- prop.table(table(gate_parsed[gate_parsed$Cell == c2, mas[1]]))
+    w2 <- names(t2)[which.max(t2)]
+    
+    if(w1 != w2){
       
-      # Top discriminant marker is not present in gate table
-      if(!int_pos){
-        cell_markers[[c]] <- c(cell_markers[[c]], top_marker)
-      }
+      signs <- w1
       
-      ## Check if the top marker is present in c2 
-      top_marker_opp <- gsub(stri_c("\\", signs, sep = ""), sg, top_marker)
-      int_c2 <- top_marker_opp %in% cell_markers[[c2]]
+      # w2 <- which.max(t2)
+      # signs2 <- names(t2)[w2]
+      # 
+      # if(signs == signs2){
+      #   if(t[signs] < t2[signs2]){
+      #     signs <- ifelse(signs == "+", "-", "+")
+      #   }
+      # }
+    
+      sig <- mas[1]
       
-      if(!int_c2){
-        cell_markers[[c2]] <- c(cell_markers[[c2]], top_marker_opp)
+      if(!is.null(sig)){
+        top_marker <- stri_c(sig, signs, sep = "")
+        int_pos <- top_marker %in% cell_markers[[c]]
+        sg <- ifelse(signs == "+", "-", "+")
+        
+        # Top discriminant marker is not present in gate table
+        if(!int_pos){
+          cell_markers[[c]] <- c(cell_markers[[c]], top_marker)
+        }
+        
+        ## Check if the top marker is present in c2 
+        top_marker_opp <- gsub(stri_c("\\", signs, sep = ""), sg, top_marker)
+        int_c2 <- top_marker_opp %in% cell_markers[[c2]]
+        
+        if(!int_c2){
+          cell_markers[[c2]] <- c(cell_markers[[c2]], top_marker_opp)
+        }
       }
     }
   }
 
+  g_temp <- cell_markers
+  g_temp <- lapply(g_temp, unique)
+  g_temp <- lapply(g_temp, unique)
+  g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
+  
+  to_remove <- sapply(1:length(g_temp), function(i){
+    ns <- names(g_temp[i])
+    el <- g_temp[[i]]
+    w <- which(duplicated(el))
+    to_remove <- el[w]
+    l <- list(which(el == to_remove))
+    names(l) <- ns
+    return(l)
+  })
+  
+  for(i in 1:length(cell_markers)){
+    ns <- names(cell_markers[i])
+    w <- -to_remove[[ns]]
+    if(length(to_remove[[ns]])){
+      cell_markers[[ns]] <- cell_markers[[ns]][w]
+    }
+  }
+  
   cell_markers <- lapply(cell_markers, sort, decreasing = F)
   g <- sapply(cell_markers, stri_c, collapse = "", sep = "")
   new_gate_table <- data.frame(Cell = names(g), Gate = g)
@@ -692,8 +781,8 @@ GateMeClass_train <- function(reference,
   return(new_gate_table)
 }
 
-## This is the classification module of GateMeClass
-GateMeClass_annotate <- function(exp_matrix,
+## This is the annotation module of GateMeClass
+GateMeClass_annotate <- function(exp_matrix = NULL,
                                  gate_table = NULL, 
                                  GMM_parameterization = NULL,
                                  train_parameters = list(
@@ -712,17 +801,18 @@ GateMeClass_annotate <- function(exp_matrix,
   # exp_matrix <- m
   # verbose = T
   # narrow_gate_table = T
-  # sampling <- 0.25
+  # sampling <- 1
   # k = NULL
   # # reference <- NULL
   # labels <- colnames(m)
   # GMM_parameterization = "V"
   # train_parameters = list(
   #   reference = NULL,
-  #   labels = colnames(exp_matrix)
+  #   labels = NULL,
+  #   GMM_parameterization = "V"
   # )
-
-  set.seed(seed)
+  # 
+  # set.seed(seed)
   
   if(!is.null(exp_matrix)){
     old_names <- rownames(exp_matrix)
@@ -737,8 +827,7 @@ GateMeClass_annotate <- function(exp_matrix,
       }
     }
   }else{
-    message("GateMeClass annotate - Error! The expression matrix is mandatory!")
-    stop()
+    stop("The expression matrix is mandatory!")
   }
   
   if(!is.null(gate_table)){
@@ -763,6 +852,7 @@ GateMeClass_annotate <- function(exp_matrix,
     exp_matrix <- exp_matrix[, s]
   }else{
     exp_matrix_pre_sampling <- exp_matrix
+    s <- 1:ncol(exp_matrix_pre_sampling)
   }
   
   if(!is.null(train_parameters$reference) & is.null(gate_table)){
@@ -791,13 +881,11 @@ GateMeClass_annotate <- function(exp_matrix,
       new_gates <- parse_gate_table(gate_table, T, T)
       markers <- colnames(new_gates$gate_table)[-1]
     }else{
-      message("Error! No common markers between actual and reference datasets!")
-      stop()
+      stop("No common markers between actual and reference datasets!")
     }
   }else{
     if(is.null(gate_table)){
-      message("GateMeClass annotate - Error! Please, specify a gate table or a reference dataset!")
-      stop()
+      stop("Please, specify a gate table or a reference dataset!")
     }
     
     if(verbose){
@@ -858,33 +946,74 @@ GateMeClass_annotate <- function(exp_matrix,
     res <- res_temp
   }
   
-  uncl <- res$labels == "Unclassified"
-  not_uncl <- !uncl
+  real_uncl <- which(res$labels == "Unclassified" & (1:ncol(exp_matrix_pre_sampling)) %in% s)
+  not_real_uncl <- which(res$labels == "Unclassified" & !(1:ncol(exp_matrix_pre_sampling)) %in% s)
+  tot_uncl <- c(real_uncl, not_real_uncl)
+  not_uncl <- which(res$labels != "Unclassified")
+  real_not_uncl <- c(real_uncl, not_uncl)
   
-  uncl_prec <- length(res$labels[uncl])
+  uncl_prec <- length(res$labels[tot_uncl])
   
   ## Refinement of the unclassified cells using K-NN classification
   if(refine & uncl_prec > 0 & uncl_prec < ncol(exp_matrix_pre_sampling)){
     if(verbose){
-      message("GateMeClass annotate - Refinement of the labels using k-NN classification...")
+      message("GateMeClass annotate - Refinement of the labels...")
     }
     
     if(is.null(k)){
       t <- table(res$labels)
       tt <- t[which.min(t)]
       k <- floor(sqrt(tt))
-      if(k %% 2 == 0){
-        k <- k+1
-      }
     }
     
-    train_labels <- factor(res$labels[not_uncl])
-    training_set <- data.frame(labels = train_labels, t(exp_matrix_pre_sampling[, not_uncl]))
-    control <- t(exp_matrix_pre_sampling[, res$labels == "Unclassified"])
+    # w <- which(res$labels == "T cells")
+    # s <- sample(w, 2000)
+    # res$labels[s] <- "Unclassified"
     
-    ctrl <- trainControl(method="none")
-    knnFit <- train(labels ~ ., data = training_set, method = "knn", trControl = ctrl, tuneGrid = expand.grid(k = k))
-    knn_res <- knnPredict <- predict(knnFit, newdata = control)
+    
+    # train_labels <- factor(res$labels[not_uncl])
+    # training_set <- data.frame(labels = train_labels, t(exp_matrix_pre_sampling[, not_uncl]))
+    
+    training_set <- t(exp_matrix_pre_sampling)[real_not_uncl, ]
+    control <- t(exp_matrix_pre_sampling)[tot_uncl, ]
+  
+    nn <- FNN::knnx.index(training_set, control, k = k+1)
+    nn[1:length(real_uncl), 1] <- 0
+    
+    if(length(real_uncl) < nrow(nn)){
+      nn[(length(real_uncl)+1):nrow(nn), k+1] <- 0
+    }
+    
+    knn_res <- apply(nn, 1, function(r){
+      t <- table(res$labels[real_not_uncl][r])
+      max <- max(t)
+      if(length(max) > 1){
+        return("Unclassified")
+      }else{
+        return(names(t)[which.max(t)])
+      }
+    })
+  
+    new_labels <- rep(NA, length(res$labels))
+    new_labels[tot_uncl] <- knn_res
+    knn_res <- new_labels[res$labels == "Unclassified"]
+    
+    # training_set <- data.frame(labels = res$labels[not_uncl], t(exp_matrix_pre_sampling[, not_uncl]))
+    # control <- t(exp_matrix_pre_sampling[, res$labels == "Unclassified"])
+    # control <- t(exp_matrix_pre_sampling[, res$labels == "Unclassified"])
+    
+    # ctrl <- trainControl(method="none")
+    # knnFit <- train(labels ~ ., data = training_set, method = "knn", trControl = ctrl, tuneGrid = expand.grid(k = k))
+    # knn_res <- predict(knnFit, newdata = control, type = "prob")
+    # knn_res <- predict(knnFit, newdata = control)
+    
+    ####### TO CHECK ############################################
+    # perc_to_remove <- 1 / k
+    # # knn_res$Unclassified <- knn_res$Unclassified - perc_to_remove
+    # knn_res <- apply(knn_res, 1, function(r){
+    #   return(colnames(knn_res)[which.max(r)])
+    # })
+    #############################################################
     
     # Class R package:
     # system.time(knn_res <- knn(training_set[, -1],
