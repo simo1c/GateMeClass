@@ -837,22 +837,22 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
                                  verbose = T,
                                  seed = 1){
   
-  # gate_table <- gate
-  # refine = T
-  # seed = 1
-  # exp_matrix <- m
-  # verbose = T
-  # narrow_gate_table = T
-  # sampling <- 1
-  # k = NULL
-  # # reference <- NULL
+  gate_table <- NULL
+  refine = T
+  seed = 1
+  exp_matrix <- testing_set
+  verbose = T
+  narrow_gate_table = T
+  sampling <- 1
+  k = NULL
+  # reference <- NULL
   # labels <- colnames(m)
-  # GMM_parameterization = "V"
-  # train_parameters = list(
-  #   reference = NULL,
-  #   labels = NULL,
-  #   GMM_parameterization = "V"
-  # )
+  GMM_parameterization = "E"
+  train_parameters = list(
+    reference = training_set,
+    labels = training_set_lab,
+    GMM_parameterization = "E"
+  )
 
   set.seed(seed)
   
@@ -1004,14 +1004,18 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
     
     if(is.null(k)){
       t <- table(res$labels)
-      k <- t[which.min(t)] - 1
+      min <- t[which.min(t)]
+      if(min > 1){
+        k <- min - 1
+      }else{
+        k <- 1
+      }
       # k <- floor(sqrt(tt))
     }
     
     # w <- which(res$labels == "T cells")
     # s <- sample(w, 2000)
     # res$labels[s] <- "Unclassified"
-    
     
     # train_labels <- factor(res$labels[not_uncl])
     # training_set <- data.frame(labels = train_labels, t(exp_matrix_pre_sampling[, not_uncl]))
