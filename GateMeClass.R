@@ -185,7 +185,7 @@ parse_gate_table <- function(gate_table, narrow_gate_table, extended_gate_table)
 
 set_marker_expression_GMM <- function(X, GMM_parameterization){
   
-  # X <- m["CD45", ]
+  # X <- m["FS-A", ]
   # indexes = first$indexes
   # GMM_parameterization = "E"
   
@@ -228,6 +228,10 @@ set_marker_expression_GMM <- function(X, GMM_parameterization){
   # model_temp <- unlist(str_split(names(summary(top)[1]), ","))
   # type_model <- model_temp[1]
 
+  # test <- m["CD10", ]
+  
+  # GMM_parameterization <- "V"
+  
   cl <- Mclust(test, G = 2, verbose = F, modelNames = GMM_parameterization)
   
   max <- which.max(cl$parameters$mean)
@@ -236,25 +240,32 @@ set_marker_expression_GMM <- function(X, GMM_parameterization){
   min_cl <- min(test[cl$classification == min])
   max_cl <- max(test[cl$classification == max])
   
-  
   pred <- predict.Mclust(cl, X)
   temp <- pred$classification
   
   temp <- ifelse(temp == max, "+", "-")
   
-  temp[X < min_cl] <- "-"
-  temp[X > max_cl] <- "+"
+  # temp[X < min_cl] <- "-"
+  # temp[X > max_cl] <- "+"
   
-  
-  
+  # if(any(temp[X <= min_cl] == "+") | any(temp[X >= max_cl] == "-")){
+  # 
+  #   # print("************")
+  #   # plot(cl, what = "classification")
+  # 
+  #   GMM_parameterization <- "E"
+  #   cl <- Mclust(test, G = 2, verbose = F, modelNames = GMM_parameterization)
+  #   max <- which.max(cl$parameters$mean)
+  #   pred <- predict.Mclust(cl, X)
+  #   temp <- pred$classification
+  #   temp <- ifelse(temp == max, "+", "-")
+  # }
   
   # temp[temp == names(means)[1]] <- "-"
   # temp[temp == names(means)[2]] <- "+"
   # 
   # test <- m["CD3", ]
   # X <- test
-  
-  # 
   # cl = normalmixEM(test, k = 2, verb = F, fast = T)
   # max <- which.max(cl$mu)
   # cl <- apply(cl$posterior, 1, which.max)
@@ -842,8 +853,8 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
   #   labels = NULL,
   #   GMM_parameterization = "V"
   # )
-  # 
-  # set.seed(seed)
+
+  set.seed(seed)
   
   if(!is.null(exp_matrix)){
     old_names <- rownames(exp_matrix)
@@ -993,8 +1004,8 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
     
     if(is.null(k)){
       t <- table(res$labels)
-      tt <- t[which.min(t)]
-      k <- floor(sqrt(tt))
+      k <- t[which.min(t)] - 1
+      # k <- floor(sqrt(tt))
     }
     
     # w <- which(res$labels == "T cells")
