@@ -837,22 +837,22 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
                                  verbose = T,
                                  seed = 1){
   
-  gate_table <- NULL
-  refine = T
-  seed = 1
-  exp_matrix <- testing_set
-  verbose = T
-  narrow_gate_table = T
-  sampling <- 1
-  k = NULL
+  # gate_table <- NULL
+  # refine = T
+  # seed = 1
+  # exp_matrix <- testing_set
+  # verbose = T
+  # narrow_gate_table = T
+  # sampling <- 1
+  # k = NULL
   # reference <- NULL
   # labels <- colnames(m)
-  GMM_parameterization = "E"
-  train_parameters = list(
-    reference = training_set,
-    labels = training_set_lab,
-    GMM_parameterization = "E"
-  )
+  # GMM_parameterization = "E"
+  # train_parameters = list(
+    # reference = training_set,
+    # labels = training_set_lab,
+    # GMM_parameterization = "E"
+  # )
 
   set.seed(seed)
   
