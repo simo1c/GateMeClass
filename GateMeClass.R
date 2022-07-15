@@ -514,27 +514,22 @@ check_marker_names <- function(marker_names){
 GateMeClass_train <- function(reference = NULL,
                               labels = NULL, 
                               GMM_parameterization = NULL,
-                              sampling = "class",
+                              oversampling = T,
                               sampling_perc = 0.01,
                               perc.over = 100,
                               perc.under = 0,
                               sampling_k = min(5, table(labels)-1),
-                              sampling_imp_vars = 1000,
+                              sampling_imp_vars = 0.01,
                               seed = 1,
                               verbose = T){
 
 # reference <- m
 # labels <- lab
-# GMM_parameterization = "V"
-# sampling = "class"
+# GMM_parameterization = "E"
+# oversampling = T
 # seed = 1
-# rr = 0.1
-# sampling_feature_pre = 1000
-# sampling_imp_vars = 1000
-# thr_perc = -1
+# sampling_imp_vars = 0.1
 # verbose = T
-# sampling_feature_method ="all"
-# imp_feature_thr = "all"
 # sampling_perc = 0.01
 # sampling_k = 5
 # perc.over = 100
@@ -566,7 +561,7 @@ GateMeClass_train <- function(reference = NULL,
     stop("The parameter 'GMM_parameterization' is mandatory!")
   }
   
-  if(sampling == "class"){
+  if(oversampling){
     if(verbose){
       message("GateMeClass train - Executing oversampling to balance the training set...")
     }
@@ -674,6 +669,8 @@ GateMeClass_train <- function(reference = NULL,
   names(cell_markers) <- celltypes
   pairs <- as.matrix(comboGrid(as.character(celltypes), as.character(celltypes), repetition = F))
   
+  sampling_imp_vars <- floor(sampling_imp_vars * ncol(reference))
+  
   for(i in 1:nrow(pairs)){
     
     sig <- c()
@@ -682,7 +679,6 @@ GateMeClass_train <- function(reference = NULL,
     pair <- pairs[i, ]
     
     # pair <- pairs[1, ]
-    
     
     c <- pair[1]
     c2 <- pair[2]
@@ -845,13 +841,13 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
   # narrow_gate_table = T
   # sampling <- 1
   # k = NULL
-  # reference <- NULL
-  # labels <- colnames(m)
+  # # reference <- NULL
+  # # labels <- colnames(m)
   # GMM_parameterization = "E"
   # train_parameters = list(
-    # reference = training_set,
-    # labels = training_set_lab,
-    # GMM_parameterization = "E"
+  #   reference = training_set,
+  #   labels = training_set_lab,
+  #   GMM_parameterization = "E"
   # )
 
   set.seed(seed)
