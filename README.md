@@ -45,7 +45,7 @@ res <- GateMeClass_annotate(m,
                            reference = m,
                            labels = colnames(m)
                          ),
-                         gmm_parameterization = "V",
+                         GMM_parameterization = "V",
                          refine = T,
                          sampling = 0.25,
                          k = NULL,
