@@ -681,10 +681,10 @@ GateMeClass_train <- function(reference = NULL,
                               seed = 1,
                               verbose = T){
   
-  # reference <- m
-  # RSS = T
-  # labels <- sce2$labels
-  # GMM_parameterization = "E"
+  # reference <- m[, sample]
+  # RSS = F
+  # labels <- sce2$labels[sample]
+  # GMM_parameterization = "V"
   # oversampling = T
   # seed = 1
   # sampling_imp_vars = 0.1
@@ -858,7 +858,8 @@ GateMeClass_train <- function(reference = NULL,
   new_marker_table <- data.frame(Cell = unique(gate_parsed$Cell), Gate = "")
   rownames(new_marker_table) <- new_marker_table$Cell
   
-  markers <- colnames(gate_parsed[-1])
+  markers <- colnames(gate_parsed[-which(colnames(gate_parsed) %in% c("Cell", "labels"))])
+  
   celltypes <- unique(gate_parsed$labels)
   
   marker_df <- data.frame(Marker = markers, Pos = NA, Neg = NA)
@@ -932,7 +933,7 @@ GateMeClass_train <- function(reference = NULL,
       flag <- 1
     },
     error = function(e){
-      stop(e)
+      #stop(e)
     })
     
     if(flag < 0){
