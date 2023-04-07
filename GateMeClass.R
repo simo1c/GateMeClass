@@ -405,35 +405,36 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
   }
 
   # Check if "V" parameterization is not monotonic
-  if(GMM_parameterization == "V"){
-    if(length(table(cl$classification)) == 2){
-      min_plus <- min(test[cl$classification == max])
-      max_min <- max(test[cl$classification == min])
-      
-      ## With "V" parameterization, cells with non-monotonous behavior 
-      ## fall in "unclassified" cells for next refinement
-      if(min_plus < max_min){
-        temp[cl$classification == min & test > min_plus] <- "u"
-        test[cl$classification == max & test < max_min] <- "u"
-      }
-    }else if(length(table(cl$classification)) == 3){
-      min_plus <- min(test[cl$classification == max])
-      min_mid <- min(test[cl$classification == mid])
-      max_mid <- max(test[cl$classification == max])
-      max_min <- max(test[cl$classification == min])
-      
-      if(min_plus < max_mid | min_plus < max_min | min_mid < max_min){
-        temp[cl$classification == mid & test > min_plus] <- "u"
-        temp[cl$classification == plus & test < max_mid] <- "u"
-        
-        temp[cl$classification == min & test > min_plus] <- "u"
-        temp[cl$classification == plus & test < max_min] <- "u"
-        
-        temp[cl$classification == min & test > min_mid] <- "u"
-        temp[cl$classification == mid & test < max_min] <- "u"
-      }
-    } 
-  }
+  # if(GMM_parameterization == "V"){
+  #   if(length(table(cl$classification)) == 2){
+  #     min_plus <- min(test[cl$classification == max])
+  #     max_min <- max(test[cl$classification == min])
+  #     
+  #     ## With "V" parameterization, cells with non-monotonous behavior 
+  #     ## fall in "unclassified" cells for next refinement
+  #     if(min_plus < max_min){
+  #       temp[cl$classification == min & test > min_plus] <- "u"
+  #       test[cl$classification == max & test < max_min] <- "u"
+  #     }
+  #   }else if(length(table(cl$classification)) == 3){
+  #     min_plus <- min(test[cl$classification == max])
+  #     min_mid <- min(test[cl$classification == mid])
+  #     max_mid <- max(test[cl$classification == max])
+  #     max_min <- max(test[cl$classification == min])
+  #     
+  #     if(min_plus < max_mid | min_plus < max_min | min_mid < max_min){
+  #       temp[cl$classification == mid & test > min_plus] <- "u"
+  #       temp[cl$classification == plus & test < max_mid] <- "u"
+  #       
+  #       temp[cl$classification == min & test > min_plus] <- "u"
+  #       temp[cl$classification == plus & test < max_min] <- "u"
+  #       
+  #       temp[cl$classification == min & test > min_mid] <- "u"
+  #       temp[cl$classification == mid & test < max_min] <- "u"
+  #     }
+  #   } 
+  # }
+  
   return(temp)
 }
 
@@ -812,10 +813,10 @@ GateMeClass_train <- function(reference = NULL,
   new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
   
   ############################################
-  to_delete <- grep("u", new_cells2$Gate)
-  if(length(to_delete) > 0){
-    new_cells2 <- new_cells2[-to_delete, ]
-  }
+  # to_delete <- grep("u", new_cells2$Gate)
+  # if(length(to_delete) > 0){
+  #   new_cells2 <- new_cells2[-to_delete, ]
+  # }
   ############################################
   
   res <- list(cell_signatures = new_cells2)
@@ -837,11 +838,11 @@ GateMeClass_train <- function(reference = NULL,
   cell_df <- res
   
   #########################################
-  if(length(to_delete) > 0){
-    cell_df$labels <- labels[-to_delete]
-  }else{
+  # if(length(to_delete) > 0){
+  #   cell_df$labels <- labels[-to_delete]
+  # }else{
     cell_df$labels <- labels
-  }
+  #}
   #########################################
   
   cell_df <- cell_df[, c("Gate", "labels")]
