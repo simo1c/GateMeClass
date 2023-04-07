@@ -5,36 +5,26 @@ Example:
 ```
 source("GateMeClass.R")
 
-gates <- data.frame(read_excel("gates.xlsx"))
-colnames(gates) <- gsub("[.]", "-", colnames(gates))
-gates
+   # Training
+   gate <- GateMeClass_train(training_set,
+                             training_set_lab,
+                             RSS = T,
+                             GMM_parameterization = "V",
+                             verbose = T, 
+                             seed = 1)
 
-# Extracting the gate table
-gate <- GateMeClass_train(m,                         # reference dataset
-                       sce2$labels,                  # labels of the dataset
-                       sampling = "none",            # Type of sampling ("all" or "class"), all = no sampling, class = use SMOTE sampling
-                       gmm_parameterization = "V",   # Parameterization of GMM
-                       sampling_imp_vars = 1000,     # Dataset size for regression tree
-                       thr_perc = -1,                # minimum percentage of + and - cells for a marker to be chosed 
-                       seed = 1)
-                       
-gate
 
-# Classification with the extracted gate table
-res <- GateMeClass_annotate(m,                                # dataset to classify
-                         gate_table = gate,                   # gate table
-                         GMM_parameterization = "E",          # Parameterization of GMM
-                         train_parameters = list(             # list of parameters for the training function
-                           reference = NULL
-                         ),
-                         refine = T,                          # KNN algorithm to refine labels after classification
-                         sampling = 0.25,                     # Sampling to classify a subset of the dataset
-                         k = NULL,                            # k parameter for KNN
-                         verbose = T,                         # Show or not output program
-                         narrow_gate_table = T,               # format of gate table 
-                         seed = 1)
+    # Annotation
+    res <- GateMeClass_annotate(testing_set,
+                                marker_table = gate,
+                                reject_option = F,
+                                GMM_parameterization = "V",
+                                RSS = T,
+                                k = 20,				
+                                sampling = 0.1,
+                                verbose = T,
+                                seed = 1)
 
-# ---------------------------------------------------------------------------------------------------------------
 
 # Training and classification in one step:
 # Artificial example with the same dataset as reference and control set 
@@ -46,11 +36,8 @@ res <- GateMeClass_annotate(m,
                            labels = colnames(m)
                          ),
                          GMM_parameterization = "V",
-                         refine = T,
                          sampling = 0.25,
-                         k = NULL,
                          verbose = T,
-                         narrow_gate_table = T, 
                          seed = 1)
 
 
