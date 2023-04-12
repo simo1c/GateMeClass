@@ -90,7 +90,7 @@ res <- GateMeClass_annotate(testing_set,
 
 
 Parameters description:
-
+```
 testing_set         : Matrix of expression
 marker_table        : Manually curated table of markers
 reject_option       : default "T"
@@ -100,7 +100,7 @@ k                   : k-NN (k-Nearest-Neighbour), used to refine the uncertain l
 sampling            : default "0.1"
 verbose             : default "T"
 seed                : default = 1
-
+```
 
 The output of this function will be saved in a variable (*res*). 
 This object is relatively complex, because it contains different informations.
