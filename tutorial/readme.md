@@ -91,34 +91,27 @@ res <- GateMeClass_annotate(testing_set,
 
 Parameters description:
 
-testing_set          --> Matrix of expression
-marker_table         --> Manually curated table of markers
-reject_option        --> default "T"
-GMM_parameterization --> GMM (Gaussian-Mixture-Model) parameter: default "V" (Variance) or "E" (Equal)
-RSS                  --> RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default "T"
-k                    --> k-NN (k-Nearest-Neighbour), used to refine the uncertain labels to the most similar already annotated
-sampling             --> default "0.1"
-verbose              --> default "T"
-seed                 --> default = 1
+testing_set         : Matrix of expression
+marker_table        : Manually curated table of markers
+reject_option       : default "T"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: default "V" (Variance) or "E" (Equal)
+RSS                 : RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default "T"
+k                   : k-NN (k-Nearest-Neighbour), used to refine the uncertain labels to the most similar already annotated
+sampling            : default "0.1"
+verbose             : default "T"
+seed                : default = 1
 
 
 The output of this function will be saved in a variable (*res*). 
 This object is relatively complex, because it contains different informations.
 
 
-1) labels          --> class: character
-2) marker_table    --> class: tbl_df ; tbl ; data.frame
-3) cell_signatures --> class: data.frame
+1) labels           (class: character)
+2) marker_table     (class: tbl_df ; tbl ; data.frame)
+3) cell_signatures  (class: data.frame)
 
 
 These different fields are easily accessible with the "$" character:
-
-
-
-
-
-
-
 
 
 
