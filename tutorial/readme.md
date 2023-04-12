@@ -56,7 +56,7 @@ source("GateMeClass.R")
 ### Classification using a manually defined marker table:
 
 The annotation function of GateMeClass is able to annotate the cells of a dataset of interest using a manual gated marker table.
-The first thing to do is to assign the dataset of interest to a variable (`se`) and to extract both the expression matrix (`m`) and the labels (`lab`) from it.
+The first thing to do is to assign the dataset of interest to a variable `se` and to extract both the expression matrix `m` and the labels `lab` from it.
 Both the dataset and the manually gated marker table have to be in the working directory.
 
 ```
@@ -66,7 +66,7 @@ lab <- se$labels
 ```
  
 To use the annotation function of GateMeClass, you have to set correctly the input variables.
-Assign to the `testing_set` variable the matrix of expression (`m`) and to the variable `gate` the manually created marker table.
+Assign to the `testing_set` variable the matrix of expression `m` and to the variable `gate` the manually created marker table.
 
 ```
 testing_set<-m
@@ -102,7 +102,7 @@ verbose             : default = "T"
 seed                : default = "1"
 ```
 
-The output of this function will be saved in a variable (`res`). 
+The output of this function will be saved in a variable `res`. 
 This object is relatively complex, because it contains different informations.
 
 
