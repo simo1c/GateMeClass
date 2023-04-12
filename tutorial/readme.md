@@ -2,7 +2,7 @@
 
 ## DESCRIPTION:
 
-The concept behind GateMeClass was to build a user friendly tool in R programming language, able to fully automate both the definition of a marker table and the cell annotation. GateMeClass stands for “Gate-Mining-and-Classification” and it's a tool applicable to cytometry data.
+The concept behind GateMeClass was to build a user friendly tool (in R programming language), able to fully automate both the definition of a marker table and the cell annotation. GateMeClass stands for “Gate-Mining-and-Classification” and it's a tool applicable to cytometry data.
 
 GateMeClass is composed by two main modules, the training module, and the annotation module. Both modules can be used individually or in sequence according to user needs.
 
@@ -41,7 +41,7 @@ BiocManager::install("batchelor")
 
 ### Step 2 "Source":
 
-In order to run GateMeClass, you have to import the file called "GateMeClass.R", which has to be present in the Working Directory.
+In order to run GateMeClass, you have to import the file called *GateMeClass.R*, which has to be present in the Working Directory.
 It contains the architecture of the tool, its functions with all the default parameters and all the control procedures.
 To import all the functions of the tool, it's mandatory to execute the line:
 
@@ -56,7 +56,7 @@ source("GateMeClass.R")
 ### Classification using a manually defined marker table:
 
 The annotation function of GateMeClass is able to annotate the cells of a dataset of interest using a manual gated marker table.
-The first thing to do is to assign the dataset of interest to a variable (se) and to extract both the expression matrix (m) and the labels (lab) from it.
+The first thing to do is to assign the dataset of interest to a variable (*se*) and to extract both the expression matrix (*m*) and the labels (*lab*) from it.
 Both the dataset and the manually gated marker table have to be in the working directory.
 
 ```
@@ -66,7 +66,7 @@ lab <- se$labels
 ```
  
 To use the annotation function of GateMeClass, you have to set correctly the input variables.
-Assign to the "testing_set" variable the matrix of expression (m) and to the variable "gate" the manually created marker table.
+Assign to the *testing_set* variable the matrix of expression (*m*) and to the variable *gate* the manually created marker table.
 
 ```
 testing_set<-m
@@ -100,12 +100,14 @@ Parameters description:     testing_set          --> Matrix of expression
                             seed                 --> default = 1
 
 
-The output of this function will be saved in a variable (res). 
+The output of this function will be saved in a variable (*res*). 
 This object is relatively complex, because it contains different informations.
+
 
 1) labels          --> class: character
 2) marker_table    --> class: tbl_df ; tbl ; data.frame
 3) cell_signatures --> class: data.frame
+
 
 These different fields are easily accessible with the "$" character:
 
@@ -122,13 +124,16 @@ These different fields are easily accessible with the "$" character:
 
 ### Classification extracting the marker table from a reference annotated dataset:
 
-
-
 [Training Function Annotation function]
 
-
+Estrazione tabella  (funzione di training)
+Richiamo tabella estratta (annotation)
 
 ### All-In-One
 
+
+Se l’utente preferisce fare tutto in una volta --> Definizione parametri per farla one-shot (annotation)
+
 [PARAMETERS]
+
 
