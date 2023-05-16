@@ -101,7 +101,7 @@ Parameters description:
 testing_set         : Matrix of expression
 marker_table        : Manually curated table of markers
 reject_option       : default = "T"
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varing) or "E" (Equal), default = "V"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
 RSS                 : RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default = "T"
 k                   : k-NN (k-Nearest-Neighbour), used to refine the uncertain labels to the most similar already annotated
 sampling            : default = "0.1"
@@ -145,7 +145,7 @@ Parameters description:
 training_set        : Matrix of expression
 training_set_lab    : Labels from the dataset
 RSS                 : RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default = "T"
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Variance) or "E" (Equal), default = "V"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
 verbose             : default = "T"
 seed                : default = "1"
 ```
@@ -177,7 +177,7 @@ Parameters description:
 testing_set         : Matrix of expression
 marker_table        : gate (from the training module)
 reject_option       : default = F
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varing) or "E" (Equal), default = "V"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
 RSS                 : RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default = "T"
 k                   : k-NN (k-Nearest-Neighbour), used to refine the uncertain labels to the most similar already annotated
 sampling            : default = "0.1"
@@ -204,7 +204,7 @@ Parameters description:
 m                   : Matrix of expression
 gate_table          : gate (from the training module)
 train_parameters    : 
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Variance) or "E" (Equal), default = "V"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
 sampling            : default = "0.1"
 verbose             : default = "T"
 seed                : default = "1"
