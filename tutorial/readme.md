@@ -186,10 +186,22 @@ seed                : default = "1"
 ```
 
 
-### All-In-One
+### 3: Training and classification in one step
 
-Definizione parametri per farla one-shot (annotation)
+```
 
-[PARAMETERS]
+```
+
+
+Parameters description:
+```
+m                   : Matrix of expression
+gate_table          : gate (from the training module)
+train_parameters    : default = "T"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Variance) or "E" (Equal), default = "V"
+sampling            : default = "0.1"
+verbose             : default = "T"
+seed                : default = "1"
+```
 
 
