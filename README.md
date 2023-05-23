@@ -9,4 +9,4 @@ Tutorial:
 
 To ensure a comprehensive understanding of GateMeClass, we recommend providing a tutorial guide for its complete usage at the *tutorial* branch folder.
 
-<img align="top-right" width="500" height="500" src="logo.jpeg">
+<img align="top-center" width="500" height="500" src="logo.jpeg">
