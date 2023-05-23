@@ -9,4 +9,4 @@ Tutorial:
 
 To ensure a comprehensive understanding of GateMeClass, we recommend providing a tutorial guide for its complete usage at the *tutorial* branch folder.
 
-![de:hub.de-Projekt](logo.jpeg)
+<img align="right" width="100" height="100" src="logo.jpeg">
