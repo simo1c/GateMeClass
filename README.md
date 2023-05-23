@@ -9,6 +9,6 @@ Tutorial:
 
 To ensure a comprehensive understanding of GateMeClass, we recommend providing a tutorial guide for its complete usage at the *tutorial* branch folder.
 
-<div style="text-align: center;">
+<div style="text-align: center">
   <img src="logo.jpeg" style="width: 400px; height: 400px;">
 </div>
