@@ -10,5 +10,5 @@ Tutorial:
 To ensure a comprehensive understanding of GateMeClass, we recommend providing a tutorial guide for its complete usage at the *tutorial* branch folder.
 
 <p align="center">
-  <img width="400" height="291" src="logo.jpg">
+  <img width="300" height="218" src="logo.jpg">
 </p>
