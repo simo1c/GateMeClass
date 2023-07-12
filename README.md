@@ -1,8 +1,8 @@
 # GateMeClass: Gate Mining and Classification of cytometry data
 
- <img width="250" height="182" src="logo2.pdf" alt = "Logo GateMeClass" align = "right">
+ <img width="250" height="182" src="logo2.jpg" alt = "Logo GateMeClass" align = "right">
 
-<p align = "jistify">
+<p align = "justify">
 GateMeClass (Gate Mining and Classification), developed using the R programming language, is an intuitive tool that simplifies the cell annotation process.
 It enables both supervised and semi-supervised classification of cytometry data, with a strong emphasis on preserving a high degree of biological interpretability through the use of the marker table. By leveraging the marker table, GateMeClass effectively conducts cytometry data classification, providing precise and informative outcomes.
 
