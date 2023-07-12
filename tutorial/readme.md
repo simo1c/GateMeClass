@@ -56,7 +56,7 @@ source("GateMeClass.R")
 
 ### Section 1. Annotation of cytometry data using a manually defined marker table
 <p align="justify">
-As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (*Levine et al., 2015*) using the manually defined marker table used in ACDC (*Lee et al., 2017*). At first, we download the Levine32 dataset using the R package HDCytoData:
+As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (<i>Levine et al., 2015</i>) using the manually defined marker table used in ACDC (<i>Lee et al., 2017</i>). At first, we download the Levine32 dataset using the R package HDCytoData (<i>Weber and Soneson, 2019</i>):
 </p>
 
 ```
