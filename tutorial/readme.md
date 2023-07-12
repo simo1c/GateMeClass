@@ -84,7 +84,7 @@ Then, we read the excel file with the marker table:
 library(readxl)
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
 colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"  # To avoid naming problems
-gate[is.na(gate)] <- "*"
+gate[is.na(gate)] <- "*"  # required for markers not set
 ```
 
 After this, we can execute the *GateMeClass_annotate* function for annotating the dataset:
