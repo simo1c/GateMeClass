@@ -84,7 +84,7 @@ colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"      # To avoid na
 gate[is.na(gate)] <- "*"                                           # required for markers not set
 ```
 
-After this, we can execute the *GateMeClass_annotate* function for annotating the dataset:
+Next, we can execute the *GateMeClass_annotate* function for annotating the dataset:
 ```
 res <- GateMeClass_annotate(exp_matrix,
                             marker_table = gate,
