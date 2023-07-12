@@ -57,13 +57,15 @@ source("GateMeClass.R")
 
 ### 1: Classification using a manually defined marker table
 
-In this first application of GateMeClass we will annotate the cells of a dataset of interest using a manual gated marker table.
+In this first application of GateMeClass we will annotate the cells of the Levine32 dataset (Levine et al., X) of interest using a manual gated marker table.
 
 Prior to this, it is necessary to create several variables that will be utilized throughout all sections of our tutorial.
 
 We have to assign the dataset of interest to a variable `se` and to extract both the expression matrix `m` and the labels `lab` from it.
 
 NOTE: both the dataset and the manually gated marker table files have to be present in the working directory!
+
+At first, we download the Levine32 dataset using the R package HDCytoData:
 
 ```
 d_SE <- Levine_32dim_SE()
@@ -79,6 +81,8 @@ population <- population[population != "unassigned"]
 To use the annotation module of GateMeClass, you have to set correctly the fundamental input variables of the *GateMeClass_annotate* annotation function.
 
 Assign to the `testing_set` variable the matrix of expression `m` and to the variable `gate` the manually created marker table file.
+
+In this example, we use the marker table defined in ACDC (ref.)
 
 ```
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
