@@ -66,9 +66,14 @@ We have to assign the dataset of interest to a variable `se` and to extract both
 NOTE: both the dataset and the manually gated marker table files have to be present in the working directory!
 
 ```
-se <- readRDS("Levine32.Rds")    
-m <- se@assays@data$exprs    
-lab <- se$labels
+d_SE <- Levine_32dim_SE()
+d_sub <- assay(d_SE[, colData(d_SE)$marker_class == "type"])
+population <- rowData(d_SE)$population_id
+cofactor <- 5
+d_sub <- asinh(d_sub / cofactor)
+
+m <- t(d_sub[population != "unassigned", ])
+population <- population[population != "unassigned"]
 ```
  
 To use the annotation module of GateMeClass, you have to set correctly the fundamental input variables of the *GateMeClass_annotate* annotation function.
@@ -76,8 +81,9 @@ To use the annotation module of GateMeClass, you have to set correctly the funda
 Assign to the `testing_set` variable the matrix of expression `m` and to the variable `gate` the manually created marker table file.
 
 ```
-testing_set <- m
-gate <- read_xls("Levine32_marker_table.xls")
+gate <- as.data.frame(read_excel("Levine32.xlsx"))
+colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"
+gate[is.na(gate)] <- "*"
 ```
 
 After this, you can run the *GateMeClass_annotate* annotation function:
