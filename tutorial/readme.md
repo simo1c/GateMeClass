@@ -2,13 +2,7 @@
 
 ## DESCRIPTION
 
-The idea behind GateMeClass was to create a user-friendly tool, implemented in the R programming language, that automates the process of defining a marker table and cell annotation. GateMeClass, short for "Gate-Mining-and-Classification," is specifically designed for cytometry data.
-
-GateMeClass consists of two main modules: the training module and the annotation module. These modules can be utilized independently or in a sequence depending on the user's requirements.
-
-GateMeClass has the capability to learn a marker table from an externally annotated dataset and apply the corresponding cell labels to a different dataset of interest.
-
-Additionally, GateMeClass provides the option to manually define a marker table without relying on an annotated dataset. This marker table can then be directly applied to the dataset of interest for cell classification.
+GateMeClass, short for Gate-Mining-and-Classification is a tool implemented in the R programming language that automates the process of annotation of a cytometry dataset using marker tables. GateMeClass consists of two main modules: the training module and the annotation module. These modules can be utilized independently or in a sequence depending on the user's requirements. GateMeClass has the capability to learn a marker table from an externally annotated dataset and apply the corresponding cell labels to a different dataset of interest. Additionally, GateMeClass provides the option to manually define a marker table without relying on an annotated dataset. This marker table can then be directly applied to the dataset of interest for cell classification.
 
 To demonstrate its practicality with real biological datasets, we have prepared an easy-to-follow tutorial.
 
@@ -64,7 +58,7 @@ source("GateMeClass.R")
 
 ### Step 1: Classification of cytometry data using a manually defined marker table
 
-As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (Levine et al., 2015) using the manually defined marker table used in ACDC (Lee et al., 2017). At first, we download the Levine32 dataset using the R package HDCytoData:
+As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (*Levine et al., 2015*) using the manually defined marker table used in ACDC (*Lee et al., 2017*). At first, we download the Levine32 dataset using the R package HDCytoData:
 
 ```
 library(HDCytoData)
