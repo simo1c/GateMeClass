@@ -72,7 +72,7 @@ population <- rowData(d_SE)$population_id
 cofactor <- 5
 d_sub <- asinh(d_sub / cofactor)
 
-m <- t(d_sub[population != "unassigned", ])
+exp_matrix <- t(d_sub[population != "unassigned", ])
 population <- population[population != "unassigned"]
 ```
  
