@@ -7,6 +7,7 @@ GateMeClass consists of two main modules: the training module and the annotation
 GateMeClass has the capability to learn the marker table from an externally annotated dataset (<i>GateMeClass training module</i>) and apply the corresponding cell labels to a different dataset of interest (<i>GateMeClass annotation module</i>). In addition, GateMeClass provides the option to manually define a marker table without relying on a already annotated dataset. This marker table can then be directly applied to the dataset of interest for cell classification. In the following sections we will show how to install and use GateMeClass. 
 For the technical details of GateMeClass refer to the pubblication : <i>link to pubblication</i>
 </p> 
+
 ## Preparation
 
 ### Step 1. Installation of the required R libraries.
