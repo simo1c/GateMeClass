@@ -57,13 +57,7 @@ source("GateMeClass.R")
 
 ### 1: Classification using a manually defined marker table
 
-In this first application of GateMeClass we will annotate the cells of the Levine32 dataset (Levine et al., X) of interest using a manual gated marker table.
-
-Prior to this, it is necessary to create several variables that will be utilized throughout all sections of our tutorial.
-
-We have to assign the dataset of interest to a variable `se` and to extract both the expression matrix `m` and the labels `lab` from it.
-
-NOTE: both the dataset and the manually gated marker table files have to be present in the working directory!
+AS an example we will use GateMeClass to annotate the cells of the Levine32 dataset (Levine et al., 2015) using a manually defined marker table.
 
 At first, we download the Levine32 dataset using the R package HDCytoData:
 
@@ -115,11 +109,11 @@ RSS                 : RSS (Ranked-Set-Sampling). It is particularly advised in c
 k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, default = 20
 sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.2
 verbose             : Show output information, class = logical, default = T
-train_parameters    : A list of parameters to pass to the GateMeClass_train function, class = list, default = NULL
+train_parameters    : A list of parameters to pass to the *GateMeClass_train* function, class = list, default = NULL
 seed                : class = numeric, default = 1
 ```
 
-The output of this function is a list with the following elements: 
+The output of *GateMeClass_train* is a list with the following elements: 
 
 1) labels            : The labels returned by GateMeClass, class = character
 2) marker_table      : The marker table used by GateMeClass, class = data.frame
