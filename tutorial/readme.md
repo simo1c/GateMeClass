@@ -8,7 +8,7 @@ GateMeClass has the capability to learn the marker table from an externally anno
 
 ## Preparation
 
-### Step 1: Installation of the required R libraries.
+### Step 1. Installation of the required R libraries.
 
 This is a list of all the R packages required to run GateMeClass.
 
@@ -32,7 +32,7 @@ BiocManager::install("batchelor")
 ```
 
 
-### Step 2: Load the libraries and GateMeClass code.
+### Step 2. Load the libraries and GateMeClass code.
 
 In order to run GateMeClass, you have to import the necessary R packages and the file called *GateMeClass.R* containing the complete architecture of GateMeClass:
 
@@ -56,7 +56,7 @@ source("GateMeClass.R")
 
 ## Execution of GateMeClass
 
-### Step 1: Classification of cytometry data using a manually defined marker table
+### Step 1. Classification of cytometry data using a manually defined marker table
 
 As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (*Levine et al., 2015*) using the manually defined marker table used in ACDC (*Lee et al., 2017*). At first, we download the Levine32 dataset using the R package HDCytoData:
 
@@ -116,7 +116,7 @@ The output of *GateMeClass_train* is a list with the following elements:
 3) cell_signatures   : The marker signatures of each cell attributed by GateMeClass, class = data.frame
 
 
-### 2: Classification extracting the marker table from a reference annotated dataset
+### Step 2. Classification extracting the marker table from a reference annotated dataset
 
 In this second application of GateMeClass, we will annotate the cells of a dataset of interest by utilizing the training module and a training set to construct a marker table.
 
