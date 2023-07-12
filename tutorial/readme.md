@@ -16,7 +16,7 @@ To demonstrate its practicality with real biological datasets, we have prepared 
 
 ### Step 1: Installation of the required R libraries.
 
-This is a list of all the R packages that are fundamental to be able to run GateMeClass.
+This is a list of all the R packages required to run GateMeClass.
 
 ```
 install.packages("stringi")
