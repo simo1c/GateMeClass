@@ -68,6 +68,7 @@ NOTE: both the dataset and the manually gated marker table files have to be pres
 At first, we download the Levine32 dataset using the R package HDCytoData:
 
 ```
+library(HDCytoData)
 d_SE <- Levine_32dim_SE()
 d_sub <- assay(d_SE[, colData(d_SE)$marker_class == "type"])
 population <- rowData(d_SE)$population_id
