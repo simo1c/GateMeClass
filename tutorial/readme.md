@@ -64,7 +64,7 @@ source("GateMeClass.R")
 
 ### Step 1: Classification of cytometry data using a manually defined marker table
 
-AS an example we will use GateMeClass to annotate the cells of the Levine32 dataset (Levine et al., 2015) using the manually defined marker table used in ACDC (Lee et al., 2017). At first, we download the Levine32 dataset using the R package HDCytoData:
+As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (Levine et al., 2015) using the manually defined marker table used in ACDC (Lee et al., 2017). At first, we download the Levine32 dataset using the R package HDCytoData:
 
 ```
 library(HDCytoData)
@@ -83,11 +83,11 @@ Then, we read the excel file with the marker table:
 ```
 library(readxl)
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
-colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"
+colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"  # To avoid naming problems
 gate[is.na(gate)] <- "*"
 ```
 
-After this, we can run the *GateMeClass_annotate* annotation function:
+After this, we can execute the *GateMeClass_annotate* function for annotating the dataset:
 ```
 res <- GateMeClass_annotate(exp_matrix,
                             marker_table = gate,
