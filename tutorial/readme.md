@@ -119,14 +119,11 @@ train_parameters    : A list of parameters to pass to the GateMeClass_train func
 seed                : class = numeric, default = 1
 ```
 
-The output of this function will be saved in a variable `res`. 
+The output of this function is a list with the following elements: 
 
-This object is relatively complex, it contains different informations accessible with the `$` character:.
-
-
-1) labels           (class: character)
-2) marker_table     (class: tbl_df ; tbl ; data.frame)
-3) cell_signatures  (class: data.frame)
+1) labels            : The labels returned by GateMeClass, class = character
+2) marker_table      : The marker table used by GateMeClass, class = data.frame
+3) cell_signatures   : The marker signatures of each cell attributed by GateMeClass, class = data.frame
 
 
 ### 2: Classification extracting the marker table from a reference annotated dataset
