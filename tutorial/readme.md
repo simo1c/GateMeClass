@@ -28,7 +28,6 @@ install.packages("caret", dependencies = c("Depends", "Suggests"))
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("batchelor")
-
 ```
 
 
@@ -51,7 +50,6 @@ library("BiocManager")
 library("batchelor")
 
 source("GateMeClass.R")
-
 ```
 
 ## Execution of GateMeClass
