@@ -105,17 +105,18 @@ res <- GateMeClass_annotate(exp_matrix,
 ```
 In this example we executed GateMeClass usin GMM  with varying variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells, ranked set sampling (RSS = T) and k parameter set to 20 (k = 20) for k-NN and MNN algorithms for label refining. For a comphensive list of GateMeClass parameters refer to the following:
 
-Parameters:
+List of parameters
 ```
-testing_set         : Expression matrix
-marker_table        : Manually curated marker table
-reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, default = T
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
-RSS                 : RSS (Ranked-Set-Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, default = T
+testing_set         : Expression matrix, class = matrix
+marker_table        : Manually curated marker table, class = data.frame
+reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, , class = logical, default = T
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "V"
+RSS                 : RSS (Ranked-Set-Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
 k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, default = 20
-sampling            : Perform a sampling of the cells annotating the rest with k-NN, default = 0.2
-verbose             : Show output information, default = T
-seed                : default = 1
+sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.2
+verbose             : Show output information, class = logical, default = T
+train_parameters    : A list of parameters to pass to the GateMeClass_train function, class = list, default = NULL
+seed                : class = numeric, default = 1
 ```
 
 The output of this function will be saved in a variable `res`. 
