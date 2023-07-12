@@ -83,7 +83,7 @@ To use the annotation module of GateMeClass, you have to set correctly the funda
 
 Assign to the `testing_set` variable the matrix of expression `m` and to the variable `gate` the manually created marker table file.
 
-In this example, we use the marker table defined in ACDC (ref.)
+In this example, we use the ACDC (Lee et al., 2017) marker table:
 
 ```
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
@@ -91,11 +91,9 @@ colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"
 gate[is.na(gate)] <- "*"
 ```
 
-After this, you can run the *GateMeClass_annotate* annotation function:
-
-
+After this, we can run the *GateMeClass_annotate* annotation function:
 ```
-res <- GateMeClass_annotate(testing_set,
+res <- GateMeClass_annotate(exp_matrix,
                             marker_table = gate,
                             reject_option = F,
                             GMM_parameterization = "V",
@@ -105,7 +103,7 @@ res <- GateMeClass_annotate(testing_set,
                             verbose = T,
                             seed = 1)
 ```
-
+In this example we executed GateMeClass usin GMM  with varying variance (GMM_parameterization = "V"), no reject_option in order to do not care of cells potentially not defined in the marker table, sampling 10% of cells, ranked set sampling and k parameter set to 20 for k-NN and MNN algorithms for label refining.  
 
 Parameters description:
 ```
