@@ -42,13 +42,22 @@ BiocManager::install("batchelor")
 
 ### Step 2 "Source"
 
-In order to run GateMeClass, you have to import the file called *GateMeClass.R*, which has to be present in the Working Directory.
-
-It contains the architecture of the tool, its functions with default parameters and all the control procedures.
-
-To import all the functions of the tool, it's mandatory to execute the line:
+In order to run GateMeClass, you have to import the necessary R packages and the file called *GateMeClass.R* containing the complete architecture of GateMeClass:
 
 ```
+library("stringi")
+library("data.table")
+library("moments")
+library("mclust")
+library("stringr")
+library("scales")
+library("recipes")
+library("dplyr")
+library("RcppAlgos")
+library("caret")
+library("BiocManager")
+library("batchelor")
+
 source("GateMeClass.R")
 
 ```
@@ -74,6 +83,7 @@ population <- population[population != "unassigned"]
 Then, we read the excel file with the marker table:
 
 ```
+library(readxl)
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
 colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"
 gate[is.na(gate)] <- "*"
