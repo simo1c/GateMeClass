@@ -109,13 +109,13 @@ Parameters:
 ```
 testing_set         : Expression matrix
 marker_table        : Manually curated marker table
-reject_option       : This parameter tries to detect cell types not defined in the marker table, default = T
+reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, default = T
 GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
 RSS                 : RSS (Ranked-Set-Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, default = T
-k                   : k-NN (k-Nearest-Neighbour), used to refine the uncertain labels to the most similar already annotated
-sampling            : default = "0.1"
-verbose             : default = "T"
-seed                : default = "1"
+k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, default = 20
+sampling            : Perform a sampling of the cells annotating the rest with k-NN, default = 0.2
+verbose             : Show output information, default = T
+seed                : default = 1
 ```
 
 The output of this function will be saved in a variable `res`. 
