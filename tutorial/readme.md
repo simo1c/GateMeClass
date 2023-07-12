@@ -4,7 +4,7 @@
 
 GateMeClass, short for Gate-Mining-and-Classification is a tool implemented in the R programming language that automates the process of annotation of a cytometry dataset using marker tables. 
 GateMeClass consists of two main modules: the training module and the annotation module. These modules can be utilized independently or in a sequence depending on the user's requirements. 
-GateMeClass has the capability to learn the marker table from an externally annotated dataset (GateMeClass training module) and apply the corresponding cell labels to a different dataset of interest (GateMeClass annotation module). Additionally, GateMeClass provides the option to manually define a marker table without relying on a already annotated dataset. This marker table can then be directly applied to the dataset of interest for cell classification.
+GateMeClass has the capability to learn the marker table from an externally annotated dataset (*GateMeClass training module*) and apply the corresponding cell labels to a different dataset of interest (*GateMeClass annotation module*). Additionally, GateMeClass provides the option to manually define a marker table without relying on a already annotated dataset. This marker table can then be directly applied to the dataset of interest for cell classification.
 
 
 
