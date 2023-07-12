@@ -58,9 +58,9 @@ source("GateMeClass.R")
 ## Execution of GateMeClass
 
 ### Step 1. Annotation of cytometry data using a manually defined marker table
-
+<p align="justify">
 As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (*Levine et al., 2015*) using the manually defined marker table used in ACDC (*Lee et al., 2017*). At first, we download the Levine32 dataset using the R package HDCytoData:
-
+</p>
 ```
 
 # if (!require("BiocManager", quietly = TRUE))
@@ -99,7 +99,9 @@ res <- GateMeClass_annotate(exp_matrix,
                             verbose = T,
                             seed = 1)
 ```
+<p align="justify">
 In this example we executed GateMeClass usin GMM  with varying variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells, ranked set sampling (RSS = T) and k parameter set to 20 (k = 20) for k-NN and MNN algorithms for label refining. For a comphensive list of GateMeClass parameters refer to the following:
+</p>
 
 List of parameters
 ```
