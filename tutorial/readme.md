@@ -1,4 +1,4 @@
-# Manual of GateMeClass
+# GateMeClass - Manual
 
 ## Description
 <p align="justify">
