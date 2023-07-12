@@ -14,8 +14,6 @@ To demonstrate its practicality with real biological datasets, we have prepared 
 
 ## Preparation
 
-It is highly recommended to follow these steps prior to utilizing GateMeClass.
-
 ### Step 1: Installation of the required R libraries.
 
 This is a list of all the R packages that are fundamental to be able to run GateMeClass.
