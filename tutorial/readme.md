@@ -27,7 +27,6 @@ install.packages("caret", dependencies = c("Depends", "Suggests"))
 
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-
 BiocManager::install("batchelor")
 
 ```
