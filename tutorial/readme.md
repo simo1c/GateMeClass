@@ -103,15 +103,15 @@ res <- GateMeClass_annotate(exp_matrix,
                             verbose = T,
                             seed = 1)
 ```
-In this example we executed GateMeClass usin GMM  with varying variance (GMM_parameterization = "V"), no reject_option in order to do not care of cells potentially not defined in the marker table, sampling 10% of cells, ranked set sampling and k parameter set to 20 for k-NN and MNN algorithms for label refining.  
+In this example we executed GateMeClass usin GMM  with varying variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells, ranked set sampling (RSS = T) and k parameter set to 20 (k = 20) for k-NN and MNN algorithms for label refining. For a comphensive list of GateMeClass parameters refer to the following:
 
-Parameters description:
+Parameters:
 ```
-testing_set         : Matrix of expression
-marker_table        : Manually curated table of markers
-reject_option       : default = "T"
+testing_set         : Expression matrix
+marker_table        : Manually curated marker table
+reject_option       : This parameter tries to detect cell types not defined in the marker table, default = T
 GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
-RSS                 : RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default = "T"
+RSS                 : RSS (Ranked-Set-Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, default = T
 k                   : k-NN (k-Nearest-Neighbour), used to refine the uncertain labels to the most similar already annotated
 sampling            : default = "0.1"
 verbose             : default = "T"
