@@ -105,7 +105,7 @@ In this example we executed GateMeClass usin GMM  with varying variance (GMM_par
 
 List of parameters
 ```
-testing_set         : Expression matrix, class = matrix
+exp_matrix          : Expression matrix, class = matrix
 marker_table        : Manually curated marker table, class = data.frame
 reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, , class = logical, default = T
 GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "V"
