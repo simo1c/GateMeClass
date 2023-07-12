@@ -58,7 +58,7 @@ library("caret")
 library("BiocManager")
 library("batchelor")
 
-source("GateMeClass.R")
+# source("GateMeClass.R")
 
 ```
 
