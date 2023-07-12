@@ -1,6 +1,6 @@
 # GateMeClass tutorial
 
-## DESCRIPTION
+## Description
 
 GateMeClass, short for Gate-Mining-and-Classification is a tool implemented in the R programming language that automates the process of annotation of a cytometry dataset using marker tables. 
 GateMeClass consists of two main modules: the training module and the annotation module. These modules can be utilized independently or in a sequence depending on the user's requirements. 
