@@ -107,10 +107,6 @@ generate_set_values <- function(v, cell){
 ## Read the gate table and generate the possbile marker signature of ceach cell type
 parse_marker_table <- function(marker_table, narrow_marker_table, extended_marker_table){
   
-  # marker_table <- gate
-  # narrow_marker_table = T
-  # extended_marker_table = T
-  
   if(any(duplicated(marker_table$Cell))){
     stop("The gate table must contains uniquely defined cell types!")
   }
@@ -162,18 +158,6 @@ parse_marker_table <- function(marker_table, narrow_marker_table, extended_marke
   
   if(extended_marker_table){
     df_list <- apply(marker_table, 1, function(v){
-      
-      # v <- as.character(marker_table[2,-1])
-      # names(v) <- colnames(marker_table[2,-1])
-      # cell <- marker_table[2,1]
-      # 
-      # v <- as.character(v)
-      # cell <- v[1]
-      # v <- v[-1] 
-      # names(v) <- colnames(marker_table)[-1]
-      # print(class(v))
-      # print(cell)
-      
       to_add <- generate_set_values(v[-1], v[1])
       return(to_add)
     })
@@ -203,47 +187,13 @@ parse_marker_table <- function(marker_table, narrow_marker_table, extended_marke
 
 set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
   
-  # X <- m["CD11b", ]
-  # type = T
-  # # plot(density(X))
-  # # plot(density(test))
-  # # indexes = first$indexes
-  # GMM_parameterization = "E"
-  
   if(length(X) >= 100){
     
     sample <- X
     
-    # if(moments::skewness(X) < 0){
-    #   sk <- "min"
-    # }else{
-    #   sk <- "max"
-    # }
-    
     if(RSS){
       ############ Ranked Set Sampling (RSS) #########################
       sample <- X
-      
-      ################### TO DELETE ##################################
-      # pdf(paste0("RSS/", names(type), "_before_RSS.pdf"), width = 2, height = 2)
-      # df <- data.frame(Marker = sample)
-      # gg <- ggplot(df, aes(x = Marker)) + 
-      #   geom_density(fill = "#00AFBB") +
-      #   theme_classic() +
-      #   xlab(names(type))+
-      #   #ylab("") +
-      #   theme(axis.line=element_blank(),
-      #         strip.text = element_blank()) +
-      #   theme(panel.border = element_rect(colour = "black", fill=NA, size=1))+
-      #   ylab("") +
-      #   theme(legend.position="none") +
-      #   theme(axis.text=element_text(size=16, color = "black"),
-      #         axis.title=element_text(size=16)) 
-      # print(gg)
-      # graphics.off()
-      ################### END TO DELETE ##################################
-      
-      
       cycles <- floor(length(sample) / 4)
       n_unit <- 2
       n <- length(sample)
@@ -268,53 +218,10 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
           return(indexes[w, i])
         })
       }
-      
-      # print(index_sel)
-      
-      ################### TO DELETE ##################################
-      # pdf(paste0("RSS/", names(type), "_post_RSS.pdf"), width = 2, height = 2)
-      # df <- data.frame(Marker = test)
-      # gg <- ggplot(df, aes(x = Marker)) + 
-      #   geom_density(fill = "#E7B800") +
-      #   theme_classic() +
-      #   xlab(names(type))+
-      #   ylab("") +
-      #   theme(axis.line=element_blank(),
-      #         strip.text = element_blank()) +
-      #   theme(panel.border = element_rect(colour = "black", fill=NA, size=1))+
-      #   #xlab("") +
-      #   ylab("") +
-      #   theme(legend.position="none") +
-      #   theme(axis.text=element_text(size=16, color = "black"),
-      #         axis.title=element_text(size=16)) 
-      # print(gg)
-      # graphics.off()
-      ################### END TO DELETE ##################################
-      
-      
     }else{
       
-      ################### TO DELETE ##################################
       ############ Ranked Set Sampling (RSS) #########################
       sample <- X
-      
-      # pdf(paste0("RSS/", names(type), "_before_RSS.pdf"), width = 2, height = 2)
-      # df <- data.frame(Marker = sample)
-      # gg <- ggplot(df, aes(x = Marker)) + 
-      #   geom_density(fill = "#00AFBB") +
-      #   theme_classic() +
-      #   xlab(names(type))+
-      #   #ylab("") +
-      #   theme(axis.line=element_blank(),
-      #         strip.text = element_blank()) +
-      #   theme(panel.border = element_rect(colour = "black", fill=NA, size=1))+
-      #   ylab("") +
-      #   theme(legend.position="none") +
-      #   theme(axis.text=element_text(size=16, color = "black"),
-      #         axis.title=element_text(size=16)) 
-      # print(gg)
-      # graphics.off()
-      
       cycles <- floor(length(sample) / 4)
       n_unit <- 2
       n <- length(sample)
@@ -328,26 +235,6 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
       }else{
         test <- apply(sel_samples, 2, base::max)
       }
-      
-      # pdf(paste0("RSS/", names(type), "_post_RSS.pdf"), width = 2, height = 2)
-      # df <- data.frame(Marker = test)
-      # gg <- ggplot(df, aes(x = Marker)) + 
-      #   geom_density(fill = "#E7B800") +
-      #   theme_classic() +
-      #   xlab(names(type))+
-      #   ylab("") +
-      #   theme(axis.line=element_blank(),
-      #         strip.text = element_blank()) +
-      #   theme(panel.border = element_rect(colour = "black", fill=NA, size=1))+
-      #   #xlab("") +
-      #   ylab("") +
-      #   theme(legend.position="none") +
-      #   theme(axis.text=element_text(size=16, color = "black"),
-      #         axis.title=element_text(size=16)) 
-      # print(gg)
-      # graphics.off()
-      ################### TO DELETE ##################################
-
       test <- X
     }
   }else if(length(X) >= 2){
@@ -386,6 +273,14 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
         temp <- ifelse(cl$classification == max, "+", "-")
       }
     }else{
+      
+      
+      print("3 GMM")
+      
+      
+      plot(cl, what = "classification")
+      
+      
       cl2 <- sort(cl$parameters$mean)
       min <- names(cl2)[1]
       mid <- names(cl2)[2]
@@ -403,38 +298,6 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
       }
     }
   }
-
-  # Check if "V" parameterization is not monotonic
-  # if(GMM_parameterization == "V"){
-  #   if(length(table(cl$classification)) == 2){
-  #     min_plus <- min(test[cl$classification == max])
-  #     max_min <- max(test[cl$classification == min])
-  #     
-  #     ## With "V" parameterization, cells with non-monotonous behavior 
-  #     ## fall in "unclassified" cells for next refinement
-  #     if(min_plus < max_min){
-  #       temp[cl$classification == min & test > min_plus] <- "u"
-  #       test[cl$classification == max & test < max_min] <- "u"
-  #     }
-  #   }else if(length(table(cl$classification)) == 3){
-  #     min_plus <- min(test[cl$classification == max])
-  #     min_mid <- min(test[cl$classification == mid])
-  #     max_mid <- max(test[cl$classification == max])
-  #     max_min <- max(test[cl$classification == min])
-  #     
-  #     if(min_plus < max_mid | min_plus < max_min | min_mid < max_min){
-  #       temp[cl$classification == mid & test > min_plus] <- "u"
-  #       temp[cl$classification == plus & test < max_mid] <- "u"
-  #       
-  #       temp[cl$classification == min & test > min_plus] <- "u"
-  #       temp[cl$classification == plus & test < max_min] <- "u"
-  #       
-  #       temp[cl$classification == min & test > min_mid] <- "u"
-  #       temp[cl$classification == mid & test < max_min] <- "u"
-  #     }
-  #   } 
-  # }
-  
   return(temp)
 }
 
@@ -447,20 +310,6 @@ set_marker_expression <- function(exp_matrix,
                                   GMM_parameterization,
                                   RSS){
   
-  
-  # exp_matrix <- exp_matrix_2
-  # markers <- colnames(new_gates$marker_table)[-1]
-  # # # expr_markers
-  # gates <- new_gates$marker_table
-  # # verbose = F
-  # marker_seq_eval = F
-  # mm <- 2
-  # rr <- 0.05
-  # gmm_criteria <- "ICL"
-  # type = new_gates$bimodal  
-  # ## GMM probabilities initialization
-  # # prob <- rep(1, ncol(exp_matrix))
-  
   queue <- list(list(indexes = 1:ncol(exp_matrix), markers = markers, type = type))
   
   while(length(queue) > 0){
@@ -472,9 +321,6 @@ set_marker_expression <- function(exp_matrix,
     queue <- queue[-1]
     
     for(m in first$markers){
-      
-      # m <- "CD3"
-      
       X <- exp_matrix[m, first$indexes]
       marker_expr <- set_marker_expression_GMM(X, GMM_parameterization, first$type[m], RSS)
       
@@ -524,9 +370,6 @@ set_marker_expression <- function(exp_matrix,
 
 ## This function performs the cell classification
 cell_classification <- function(marker_table, gates){
-  
-  # marker_table <- new_cells2
-  # gates <- new_gates$extended_marker_table
   
   df_gate <- marker_table
   colnames(df_gate)[1] <- "Cell_ID"
@@ -681,20 +524,7 @@ GateMeClass_train <- function(reference = NULL,
                               sampling_imp_vars = 0.05,
                               seed = 1,
                               verbose = T){
-  
-  # reference <- m[, sample]
-  # RSS = F
-  # labels <- sce2$labels[sample]
-  # GMM_parameterization = "V"
-  # oversampling = T
-  # seed = 1
-  # sampling_imp_vars = 0.1
-  # verbose = T
-  # sampling_perc = 0.01
-  # sampling_k = 5
-  # perc.over = 100
-  # perc.under = 0
-  
+
   set.seed(seed)
   
   if(!is.null(reference)){
@@ -721,38 +551,6 @@ GateMeClass_train <- function(reference = NULL,
     stop("The parameter 'GMM_parameterization' is mandatory!")
   }
   
-  # if(oversampling){
-  #   if(verbose){
-  #     message("GateMeClass train - Executing oversampling to balance the training set...")
-  #   }
-  #   
-  #   new_reference <- reference
-  #   new_reference <- t(new_reference)
-  #   new_reference <- data.frame(new_reference)
-  #   new_reference$labels <- labels 
-  #   
-  #   new_labels <- labels
-  #   t_lab <- table(labels)
-  #   max <- max(t_lab)
-  #   w <- names(which.max(t_lab))
-  #   t_lab_perc <- t_lab / max
-  #   w_sample <- names(which(t_lab_perc < sampling_perc))
-  #   
-  #   for(w2 in w_sample){
-  #     temp <- as.data.frame(t(reference[, labels %in% c(w, w2)]))
-  #     temp$labels <- labels[labels %in% c(w, w2)]
-  #     temp$labels <- factor(temp$labels)
-  #     
-  #     newData <- SMOTE(labels ~ ., temp, perc.over = perc.over, k = sampling_k, perc.under = perc.under)
-  #     new_reference <- rbind(new_reference, newData)
-  #   }
-  #   
-  #   labels <- new_reference$labels 
-  #   new_reference <- new_reference[, -which(colnames(new_reference) == "labels")]
-  #   new_reference <- t(new_reference)
-  #   reference <- new_reference
-  # }
-  
   markers <- rownames(reference)
   celltypes <- factor(unique(labels))
   reference_2 <- reference[markers, , drop = F]
@@ -772,6 +570,7 @@ GateMeClass_train <- function(reference = NULL,
   m_neg <- paste0(markers, "-")
   m_mid <- paste0(markers, "mid")
   m_hi <- paste0(markers, "hi")
+  
   
   type_neg <- sapply(m_neg, function(x){
     g <- grep(x, unique(labels), ignore.case = T)
@@ -811,14 +610,7 @@ GateMeClass_train <- function(reference = NULL,
   
   expr_markers <- apply(cells[,- 1], 1, paste0, collapse = "")
   new_cells2 <- data.frame(Cell = names(expr_markers), Gate = expr_markers)
-  
-  ############################################
-  # to_delete <- grep("u", new_cells2$Gate)
-  # if(length(to_delete) > 0){
-  #   new_cells2 <- new_cells2[-to_delete, ]
-  # }
-  ############################################
-  
+
   res <- list(cell_signatures = new_cells2)
   signatures <- res$cell_signatures
   
@@ -836,15 +628,7 @@ GateMeClass_train <- function(reference = NULL,
   }
   
   cell_df <- res
-  
-  #########################################
-  # if(length(to_delete) > 0){
-  #   cell_df$labels <- labels[-to_delete]
-  # }else{
-    cell_df$labels <- labels
-  #}
-  #########################################
-  
+  cell_df$labels <- labels
   cell_df <- cell_df[, c("Gate", "labels")]
   cell_df <- na.omit(cell_df)
   
@@ -951,23 +735,12 @@ GateMeClass_train <- function(reference = NULL,
     if(w1 != w2){
       
       signs <- w1
-      
-      # w2 <- which.max(t2)
-      # signs2 <- names(t2)[w2]
-      # 
-      # if(signs == signs2){
-      #   if(t[signs] < t2[signs2]){
-      #     signs <- ifelse(signs == "+", "-", "+")
-      #   }
-      # }
-      
       sig <- mas[1]
       
       if(!is.null(sig)){
         top_marker <- paste0(sig, signs, sep = "")
         int_pos <- top_marker %in% cell_markers[[c]]
         
-        # sg <- ifelse(signs == "+", "-", "+")
         sg <- w2
         
         # Top discriminant marker is not present in gate table
@@ -985,29 +758,6 @@ GateMeClass_train <- function(reference = NULL,
       }
     }
   }
-  
-  # g_temp <- cell_markers
-  # g_temp <- lapply(g_temp, unique)
-  # g_temp <- lapply(g_temp, unique)
-  # g_temp <- lapply(g_temp, gsub, pattern = "\\+|-", replacement = "")
-  # 
-  # to_remove <- sapply(1:length(g_temp), function(i){
-  #   ns <- names(g_temp[i])
-  #   el <- g_temp[[i]]
-  #   w <- which(duplicated(el))
-  #   to_remove <- el[w]
-  #   l <- list(which(el == to_remove))
-  #   names(l) <- ns
-  #   return(l)
-  # })
-  # 
-  # for(i in 1:length(cell_markers)){
-  #   ns <- names(cell_markers[i])
-  #   w <- -to_remove[[ns]]
-  #   if(length(to_remove[[ns]])){
-  #     cell_markers[[ns]] <- cell_markers[[ns]][w]
-  #   }
-  # }
   
   cell_markers <- lapply(cell_markers, sort, decreasing = F)
   g <- sapply(cell_markers, paste0, collapse = "", sep = "")
@@ -1032,25 +782,6 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
                                  narrow_marker_table = T,
                                  verbose = T,
                                  seed = 1){
-  
-  # marker_table <- gate
-  # reject_option = F
-  # RSS = F
-  # refine = T
-  # seed = 1
-  # exp_matrix <- m
-  # verbose = T
-  # narrow_marker_table = T
-  # sampling <- 0.1
-  # k = 20
-  # # reference <- NULL
-  # # labels <- colnames(m)
-  # GMM_parameterization = "V"
-  # train_parameters = list(
-  #   reference = NULL,
-  #   labels = NULL,
-  #   GMM_parameterization = "E"
-  # )
 
   set.seed(seed)
   
