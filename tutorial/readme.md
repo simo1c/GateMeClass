@@ -1,4 +1,4 @@
-# GateMeClass Tutorial
+# GateMeClass tutorial
 
 ## DESCRIPTION
 
