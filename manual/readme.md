@@ -199,7 +199,7 @@ print(res$cell_signatures)
 ### Section 3. Training and classification in one step
 
 <p align="justify">
-Training and classification can be performed in one step using the <u>GateMeClass_annotate</u> function using the parameter </p> `train_parameters .`
+Training and classification can be performed in one step using the <u>GateMeClass_annotate</u> function using the parameter </p> `train_parameters`.
 
 ```
 res <- GateMeClass_annotate(exp_matrix,
