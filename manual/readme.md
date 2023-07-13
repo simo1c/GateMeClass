@@ -154,7 +154,7 @@ new_gate <- GateMeClass_train(training_set,
                           verbose = T, 
                           seed = 1)
 ```
-Some of the parameters are shared between <u>GateMeClass_train</u> and <u>GateMeClass_annotate</u> modules:
+Some of the parameters are shared between *GateMeClass_train* and *GateMeClass_annotate* modules:
 
 List of parameters
 
@@ -198,10 +198,10 @@ print(res$cell_signatures)
 
 ### Section 3. Training and classification in one step
 
-<p align="justify">
+
 Training and classification can be performed in one step using the *GateMeClass_annotate* function using the parameter 'train_parameters'. In this case, 
 It is sufficient to specify in the 'train_parameters' the expression matrix of the reference matrix and the corresponding labels:
-</p>
+
 
 
 ```
