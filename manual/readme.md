@@ -107,9 +107,9 @@ In this example we executed GateMeClass using GMM  with varying variance (GMM_pa
 
 List of parameters
 ```
-exp_matrix          : Expression matrix, class = matrix
-marker_table        : Manually curated marker table, class = data.frame
-reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, , class = logical, default = T
+exp_matrix          : Expression matrix, class = matrix, (mandatory)
+marker_table        : Manually curated marker table, class = data.frame, 
+reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, class = logical, default = T
 GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "E"
 RSS                 : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
 k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric, default = 20
@@ -125,6 +125,13 @@ The output of *GateMeClass_train* is a list with the following elements:
 2) marker_table      : The marker table used by GateMeClass, class = data.frame
 3) cell_signatures   : The marker signatures of each cell attributed by GateMeClass, class = data.frame
 
+The output can be showed using the following:
+
+```
+table(res$labels)
+print(res$marker_table)      
+print(res$cell_signatures)
+```
 
 ### Section 2. Annotation of cytometry data extracting the marker table from an annotated reference dataset
 
@@ -140,7 +147,7 @@ training_set_lab <- population    # Labels of Levine32
 The next step involves the use the <u>GateMeClass_train</u> training function to obtain the `gate` variable, which encompasses the pseudo gating strategy employed for the training set:
 
 ```
-gate <- GateMeClass_train(training_set,
+new_gate <- GateMeClass_train(training_set,
                           training_set_lab,
                           RSS = T,
                           GMM_parameterization = "V",
@@ -152,8 +159,8 @@ Some of the parameters are shared between <u>GateMeClass_train</u> and <u>GateMe
 List of parameters
 
 ```
-reference             : Expression matrix of the reference annotated dataset
-labels                : Labels of the reference dataset
+reference             : Expression matrix of the reference annotated dataset, class = matrix, (mandatory)
+labels                : Labels of the reference dataset, class = character, (mandatory)
 RSS                   : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
 GMM_parameterization  : GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "E"
 verbose               : Show output information, class = logical, default = T
@@ -166,13 +173,11 @@ We can display the output of the function, which is the gating strategy of each 
 print(gate)
 
 ```
-To keep the guided tutorial simple, we have chosen to apply the *GateMeClass_annotate* annotation function to the same matrix `m`:
+Next, <u>GateMeClass_annotate</u> can be executed to the same dataset with the following:
 
 ```
-testing_set <- m
-
-res <- GateMeClass_annotate(testing_set,
-                            marker_table = gate,
+res <- GateMeClass_annotate(exp_matrix,
+                            marker_table = new_gate,
                             reject_option = F,
                             GMM_parameterization = "V",
                             RSS = T,
@@ -182,17 +187,12 @@ res <- GateMeClass_annotate(testing_set,
                             seed = 1)
 ```
 
-Parameters description:
+The output can be showed using the following:
+
 ```
-testing_set         : Matrix of expression
-marker_table        : gate (from the training module)
-reject_option       : default = F
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
-RSS                 : RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default = "T"
-k                   : k-NN (k-Nearest-Neighbour), used to refine the uncertain labels to the most similar already annotated
-sampling            : default = "0.1"
-verbose             : default = T
-seed                : default = "1"
+table(res$labels)
+print(res$marker_table)
+print(res$cell_signatures)
 ```
 
 
