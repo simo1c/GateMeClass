@@ -132,7 +132,7 @@ print(res$cell_signatures)
 ### Method 2. Annotation of cytometry data extracting the marker table from an annotated reference dataset
 
 <p align="justify">
-In this section, we will use GateMeClass to extract a marker table from an already annotated reference cytometry dataset (training set) to annotate our current dataset (control set). For a matter of semplicity, we will use the same dataset (Levine32) as training and control set. The <u>GateMeClass_train</u> function takes in input two main parameters, an expression matrix of the reference dataset and the corresponding labels and returns in output a marker table:
+In this section, we will use GateMeClass to extract a marker table from an already annotated reference cytometry dataset (training set) to annotate our current dataset (control set). For a matter of semplicity, we will use the same dataset (Levine32) as training and control set. The <i>GateMeClass_train</i> function takes in input two main parameters, an expression matrix of the reference dataset and the corresponding labels and returns in output a marker table:
 </p>
     
 ```
