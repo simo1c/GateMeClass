@@ -220,11 +220,11 @@ GateMeClass can be used also to annotate clusters obtained using other technique
 
 ```
 gate_clusters <- GateMeClass_train(exp_matrix,
-                          labels = cluster_labels,            # This labels are obtained executing clustering with an external tool (e.g., FlowSOM)
-                          RSS = T,
-                          GMM_parameterization = "V",
-                          verbose = T, 
-                          seed = 1)
+                                  labels = cluster_labels,            # This labels are obtained executing clustering with an external tool (e.g., FlowSOM)
+                                  RSS = T,
+                                  GMM_parameterization = "V",
+                                  verbose = T, 
+                                  seed = 1)
 ```
 
 
