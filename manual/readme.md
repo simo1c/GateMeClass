@@ -112,7 +112,7 @@ marker_table        : Manually curated marker table, class = data.frame
 reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, , class = logical, default = T
 GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "V"
 RSS                 : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
-k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, default = 20
+k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric, default = 20
 sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.2
 verbose             : Show output information, class = logical, default = T
 train_parameters    : A list of parameters to pass to the *GateMeClass_train* function, class = list, default = NULL
