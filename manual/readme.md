@@ -199,7 +199,8 @@ print(res$cell_signatures)
 ### Section 3. Training and classification in one step
 
 <p align="justify">
-Training and classification can be performed in one step using the <u>GateMeClass_annotate</u> function using the parameter </p> `train_parameters`.
+Training and classification can be performed in one step using the <u>GateMeClass_annotate</u> function using the parameter 'train_parameters'. In this case, 
+It is sufficient to specify in the train_parameters the expression matrix of the reference matrix and the corresponding labels:
 
 ```
 res <- GateMeClass_annotate(exp_matrix,
@@ -209,18 +210,6 @@ res <- GateMeClass_annotate(exp_matrix,
                             sampling = 0.1,
                             verbose = T,
                             seed = 1)
-```
-
-
-Parameters description:
-```
-m                   : Matrix of expression
-gate_table          : gate (from the training module)
-train_parameters    : 
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
-sampling            : default = "0.1"
-verbose             : default = "T"
-seed                : default = "1"
 ```
 
 
