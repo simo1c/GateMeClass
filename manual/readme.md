@@ -140,7 +140,7 @@ training_set <- exp_matrix        # Levine32 expression matrix
 training_set_lab <- population    # Labels of Levine32
 ```
 
-The next step involves the use the <u>GateMeClass_train</u> training function to obtain the `gate` variable, which encompasses the pseudo gating strategy employed for the training set:
+The next step involves the use the *GateMeClass_train* training function to obtain the `gate` variable, which encompasses the pseudo gating strategy employed for the training set:
 
 ```
 new_gate <- GateMeClass_train(training_set,
@@ -169,7 +169,7 @@ We can display the output of the function, which is the gating strategy of each 
 print(gate)
 
 ```
-Next, <u>GateMeClass_annotate</u> can be executed to the same dataset with the following:
+Next, *GateMeClass_annotate* can be executed to the same dataset with the following:
 
 ```
 res <- GateMeClass_annotate(exp_matrix,
