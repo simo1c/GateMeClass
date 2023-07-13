@@ -102,7 +102,7 @@ res <- GateMeClass_annotate(exp_matrix,
                             seed = 1)
 ```
 <p align="justify">
-In this example we executed GateMeClass using GMM  with varying variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells, ranked set sampling (RSS = T) and k parameter set to 20 (k = 20) for k-NN and MNN algorithms for label refining. For a comphensive list of GateMeClass parameters refer to the following:
+In this example we executed GateMeClass using GMM  with varying variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells, ranked set sampling (RSS = T) and k parameter set to 20 (k = 20) for k-NN and MNN algorithms for label refining. For a comphensive list of GateMeClass_annotate parameters refer to the following:
 </p>
 
 List of parameters
@@ -110,7 +110,7 @@ List of parameters
 exp_matrix          : Expression matrix, class = matrix
 marker_table        : Manually curated marker table, class = data.frame
 reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, , class = logical, default = T
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "V"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "E"
 RSS                 : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
 k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric, default = 20
 sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.2
@@ -137,7 +137,7 @@ training_set <- exp_matrix        # Levine32 expression matrix
 training_set_lab <- population    # Labels of Levine32
 ```
 
-The next step involves the use the <u>GateMeClass_train</u> training function to obtain the `gate` variable, which encompasses the gating strategy employed for the training set.
+The next step involves the use the <u>GateMeClass_train</u> training function to obtain the `gate` variable, which encompasses the pseudo gating strategy employed for the training set:
 
 ```
 gate <- GateMeClass_train(training_set,
@@ -147,14 +147,17 @@ gate <- GateMeClass_train(training_set,
                           verbose = T, 
                           seed = 1)
 ```
-Parameters description:
+Some of the parameters are shared between <u>GateMeClass_train</u> and <u>GateMeClass_annotate</u> modules:
+
+List of parameters
+
 ```
-training_set        : Matrix of expression
-training_set_lab    : Labels from the dataset
-RSS                 : RSS (Ranked-Set-Sampling) observations, used to have a better resolution: default = "T"
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), default = "V"
-verbose             : default = "T"
-seed                : default = "1"
+reference             : Expression matrix of the reference annotated dataset
+labels                : Labels of the reference dataset
+RSS                   : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
+GMM_parameterization  : GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "E"
+verbose               : Show output information, class = logical, default = T
+seed                  : class = numeric, default = 1
 ```
 
 We can display the output of the function, which is the gating strategy of each cell type, using the command:
