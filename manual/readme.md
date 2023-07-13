@@ -64,7 +64,6 @@ As an example we will use GateMeClass to annotate the cells of the Levine32 data
 # BiocManager::install("HDCytoData")
 
 library(HDCytoData)
-
 d_SE <- Levine_32dim_SE()
 d_sub <- assay(d_SE[, colData(d_SE)$marker_class == "type"])
 population <- rowData(d_SE)$population_id
@@ -79,7 +78,6 @@ Then, we read the excel file with the marker table:
 
 ```
 library(readxl) # install.packages("readxl")
-
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
 colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"      # To avoid naming problems with marker names that contain keywords of GateMeClass
 gate[is.na(gate)] <- "*"                                           # required for markers not set
