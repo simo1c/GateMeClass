@@ -99,7 +99,7 @@ res <- GateMeClass_annotate(exp_matrix,
 In this example we executed GateMeClass using GMM  with varying variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells, ranked set sampling (RSS = T) and k parameter set to 20 (k = 20) for k-NN and mutual nearest neighbor (MNN) algorithms for label refining. For a comphensive list of <i>GateMeClass_annotate</i> parameters refer to the following:
 </p>
 
-List of parameters
+List of parameters:
 ```
 exp_matrix          : Expression matrix, class = matrix, (mandatory)
 marker_table        : Manually curated marker table, class = data.frame, 
@@ -150,7 +150,7 @@ new_gate <- GateMeClass_train(training_set,
 ```
 Some of the parameters are shared between *GateMeClass_train* and *GateMeClass_annotate* modules:
 
-List of parameters
+List of parameters:
 
 ```
 reference             : Expression matrix of the reference annotated dataset, class = matrix, (mandatory)
