@@ -214,4 +214,21 @@ res <- GateMeClass_annotate(exp_matrix,
                             seed = 1)
 ```
 
+### Method 4. Annotation of clusters using GateMeClass
+
+
+GateMeClass can be used also to annotate clusters obtained using other techniques. In this example, we will use 
+
+
+
+```
+res <- GateMeClass_annotate(exp_matrix,
+                            marker_table = NULL,
+                            train_parameters = list(reference = exp_matrix, labels = training_set_lab),
+                            GMM_parameterization = "V",
+                            sampling = 0.1,
+                            verbose = T,
+                            seed = 1)
+```
+
 
