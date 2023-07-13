@@ -48,7 +48,7 @@ library("RcppAlgos")
 library("caret")
 library("BiocManager")
 library("batchelor")
-source("GateMeClass.R")
+source("GateMeClass.R")    # GateMeClass code
 ```
 
 ## Execution of GateMeClass
