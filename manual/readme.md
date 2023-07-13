@@ -196,10 +196,14 @@ print(res$cell_signatures)
 ```
 
 
-### 3: Training and classification in one step
+### Section 3. Training and classification in one step
+
+<p align="justify">
+Training and classification can be performed in one step using the <u>GateMeClass_annotate</u> function using the parameter ``` train_parameters ```.
+</p>
 
 ```
-res <- GateMeClass_annotate(m,
+res <- GateMeClass_annotate(exp_matrix,
                             marker_table = NULL,
                             train_parameters = list(reference = m, labels = lab),
                             GMM_parameterization = "V",
