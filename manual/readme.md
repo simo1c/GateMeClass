@@ -57,7 +57,7 @@ source("GateMeClass.R")
 
 ## Execution of GateMeClass
 
-### Section 1. Annotation of cytometry data using a manually defined marker table
+### Method 1. Annotation of cytometry data using a manually defined marker table
 <p align="justify">
 As an example we will use GateMeClass to annotate the cells of the Levine32 dataset (<i>Levine et al., 2015</i>) using the manually defined marker table used in ACDC (<i>Lee et al., 2017</i>). At first, we download the Levine32 dataset using the R package HDCytoData (<i>Weber and Soneson, 2019</i>):
 </p>
@@ -133,7 +133,7 @@ print(res$marker_table)
 print(res$cell_signatures)
 ```
 
-### Section 2. Annotation of cytometry data extracting the marker table from an annotated reference dataset
+### Method 2. Annotation of cytometry data extracting the marker table from an annotated reference dataset
 
 <p align="justify">
 In this section, we will use GateMeClass to extract a marker table from an already annotated reference cytometry dataset (training set) to annotate our current dataset (control set). For a matter of semplicity, we will use the same dataset (Levine32) as training and control set. The <u>GateMeClass_train</u> function takes in input two main parameters, an expression matrix of the reference dataset and the corresponding labels and returns in output a marker table:
@@ -196,7 +196,7 @@ print(res$cell_signatures)
 ```
 
 
-### Section 3. Training and classification in one step
+### Method 3. Training and classification in one step
 
 
 Training and classification can be performed in one step using the *GateMeClass_annotate* function using the parameter 'train_parameters'. In this case, 
