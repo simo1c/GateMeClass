@@ -128,16 +128,16 @@ The output of *GateMeClass_train* is a list with the following elements:
 
 ### Section 2. Annotation of cytometry data extracting the marker table from an annotated reference dataset
 
-In this second application of GateMeClass, we will annotate the cells of a dataset of interest by utilizing the training module and a training set to construct a marker table.
-
-We assign to the variable `training_set` the expression matrix `m`, and to the variable `training_set_lab` the labels fron the se object.
-
+<p align="justify">
+In this section, we will use GateMeClass to extract a marker table from an already annotated reference cytometry dataset (training set) to annotate our current dataset (control set). For a matter of semplicity, we will use the same dataset (Levine32) as training and control set. The <u>GateMeClass_train</u> function takes in input two main parameters, an expression matrix of the reference dataset and the corresponding labels and returns in output a marker table:
+</p>
+    
 ```
-training_set <- m
-training_set_lab <- lab
+training_set <- exp_matrix        # Levine32 expression matrix
+training_set_lab <- population    # Labels of Levine32
 ```
 
-The next step involves utilizing the *GateMeClass_train* training function to construct the `gate` variable, which encompasses the gating strategy employed for the training set.
+The next step involves the use the <u>GateMeClass_train</u> training function to obtain the `gate` variable, which encompasses the gating strategy employed for the training set.
 
 ```
 gate <- GateMeClass_train(training_set,
