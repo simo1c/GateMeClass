@@ -203,7 +203,8 @@ It is sufficient to specify in the 'train_parameters' the expression matrix of t
 ```
 res <- GateMeClass_annotate(exp_matrix,
                             marker_table = NULL,
-                            train_parameters = list(reference = exp_matrix, labels = training_set_lab),
+                            train_parameters = list(reference = exp_matrix,
+                                                    labels = training_set_lab),
                             GMM_parameterization = "V",
                             sampling = 0.1,
                             verbose = T,
