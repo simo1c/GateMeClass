@@ -51,7 +51,6 @@ library("RcppAlgos")
 library("caret")
 library("BiocManager")
 library("batchelor")
-
 source("GateMeClass.R")
 ```
 
