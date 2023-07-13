@@ -273,14 +273,7 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
         temp <- ifelse(cl$classification == max, "+", "-")
       }
     }else{
-      
-      
-      print("3 GMM")
-      
-      
-      plot(cl, what = "classification")
-      
-      
+
       cl2 <- sort(cl$parameters$mean)
       min <- names(cl2)[1]
       mid <- names(cl2)[2]
