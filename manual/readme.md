@@ -85,7 +85,7 @@ Then, we read the excel file with the marker table:
 library(readxl) # install.packages("readxl")
 
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
-colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"      # To avoid naming problems
+colnames(gate)[which(colnames(gate) == "HLA-DR")] <- "HLA_DR"      # To avoid naming problems with marker names that contain keywords of GateMeClass
 gate[is.na(gate)] <- "*"                                           # required for markers not set
 ```
 
