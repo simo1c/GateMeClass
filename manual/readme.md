@@ -199,7 +199,7 @@ print(res$cell_signatures)
 ### Section 3. Training and classification in one step
 
 <p align="justify">
-Training and classification can be performed in one step using the <u>GateMeClass_annotate</u> function using the parameter 'train_parameters'. In this case, 
+Training and classification can be performed in one step using the *GateMeClass_annotate* function using the parameter 'train_parameters'. In this case, 
 It is sufficient to specify in the 'train_parameters' the expression matrix of the reference matrix and the corresponding labels:
 </p>
 
