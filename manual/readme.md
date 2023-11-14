@@ -251,7 +251,7 @@ res <- GateMeClass_annotate(exp_matrix,
 ### Method 4. Annotation of clusters using GateMeClass
 
 <p align="justify">
-GateMeClass can be used also to annotate clusters obtained using other techniques. In this case *GateMeClass_train* can be executed setting the parameter 'labels' with the corresponding cluster identity obtained using an external clustering algorithm. In this way the marker table obtained will contain the marker signatures of each cluster that can be used for better interpretability and for subsequently annotation using <i>GateMeClass_annotate</i> function:
+GateMeClass can be used also to annotate clusters obtained using other techniques. In this case <i>GateMeClass_train</i> can be executed setting the parameter 'labels' with the corresponding cluster identity obtained using an external clustering algorithm. In this way the marker table obtained will contain the marker signatures of each cluster that can be used for better interpretability and for subsequently annotation using <i>GateMeClass_annotate</i> function:
 </p>
 
 ```
