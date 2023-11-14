@@ -145,7 +145,7 @@ res <- GateMeClass_annotate(exp_matrix,
                             seed = 1)
 table(res$labels)
 ```
-GateMeClass gives the possibility to use the or (|) and XOR (^) logical operators in the marker table. For example, if we want to identify cells that expresses CD11b, CD11c or both we can create the following marker table:
+GateMeClass supports the use of the or (|) and XOR (^) logical operators in the marker table. For example, if we want to identify cells that expresses CD11b, CD11c or both we can create the following marker table:
 
 ```
 gate <- data.frame(Cell = c("Cells"), Gate = ("CD11b+|CD11c+|"))
