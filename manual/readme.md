@@ -144,12 +144,18 @@ res <- GateMeClass_annotate(exp_matrix,
                             narrow_marker_table = T,    # we specified a narrow marker table
                             seed = 1)
 table(res$labels)
-
+```
+GateMeClass gives the possibility to use the or (|) and XOR (^) logical operators in the marker table. For example, if we want to identify cells that expresses CD11b, CD11c or both we can create the following marker table:
 
 ```
+gate <- data.frame(Cell = c("Cells"), Gate = ("CD11b+|CD11c+|"))
+```
 
+To identify cells that expresses CD11b or CD11c but not both we can create the following marker table:
 
-
+```
+gate <- data.frame(Cell = c("Cells"), Gate = ("CD11b+^CD11c+^"))
+```
 
 
 ### Method 2. Annotation of cytometry data extracting the marker table from an annotated reference dataset
