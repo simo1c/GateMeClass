@@ -263,5 +263,15 @@ gate_clusters <- GateMeClass_train(exp_matrix,
                                    verbose = T, 
                                    seed = 1)
 ```
+### Attached packages:
+
+ [1] batchelor_1.14.1            SingleCellExperiment_1.20.0 BiocManager_1.30.20         caret_6.0-93                lattice_0.20-45            
+ [6] ggplot2_3.4.1               RcppAlgos_2.7.2             recipes_1.0.5               dplyr_1.1.0                 scales_1.2.1               
+[11] stringr_1.5.0               mclust_6.0.0                moments_0.14.1              data.table_1.14.8           stringi_1.7.12             
+[16] readxl_1.4.2                HDCytoData_1.18.0           flowCore_2.10.0             SummarizedExperiment_1.28.0 Biobase_2.58.0             
+[21] GenomicRanges_1.50.2        GenomeInfoDb_1.34.9         IRanges_2.32.0              S4Vectors_0.36.2            MatrixGenerics_1.10.0      
+[26] matrixStats_0.63.0          ExperimentHub_2.6.0         AnnotationHub_3.6.0         BiocFileCache_2.6.1         dbplyr_2.3.1               
+[31] BiocGenerics_0.44.0 
+
 
 
