@@ -938,42 +938,47 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
       res$cell_signatures$Celltype <- res$labels
       res$cell_signatures$Cell[tot_uncl] <- tot_uncl
       res$cell_signatures$Gate[tot_uncl] <- NA
-    
     }else{
       
-      ## High confident "Unclassified" are cells with not MNN in the set of annotated cells
-      d1 <- t(exp_matrix_pre_sampling[, real_uncl])
-      d2 <- t(exp_matrix_pre_sampling[, not_uncl])
-      out <- findMutualNN(d1, d2, k1=k)
-      not_mnn <- setdiff(1:nrow(d1), unique(out$first))
+      if(length(real_uncl) > 0){
+        ## High confident "Unclassified" are cells with not MNN in the set of annotated cells
+        d1 <- t(exp_matrix_pre_sampling[, real_uncl])
+        d2 <- t(exp_matrix_pre_sampling[, not_uncl])
+        out <- findMutualNN(d1, d2, k1=k)
+        not_mnn <- setdiff(1:nrow(d1), unique(out$first))
+        
+        ## Annotation errors are, probably, annotated cells with many MNN in the set of "Unclassified" cells 
+        d1 <- t(exp_matrix_pre_sampling[, not_uncl])
+        tot <- c(not_uncl, real_uncl)
+        d2 <- t(exp_matrix_pre_sampling[, tot])
+        out <- findMutualNN(d1, d2, k1=k)
+        
+        label_mapped <- res$labels[tot[out$second]]
+        names(label_mapped) <- out$first
+        
+        t <- data.table(table(names(label_mapped), label_mapped))
+        colnames(t) <- c("Index", "Cell", "N")
+        t$Index <- as.factor(t$Index)
+        t$N <- as.numeric(t$N)
+        
+        sel_max <- t %>% group_by(Index) %>% slice_max(N)
+        sel_max$Index <- as.numeric(as.character(sel_max$Index))
+        dup <- sel_max[which(duplicated(sel_max$Index)), "Index"]$Index
+        sel_max <- sel_max[!sel_max$Index %in% dup, ]
+        w_uncl <- c(sel_max[sel_max$Cell == "Unclassified", "Index"]$Index)
+        to_reannotate <- not_uncl[w_uncl]
+        res$labels[to_reannotate] <- "Unclassified"
+        
+        tot_uncl <- c(setdiff(tot_uncl, real_uncl[not_mnn]), to_reannotate)
+        not_uncl <- setdiff(not_uncl, to_reannotate)
+        
+        training_set <- data.frame(labels = c(res$labels[not_uncl], rep("Unclassified", length(not_mnn))), t(exp_matrix_pre_sampling[, c(not_uncl, real_uncl[not_mnn])]))
+        control <- t(exp_matrix_pre_sampling[, tot_uncl])
+      }else{
+        training_set <- data.frame(labels = res$labels[not_uncl], t(exp_matrix_pre_sampling[, not_uncl]))
+        control <- t(exp_matrix_pre_sampling[, not_real_uncl])
+      }
       
-      ## Annotation errors are, probably, annotated cells with many MNN in the set of "Unclassified" cells 
-      d1 <- t(exp_matrix_pre_sampling[, not_uncl])
-      tot <- c(not_uncl, real_uncl)
-      d2 <- t(exp_matrix_pre_sampling[, tot])
-      out <- findMutualNN(d1, d2, k1=k)
-      
-      label_mapped <- res$labels[tot[out$second]]
-      names(label_mapped) <- out$first
-      
-      t <- data.table(table(names(label_mapped), label_mapped))
-      colnames(t) <- c("Index", "Cell", "N")
-      t$Index <- as.factor(t$Index)
-      t$N <- as.numeric(t$N)
-      
-      sel_max <- t %>% group_by(Index) %>% slice_max(N)
-      sel_max$Index <- as.numeric(as.character(sel_max$Index))
-      dup <- sel_max[which(duplicated(sel_max$Index)), "Index"]$Index
-      sel_max <- sel_max[!sel_max$Index %in% dup, ]
-      w_uncl <- c(sel_max[sel_max$Cell == "Unclassified", "Index"]$Index)
-      to_reannotate <- not_uncl[w_uncl]
-      res$labels[to_reannotate] <- "Unclassified"
-      
-      tot_uncl <- c(setdiff(tot_uncl, real_uncl[not_mnn]), to_reannotate)
-      not_uncl <- setdiff(not_uncl, to_reannotate)
-      
-      training_set <- data.frame(labels = c(res$labels[not_uncl], rep("Unclassified", length(not_mnn))), t(exp_matrix_pre_sampling[, c(not_uncl, real_uncl[not_mnn])]))
-      control <- t(exp_matrix_pre_sampling[, tot_uncl])
       ctrl <- trainControl(method="none")
       knnFit <- train(labels ~ ., data = training_set, method = "knn", trControl = ctrl, tuneGrid = expand.grid(k = k))
       knn_res <- predict(knnFit, newdata = control)
