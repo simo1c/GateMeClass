@@ -265,6 +265,7 @@ gate_clusters <- GateMeClass_train(exp_matrix,
 ```
 ### Attached packages:
 
+```
 batchelor_1.14.1
 SingleCellExperiment_1.20.0
 BiocManager_1.30.20
@@ -296,6 +297,6 @@ AnnotationHub_3.6.0
 BiocFileCache_2.6.1
 dbplyr_2.3.1               
 BiocGenerics_0.44.0 
-
+```
 
 
