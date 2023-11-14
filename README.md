@@ -8,6 +8,6 @@ It enables both supervised and semi-supervised classification with a strong emph
 
 <!-- For technical details, we invite you to refer to the published article regarding GateMeClass at the following link: [LINK] -->
 
-<a href = "https://github.com/simo1c/GateMeClass/tree/main/manual">Manual of usage</a>
+For details refer to the <a href = "https://github.com/simo1c/GateMeClass/tree/main/manual">Manual of usage</a>
 
 </p>
