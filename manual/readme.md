@@ -128,7 +128,9 @@ table(res$labels)
 print(res$marker_table)      
 print(res$cell_signatures)
 ```
+<p align="justify">
 If we want to detect cell types not specified in the marker table, we can set the parameter reject_option = T. As an example, we define a "narrow" (narrow_marker_table = T) marker table and specify only the CD3 marker of T cells:
+</p>
 
 ```
 gate <- data.frame(Cell = c("T cells"), Gate = ("CD3+"))
@@ -145,7 +147,9 @@ res <- GateMeClass_annotate(exp_matrix,
                             seed = 1)
 table(res$labels)
 ```
+<p align="justify">
 GateMeClass supports the use of the or (|) and XOR (^) logical operators in the marker table. For example, if we want to identify cells that expresses CD11b, CD11c or both we can create the following marker table:
+</p>
 
 ```
 gate <- data.frame(Cell = c("Cells"), Gate = ("CD11b+|CD11c+|"))
@@ -219,8 +223,9 @@ table(res$labels)
 print(res$marker_table)
 print(res$cell_signatures)
 ```
+<p align="justify">
 Suppose we want to extract a marker table from a dataset in which we know that monocytes were gated considering the medium expression of CD11b. In that case, GateMeClass needs the presence of three subsets with the following labels: monocytes_CD11bhi, monocytes_CD11bmid and monocytes_CD11b-. The syntax is important and must be <cell_type_name>_<marker_name>[hi|mid|-]. If we have these labels in the reference dataset we can execute *GateMeClass_train*.
-
+</p>
 
 ### Method 3. Training and classification in one step
 
