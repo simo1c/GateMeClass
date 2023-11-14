@@ -13,4 +13,4 @@ For details refer to the <a href = "https://github.com/simo1c/GateMeClass/tree/m
 </p>
 
 ## Contact
-Simone Caligola simone.caligola@iov.veneto.it
+For support please contact: simone.caligola@iov.veneto.it
