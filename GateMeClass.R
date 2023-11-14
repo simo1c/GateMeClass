@@ -1,5 +1,3 @@
-#options(warn=1)
-
 ## This function generates the possible value combinations of the markers of a cell type 
 generate_set_values <- function(v, cell){
   
