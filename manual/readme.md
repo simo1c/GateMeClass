@@ -1,6 +1,6 @@
 # GateMeClass - Manual
 
- <img width="230" height="250" src="../logo2.jpg" alt = "Logo GateMeClass" align = "right">
+ <img width="200" height="220" src="../logo2.jpg" alt = "Logo GateMeClass" align = "right">
 
 ## Description
 <p align="justify">
