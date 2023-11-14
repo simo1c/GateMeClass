@@ -129,6 +129,7 @@ print(res$marker_table)
 print(res$cell_signatures)
 ```
 If we want to detect cell types not specoified in the marker table, we can set the parameter reject_option = T. To show this, we define a "narrow" (narrow_marker_table = T) marker table and specify only the CD3 marker of T cells:
+
 ```
 gate <- data.frame(Cell = c("T cells"), Gate = ("CD3+"))
 res <- GateMeClass_annotate(exp_matrix,
