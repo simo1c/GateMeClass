@@ -203,7 +203,6 @@ We can display the output of the function, which is the gating strategy of each 
 
 ```
 print(gate)
-
 ```
 Next, *GateMeClass_annotate* can be executed to the same dataset with the following:
 
