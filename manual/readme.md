@@ -219,6 +219,7 @@ table(res$labels)
 print(res$marker_table)
 print(res$cell_signatures)
 ```
+Suppose we want to extract a marker table from a dataset in which we know that monocytes were gated considering the medium expression of CD11b. In that case, GateMeClass needs the presence of three subsets with the following labels: monocytes_CD11bhi, monocytes_CD11bmid and monocytes_CD11b-. The syntax is important and must be <cell_type_name>_<marker_name>[hi|mid|-]. Having these labels in the reference dataset we can execute *GateMeClass_train*.
 
 
 ### Method 3. Training and classification in one step
