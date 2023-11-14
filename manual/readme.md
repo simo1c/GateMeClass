@@ -88,13 +88,13 @@ gate[is.na(gate)] <- "*"                                           # required fo
 
 Next, we can execute the *GateMeClass_annotate* function for annotating the dataset:
 ```
-res <- GateMeClass_annotate(exp_matrix,
+res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             marker_table = gate,
-                            reject_option = F,
                             GMM_parameterization = "V",
+                            reject_option = F,
+                            sampling = 0.1,
                             RSS = T,
                             k = 20,				
-                            sampling = 0.1,
                             verbose = T,
                             narrow_marker_table = F,
                             seed = 1)
@@ -138,7 +138,7 @@ If we want to detect cell types not specified in the marker table, we can set th
 ```
 gate <- data.frame(Cell = c("T cells"), Gate = ("CD3+"))
 
-res <- GateMeClass_annotate(exp_matrix,
+res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             marker_table = gate,
                             reject_option = T,          # we want to discriminate cell types not in marker table 
                             GMM_parameterization = "V",
@@ -151,7 +151,7 @@ res <- GateMeClass_annotate(exp_matrix,
 table(res$labels)
 ```
 <p align="justify">
-GateMeClass supports the use of the or (|) and XOR (^) logical operators in the marker table. For example, if we want to identify cells that expresses CD11b, CD11c or both we can create the following marker table:
+GateMeClass supports the use of the OR (|) and XOR (^) logical operators in the marker table. For example, if we want to identify cells that expresses CD11b, CD11c or both we can create the following marker table:
 </p>
 
 ```
@@ -179,8 +179,8 @@ training_set_lab <- population    # Labels of Levine32
 The next step involves the use the *GateMeClass_train* training function to obtain the `gate` variable, which encompasses the pseudo gating strategy employed for the training set:
 
 ```
-new_gate <- GateMeClass_train(training_set,
-                          training_set_lab,
+new_gate <- GateMeClass_train(reference = training_set,
+                          labels = training_set_lab,
                           RSS = T,
                           GMM_parameterization = "V",
                           verbose = T, 
@@ -207,7 +207,7 @@ print(gate)
 Next, *GateMeClass_annotate* can be executed to the same dataset with the following:
 
 ```
-res <- GateMeClass_annotate(exp_matrix,
+res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             marker_table = new_gate,
                             reject_option = F,
                             GMM_parameterization = "V",
@@ -238,7 +238,7 @@ It is sufficient to specify in the 'train_parameters' the expression matrix of t
 
 
 ```
-res <- GateMeClass_annotate(exp_matrix,
+res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             marker_table = NULL,
                             train_parameters = list(reference = exp_matrix,
                                                     labels = training_set_lab),
@@ -255,7 +255,7 @@ GateMeClass can be used also to annotate clusters obtained using other technique
 </p>
 
 ```
-gate_clusters <- GateMeClass_train(exp_matrix,
+gate_clusters <- GateMeClass_train(exp_matrix = exp_matrix,
                                    labels = cluster_labels,            # This labels are obtained executing clustering with an external tool (e.g., FlowSOM)
                                    RSS = T,
                                    GMM_parameterization = "V",
