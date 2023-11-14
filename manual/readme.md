@@ -93,6 +93,7 @@ res <- GateMeClass_annotate(exp_matrix,
                             k = 20,				
                             sampling = 0.1,
                             verbose = T,
+                            narrow_marker_table = F,
                             seed = 1)
 ```
 <p align="justify">
