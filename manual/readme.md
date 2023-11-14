@@ -2,7 +2,6 @@
 
  <img width="230" height="250" src="../logo2.jpg" alt = "Logo GateMeClass" align = "right">
 
-
 ## Description
 <p align="justify">
 GateMeClass (Gate Mining and Classification) is a tool implemented in the R programming language that automates the process of annotation of a cytometry dataset using marker tables. 
