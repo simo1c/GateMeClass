@@ -11,3 +11,6 @@ It enables both supervised and semi-supervised classification with a strong emph
 For details refer to the <a href = "https://github.com/simo1c/GateMeClass/tree/main/manual">Manual</a>
 
 </p>
+
+## Contact
+Simone Caligola simone.caligola@iov.veneto.it
