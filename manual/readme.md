@@ -128,6 +128,24 @@ table(res$labels)
 print(res$marker_table)      
 print(res$cell_signatures)
 ```
+If we want to detect cell types not specoified in the marker table, we can set the parameter reject_option = T. To show this, we define a "narrow" (narrow_marker_table = T) marker table and specify only the CD3 marker of T cells:
+```
+gate <- data.frame(Cell = c("T cells"), Gate = ("CD3+"))
+res <- GateMeClass_annotate(exp_matrix,
+                            marker_table = gate,
+                            reject_option = T,          # we want to discriminate cell types not in marker table 
+                            GMM_parameterization = "V",
+                            RSS = T,
+                            k = 20,				
+                            sampling = 0.1,
+                            verbose = T,
+                            narrow_marker_table = T,    # we specified a narrow marker table
+                            seed = 1)
+```
+
+
+
+
 
 ### Method 2. Annotation of cytometry data extracting the marker table from an annotated reference dataset
 
