@@ -13,7 +13,7 @@ For details refer to the <a href = "https://github.com/simo1c/GateMeClass/tree/m
 </p>
 
 ## Contact
-For support and bug fixes please contact: Simone Caligola, simone.caligola@iov.veneto.it
+For support please contact: Simone Caligola, simone.caligola@iov.veneto.it
 
 ## License
 GateMeClass is distributed under the <a href = "https://raw.githubusercontent.com/simo1c/GateMeClass/main/LICENSE">MIT license.</a>
