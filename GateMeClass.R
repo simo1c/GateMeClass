@@ -991,9 +991,13 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
   signatures <- res$cell_signatures
   
   gate_ext <- sapply(signatures$Gate, function(v){
-    split <- unlist(str_split(v, ""))
-    sig <- paste0(markers, split, collapse = "", sep = "")
-    return(sig)
+    if(!is.na(v)){
+      split <- unlist(str_split(v, ""))
+      sig <- paste0(markers, split, collapse = "", sep = "")
+      return(sig)
+    }else{
+      return(NA)
+    }
   })
   
   res$cell_signatures[, "Gate"] <- gate_ext
