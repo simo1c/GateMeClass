@@ -16,6 +16,6 @@ For details refer to the <a href = "https://github.com/simo1c/GateMeClass/tree/m
 For support and bug fixes please contact: Simone Caligola, simone.caligola@iov.veneto.it
 
 ## License
-GateMeClass is distributed under the <a href = "license.txt">MIT license.</a>
+GateMeClass is distributed under the <a href = "LICENSE">MIT license.</a>
 
 ## Citation
