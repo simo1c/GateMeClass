@@ -13,7 +13,7 @@ GateMeClass_annotate(exp_matrix,
     verbose = T,
     narrow_marker_table = F,
     seed = 1)
-
+}
 \arguments{
   \item{exp_matrix}{
   Expression matrix, class = matrix
