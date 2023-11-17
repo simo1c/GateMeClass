@@ -13,49 +13,14 @@ GateMeClass has the capability to learn the marker table from an externally anno
 
 ## Preparation
 
-### Step 1. Installation of the required R libraries.
+### Installation and loading of GateMeClass package
 
-This is a list of all the R packages required to run GateMeClass.
-
+To install and load GateMeClass please execute the following lines of code:
 ```
-install.packages("stringi")
-install.packages("data.table")
-install.packages("moments")
-install.packages("mclust")
-install.packages("stringr")
-install.packages("scales")
-install.packages("recipes")
-install.packages("dplyr")
-install.packages("RcppAlgos")
-install.packages("caret", dependencies = c("Depends", "Suggests"))
-
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install("batchelor")
+install.packages("devtools")
+devtools::install_github("https://github.com/simo1c/GateMeClass")
+library(GateMeClass)
 ```
-
-
-### Step 2. Load the libraries and GateMeClass code.
-
-In order to run GateMeClass, you have to import the necessary R packages and the file called *GateMeClass.R* containing the complete architecture of GateMeClass:
-
-```
-library("stringi")
-library("data.table")
-library("moments")
-library("mclust")
-library("stringr")
-library("scales")
-library("recipes")
-library("dplyr")
-library("RcppAlgos")
-library("caret")
-library("BiocManager")
-library("batchelor")
-
-source("GateMeClass.R")    # GateMeClass code
-```
-
 ## Execution of GateMeClass
 
 ### Method 1. Annotation of cytometry data using a manually defined marker table
