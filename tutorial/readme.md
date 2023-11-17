@@ -1,4 +1,4 @@
-# GateMeClass - Manual
+# GateMeClass - Tutorial
 
 ## Description
  <img width="200" height="220" src="../logo2.jpg" alt = "Logo GateMeClass" align = "right">
