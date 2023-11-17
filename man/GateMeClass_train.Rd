@@ -34,7 +34,3 @@ GateMeClass_train(reference,
 \examples{
 For usage examples refer to https://github.com/simo1c/GateMeClass
 }
-
-
-
-
