@@ -48,7 +48,7 @@ GateMeClass_annotate(exp_matrix,
 }
 
 \value{
-    The output of GateMeClass_train is a list with the following elements:
+    The function returns a list with the following elements:
     \item{labels}{
         The labels returned by GateMeClass, class = character
     }    
