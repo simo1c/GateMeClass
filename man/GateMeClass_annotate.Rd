@@ -59,11 +59,6 @@ GateMeClass_annotate(exp_matrix,
         The marker signatures of each cell attributed by GateMeClass, class = data.frame
     }
 }
-
-
-
-
-
 \examples{
 For usage examples refer to https://github.com/simo1c/GateMeClass
 }
