@@ -31,6 +31,9 @@ GateMeClass_train(reference,
   Seed for randomization
   }
 }
+\value{
+    The function returns a data.frame containing the marker table extracted.
+}
 \examples{
 For usage examples refer to https://github.com/simo1c/GateMeClass
 }
