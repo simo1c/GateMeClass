@@ -60,5 +60,5 @@ GateMeClass_annotate(exp_matrix,
     }
 }
 \examples{
-For usage examples refer to https://github.com/simo1c/GateMeClass
+# For usage examples refer to https://github.com/simo1c/GateMeClass
 }
