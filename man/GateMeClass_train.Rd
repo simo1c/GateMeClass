@@ -12,25 +12,29 @@ GateMeClass_train(reference,
 }
 
 \arguments{
-\item{reference} {
-Expression matrix of the reference annotated dataset
-}
-\item{labels} {
-Labels of the reference dataset, class = character
-}
-\item{RSS} {
-RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution
-}
-\item{GMM_parameterization}{
-GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal)
-}
-\item{verbose}{
-Show output information
-}
-\item{seed}{
-Seed for randomization
-}
+  \item{reference}{
+  Expression matrix of the reference annotated dataset
+  }
+  \item{labels}{
+  Labels of the reference dataset, class = character
+  }
+  \item{RSS}{
+  RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution
+  }
+  \item{GMM_parameterization}{
+  GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal)
+  }
+  \item{verbose}{
+  Show output information
+  }
+  \item{seed}{
+  Seed for randomization
+  }
 }
 \examples{
 For usage examples refer to https://github.com/simo1c/GateMeClass
 }
+
+
+
+
