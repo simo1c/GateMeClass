@@ -1,7 +1,7 @@
 \name{GateMeClass_annotate}
 \alias{GateMeClass_annotate}
 \title{Extracting the marker table from a reference annotated dataset}
-\description{It inputs an annotated cytometry dataset in the form of an expression matrix and outputs a marker table with a pseudo gating strategy for each cell type}
+\description{The annotation module of GateMeClass inputs a dataset in the form of a matrix and a marker table and returns a vector of cell annotations}
 \usage{
 GateMeClass_annotate(exp_matrix,
     marker_table,
