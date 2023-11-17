@@ -35,5 +35,5 @@ GateMeClass_train(reference,
     The function returns a data.frame containing the marker table extracted.
 }
 \examples{
-# For usage examples refer to https://github.com/simo1c/GateMeClass
+# For examples refer to https://github.com/simo1c/GateMeClass
 }
