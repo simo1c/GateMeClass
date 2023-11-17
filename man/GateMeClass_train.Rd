@@ -5,9 +5,9 @@
 \usage{
 GateMeClass_train(reference,
     labels,
-    RSS = T,
+    RSS = TRUE,
     GMM_parameterization = "V",
-    verbose = T, 
+    verbose = TRUE, 
     seed = 1)
 }
 
