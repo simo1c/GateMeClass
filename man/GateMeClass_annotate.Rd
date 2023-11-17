@@ -6,12 +6,12 @@
 GateMeClass_annotate(exp_matrix,
     marker_table,
     GMM_parameterization = "V",
-    reject_option = F,
+    reject_option = FALSE,
     sampling = 0.1,
-    RSS = T,
+    RSS = TRUE,
     k = 20,				
-    verbose = T,
-    narrow_marker_table = F,
+    verbose = TRUE,
+    narrow_marker_table = FALSE,
     seed = 1)
 }
 \arguments{
