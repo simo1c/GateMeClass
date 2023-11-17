@@ -34,7 +34,3 @@ Seed for randomization
 \examples{
 For usage examples refer to https://github.com/simo1c/GateMeClass
 }
-
-
-
-
