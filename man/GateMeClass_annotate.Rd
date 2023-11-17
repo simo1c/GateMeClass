@@ -46,6 +46,24 @@ GateMeClass_annotate(exp_matrix,
   Seed for randomization
   }
 }
+
+\values{
+    The output of GateMeClass_train is a list with the following elements:
+    \item{labels}{
+        The labels returned by GateMeClass, class = character
+    }    
+    \item{marker_table}{
+        The marker table used by GateMeClass, class = data.frame
+    }    
+    \item{cell_signatures}{
+        The marker signatures of each cell attributed by GateMeClass, class = data.frame
+    }
+}
+
+
+
+
+
 \examples{
 For usage examples refer to https://github.com/simo1c/GateMeClass
 }
