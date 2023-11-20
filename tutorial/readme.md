@@ -81,7 +81,7 @@ k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine u
 sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.2
 narrow_marker_table : format of marker table. TRUE for using a marker table with two columns, "Cell" with the name of cell type and "Gate" with the gating strategy (e.g., CD3+CD4+). FALSE for using a column for each marker (as in the above example), class = logical, default = T. 
 verbose             : Show output information, class = logical, default = T
-train_parameters    : A list of parameters to pass to the *GateMeClass_train* function, class = list, default = NULL
+train_parameters    : A list of parameters to pass to the GateMeClass_train function, class = list, default = NULL
 seed                : class = numeric, default = 1
 ```
 
