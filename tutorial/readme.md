@@ -106,7 +106,10 @@ To select the parameter GMM_parameterization (E or V), it can be useful to graph
  with equal variance and V otherwise.
 </p>
 
-  <img width="400" height="200" src="eq_var_2.jpg" alt = "GMM" align = "center">
+<p align = "center">
+ <img src="eq_var_2.jpg" alt = "GMM">
+
+</p>
 
 ```
 m <- as.data.frame(t(exp_matrix))
