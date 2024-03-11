@@ -107,7 +107,7 @@ To select the parameter GMM_parameterization (E or V), it can be useful to graph
 </p>
 
 <p align = "center">
- <img src="eq_var_2.jpg" alt = "GMM">
+ <img width = "200"  height = "400" src="eq_var_2.jpg" alt = "GMM">
 
 </p>
 
