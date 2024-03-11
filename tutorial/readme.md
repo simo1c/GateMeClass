@@ -34,6 +34,8 @@ As an example we will use GateMeClass to annotate the cells of the Levine32 data
 # BiocManager::install("HDCytoData")
 
 library(HDCytoData)
+library("tidyr")
+
 d_SE <- Levine_32dim_SE()
 d_sub <- assay(d_SE[, colData(d_SE)$marker_class == "type"])
 population <- rowData(d_SE)$population_id
@@ -42,7 +44,27 @@ d_sub <- asinh(d_sub / cofactor)
 
 exp_matrix <- t(d_sub[population != "unassigned", ])
 population <- population[population != "unassigned"]
+
+
+m <- as.data.frame(t(exp_matrix))
+
+data_long <- m %>%
+  pivot_longer(colnames(m)) %>% 
+  as.data.frame()
+head(data_long) 
+
+ggp2 <- ggplot(data_long, aes(x = value)) +
+  geom_density() + 
+  facet_wrap(~ name, scales = "free") +
+  theme_classic()
+ggp2
+
 ```
+
+
+
+
+
 
 Then, we read the excel file with the marker table:
 
@@ -75,7 +97,7 @@ List of parameters:
 exp_matrix          : Expression matrix, class = matrix, (mandatory)
 marker_table        : Manually curated marker table, class = data.frame, 
 reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, class = logical, default = T
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "E"
+GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character, default = "E"
 RSS                 : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
 k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric, default = 20
 sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.2
@@ -161,7 +183,7 @@ List of parameters:
 reference             : Expression matrix of the reference annotated dataset, class = matrix, (mandatory)
 labels                : Labels of the reference dataset, class = character, (mandatory)
 RSS                   : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
-GMM_parameterization  : GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character, default = "E"
+GMM_parameterization  : GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character, default = "E"
 verbose               : Show output information, class = logical, default = T
 seed                  : class = numeric, default = 1
 ```
