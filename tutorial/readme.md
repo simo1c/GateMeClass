@@ -104,6 +104,8 @@ print(res$cell_signatures)
 <p align="justify">
 To select the parameter GMM_parameterization (E or V), it can be useful to graphically explore the variance of the expeceted Gaussian components underlie the distribution of each marker. Ideally, E can be used when the Gaussian components are supposed to be 
  with equal variance and V otherwise.
+  <img width="200" height="220" src="../eq_var_2.jpg" alt = "Logo GateMeClass" align = "right">
+
 </p>
 
 ```
