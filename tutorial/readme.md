@@ -44,27 +44,7 @@ d_sub <- asinh(d_sub / cofactor)
 
 exp_matrix <- t(d_sub[population != "unassigned", ])
 population <- population[population != "unassigned"]
-
-
-m <- as.data.frame(t(exp_matrix))
-
-data_long <- m %>%
-  pivot_longer(colnames(m)) %>% 
-  as.data.frame()
-head(data_long) 
-
-ggp2 <- ggplot(data_long, aes(x = value)) +
-  geom_density() + 
-  facet_wrap(~ name, scales = "free") +
-  theme_classic()
-ggp2
-
 ```
-
-
-
-
-
 
 Then, we read the excel file with the marker table:
 
@@ -120,6 +100,28 @@ table(res$labels)
 print(res$marker_table)      
 print(res$cell_signatures)
 ```
+
+<p align="justify">
+To select the parameter GMM_parameterization (V or E), it can be useful to explore the distribution of each marker to investigate the variance of the expeceted Gaussian components: 
+</p>
+
+```
+m <- as.data.frame(t(exp_matrix))
+
+data_long <- m %>%
+  pivot_longer(colnames(m)) %>% 
+  as.data.frame()
+head(data_long) 
+
+ggp2 <- ggplot(data_long, aes(x = value)) +
+  geom_density() + 
+  facet_wrap(~ name, scales = "free") +
+  theme_classic()
+ggp2
+
+```
+
+
 <p align="justify">
 If we want to detect cell types not specified in the marker table, we can set the parameter reject_option = T. As an example, we define a "narrow" (narrow_marker_table = T) marker table and specify only the CD3 marker of T cells:
 </p>
