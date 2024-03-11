@@ -102,7 +102,7 @@ print(res$cell_signatures)
 ```
 
 <p align="justify">
-To select the parameter GMM_parameterization (V or E), it can be useful to explore the distribution of each marker to investigate the variance of the expeceted Gaussian components: 
+To select the parameter GMM_parameterization (V or E), it can be useful to explore the variance of the expeceted Gaussian components underlie the distribution of each marker: 
 </p>
 
 ```
