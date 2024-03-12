@@ -111,6 +111,8 @@ To select the parameter GMM_parameterization (E or V), it can be useful to graph
 
 </p>
 
+With the following you can explore the distribution of each marker of your dataset:
+
 ```
 m <- as.data.frame(t(exp_matrix))
 
