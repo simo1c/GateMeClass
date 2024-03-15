@@ -932,7 +932,7 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
   ## Refinement of the unclassified cells using K-NN classification
   if(uncl_prec > 0 & uncl_prec < ncol(exp_matrix_pre_sampling)){
     if(verbose){
-      message(paste0("GateMeClass annotate - Refinement of the labels ","[k = ", k, ", Reject option = ", as.character(reject_option),"]..."))
+      message(paste0("GateMeClass annotate - Refinement of the labels..."))
     }
 
     if(!reject_option){
