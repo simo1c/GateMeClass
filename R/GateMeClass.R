@@ -321,9 +321,9 @@ set_marker_expression <- function(exp_matrix,
       X <- exp_matrix[m, first$indexes]
       
       if(length(GMM_parameterization) > 1){
-        marker_expr <- set_marker_expression_GMM(X, GMM_parameterization[m], first$type[m], RSS)        
+        marker_expr <- set_marker_expression_GMM(X, GMM_parameterization[m], first$type[m], RSS[m])        
       }else{
-        marker_expr <- set_marker_expression_GMM(X, GMM_parameterization, first$type[m], RSS)
+        marker_expr <- set_marker_expression_GMM(X, GMM_parameterization, first$type[m], RSS[m])
       }
       
       if(length(table(marker_expr)) > 1){
