@@ -9,10 +9,7 @@ It enables both supervised and semi-supervised classification with a strong emph
 <!-- For technical details, we invite you to refer to the published article regarding GateMeClass at the following link: [LINK] -->
 
 For details refer to the <a href = "https://github.com/simo1c/GateMeClass/tree/main/tutorial">Tutorial</a>
-
 </p>
-
-<br><br>
 
 ## Contact
 For support please contact: Simone Caligola, simone.caligola@iov.veneto.it
