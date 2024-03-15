@@ -5,10 +5,9 @@
 \usage{
 GateMeClass_annotate(exp_matrix,
     marker_table,
-    GMM_parameterization = "V",
+    GMM_parameterization = "E",
     reject_option = FALSE,
     sampling = 0.1,
-    RSS = TRUE,
     k = 20,				
     verbose = TRUE,
     narrow_marker_table = FALSE,
@@ -20,9 +19,6 @@ GateMeClass_annotate(exp_matrix,
   }
   \item{marker_table}{
   Manually curated or extracted marker table, class = data.frame
-  }
-  \item{RSS}{
-  RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical
   }
   \item{GMM_parameterization}{
   GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character
