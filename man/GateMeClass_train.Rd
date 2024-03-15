@@ -5,8 +5,7 @@
 \usage{
 GateMeClass_train(reference,
     labels,
-    RSS = TRUE,
-    GMM_parameterization = "V",
+    GMM_parameterization = "E",
     verbose = TRUE, 
     seed = 1)
 }
@@ -17,9 +16,6 @@ GateMeClass_train(reference,
   }
   \item{labels}{
   Labels of the reference dataset, class = character
-  }
-  \item{RSS}{
-  RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical
   }
   \item{GMM_parameterization}{
   GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character
