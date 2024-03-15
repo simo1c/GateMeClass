@@ -217,22 +217,6 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
         })
       }
     }else{
-
-      ############ Ranked Set Sampling (RSS) #########################
-      sample <- X
-      cycles <- floor(length(sample) / 4)
-      n_unit <- 2
-      n <- length(sample)
-      samples <- cycles * n_unit
-      indexes <- matrix(sample(1:n, samples * n_unit), nrow = n_unit)
-      sel_samples <- matrix(sample[indexes], nrow = n_unit)
-      ################################################################
-
-      if(moments::skewness(X) < 0){
-        test <- apply(sel_samples, 2, base::min)
-      }else{
-        test <- apply(sel_samples, 2, base::max)
-      }
       test <- X
     }
   }else if(length(X) >= 2){
@@ -250,6 +234,11 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
       pred <- predict.Mclust(cl, X[-index_sel])
       temp[index_sel] <- ifelse(cl$classification == max, "+", "-")
       temp[-index_sel] <- ifelse(pred$classification == max, "+", "-")
+      
+      ########## Correction for V ##########################
+      temp[X < cl$parameters$mean[min] & temp == "+"] <- "-"
+      temp[X > cl$parameters$mean[max] & temp == "-"] <- "+"
+      #######################################################
     }else{
       temp <- ifelse(cl$classification == max, "+", "-")
     }
@@ -267,6 +256,11 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
         pred <- predict.Mclust(cl, X[-index_sel])
         temp[index_sel] <- ifelse(cl$classification == max, "+", "-")
         temp[-index_sel] <- ifelse(pred$classification == max, "+", "-")
+        
+        ########## Correction for V ##########################
+        temp[X < cl$parameters$mean[min] & temp == "+"] <- "-"
+        temp[X > cl$parameters$mean[max] & temp == "-"] <- "+"
+        #######################################################
       }else{
         temp <- ifelse(cl$classification == max, "+", "-")
       }
@@ -284,6 +278,18 @@ set_marker_expression_GMM <- function(X, GMM_parameterization, type, RSS){
         temp[index_sel] <- cl$classification
         temp[-index_sel] <- pred$classification
         temp <- plyr::mapvalues(temp, c(min, mid, max), c("-", "m", "+"))
+        
+        ########## Correction for V ##########################
+        temp[X < cl$parameters$mean[min] & temp == "+"] <- "-"
+        temp[X < cl$parameters$mean[mid] & temp == "+"] <- "m"
+        
+        temp[X > cl$parameters$mean[max] & temp == "-"] <- "+"
+        temp[X > cl$parameters$mean[mid] & temp == "-"] <- "m"
+        
+        temp[X < cl$parameters$mean[min] & temp == "m"] <- "-"
+        temp[X > cl$parameters$mean[max] & temp == "m"] <- "+"
+        ######################################################
+        
       }else{
         temp <- plyr::mapvalues(cl$classification, c(min, mid, max), c("-", "m", "+"))
       }
@@ -511,7 +517,6 @@ check_marker_names <- function(marker_names){
 GateMeClass_train <- function(reference = NULL,
                               labels = NULL,
                               GMM_parameterization = "E",
-                              RSS = ifelse(GMM_parameterization == "E", F, T),
                               sampling_imp_vars = 0.05,
                               seed = 1,
                               verbose = T){
@@ -547,7 +552,7 @@ GateMeClass_train <- function(reference = NULL,
   reference_2 <- reference[markers, , drop = F]
 
   if(verbose){
-    message(paste0("GateMeClass annotate - Determining the marker signature of each cell", " [GMM = ", GMM_parameterization, ", RSS = ", RSS, "]..."))
+    message(paste0("GateMeClass annotate - Determining the marker signature of each cell", " [GMM = ", GMM_parameterization, "]..."))
   }
 
   expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
@@ -591,7 +596,7 @@ GateMeClass_train <- function(reference = NULL,
                                         # new_gates$marker_table,
                                         verbose = verbose,
                                         GMM_parameterization = GMM_parameterization,
-                                        RSS)
+                                        RSS = ifelse(GMM_parameterization == "E", F, T))
 
   expr_markers <- expr_markers[markers, ]
   expr_markers <- as.data.frame(t(expr_markers))
@@ -763,7 +768,6 @@ GateMeClass_train <- function(reference = NULL,
 GateMeClass_annotate <- function(exp_matrix = NULL,
                                  marker_table = NULL,
                                  GMM_parameterization = "E",
-                                 RSS = ifelse(GMM_parameterization == "E", F, T),
                                  train_parameters = list(
                                    reference = NULL
                                  ),
@@ -860,7 +864,7 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
   exp_matrix_2 <- exp_matrix[markers, , drop = F]
 
   if(verbose){
-    message(paste0("GateMeClass annotate - Determining the marker signature of each cell", " [GMM = ", GMM_parameterization, ", RSS = ", RSS, "]..."))
+    message(paste0("GateMeClass annotate - Determining the marker signature of each cell", " [GMM = ", GMM_parameterization, "]..."))
   }
 
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
@@ -877,7 +881,7 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
                                         expr_markers,
                                         verbose = verbose,
                                         GMM_parameterization = GMM_parameterization,
-                                        RSS)
+                                        RSS = ifelse(GMM_parameterization == "E", F, T))
 
   expr_markers <- expr_markers[markers, ]
   expr_markers <- as.data.frame(t(expr_markers))
