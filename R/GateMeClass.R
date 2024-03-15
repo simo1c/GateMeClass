@@ -319,8 +319,13 @@ set_marker_expression <- function(exp_matrix,
 
     for(m in first$markers){
       X <- exp_matrix[m, first$indexes]
-      marker_expr <- set_marker_expression_GMM(X, GMM_parameterization, first$type[m], RSS)
-
+      
+      if(length(GMM_parameterization) > 1){
+        marker_expr <- set_marker_expression_GMM(X, GMM_parameterization[m], first$type[m], RSS)        
+      }else{
+        marker_expr <- set_marker_expression_GMM(X, GMM_parameterization, first$type[m], RSS)
+      }
+      
       if(length(table(marker_expr)) > 1){
         bimodal_markers <- c(bimodal_markers, m)
 
@@ -552,7 +557,7 @@ GateMeClass_train <- function(reference = NULL,
   reference_2 <- reference[markers, , drop = F]
 
   if(verbose){
-    message(paste0("GateMeClass annotate - Determining the marker signature of each cell", " [GMM = ", GMM_parameterization, "]..."))
+    message(paste0("GateMeClass annotate - Determining the marker signature of each cell...")
   }
 
   expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
@@ -864,7 +869,7 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
   exp_matrix_2 <- exp_matrix[markers, , drop = F]
 
   if(verbose){
-    message(paste0("GateMeClass annotate - Determining the marker signature of each cell", " [GMM = ", GMM_parameterization, "]..."))
+    message(paste0("GateMeClass annotate - Determining the marker signature of each cell...")
   }
 
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
