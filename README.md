@@ -12,7 +12,7 @@ For details refer to the <a href = "https://github.com/simo1c/GateMeClass/tree/m
 
 </p>
 
-<br>
+<br><br>
 
 ## Contact
 For support please contact: Simone Caligola, simone.caligola@iov.veneto.it
