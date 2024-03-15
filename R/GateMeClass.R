@@ -557,7 +557,7 @@ GateMeClass_train <- function(reference = NULL,
   reference_2 <- reference[markers, , drop = F]
 
   if(verbose){
-    message(paste0("GateMeClass annotate - Determining the marker signature of each cell...")
+    message(paste0("GateMeClass annotate - Determining the marker signature of each cell..."))
   }
 
   expr_markers <- data.frame(matrix(ncol = ncol(reference_2), nrow = nrow(reference_2)))
@@ -869,7 +869,7 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
   exp_matrix_2 <- exp_matrix[markers, , drop = F]
 
   if(verbose){
-    message(paste0("GateMeClass annotate - Determining the marker signature of each cell...")
+    message(paste0("GateMeClass annotate - Determining the marker signature of each cell..."))
   }
 
   expr_markers <- data.frame(matrix(ncol = ncol(exp_matrix_2), nrow = nrow(exp_matrix_2)))
