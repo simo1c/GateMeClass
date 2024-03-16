@@ -62,7 +62,6 @@ res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             GMM_parameterization = "V",
                             reject_option = F,
                             sampling = 0.1,
-                            RSS = T,
                             k = 20,				
                             verbose = T,
                             narrow_marker_table = F,
@@ -78,7 +77,6 @@ exp_matrix          : Expression matrix, class = matrix, (mandatory)
 marker_table        : Manually curated marker table, class = data.frame, 
 reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, class = logical, default = T
 GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character, default = "E"
-RSS                 : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
 k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric, default = 20
 sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.2
 narrow_marker_table : format of marker table. TRUE for using a marker table with two columns, "Cell" with the name of cell type and "Gate" with the gating strategy (e.g., CD3+CD4+). FALSE for using a column for each marker (as in the above example), class = logical, default = T. 
@@ -141,7 +139,6 @@ res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             marker_table = gate,
                             reject_option = T,          # we want to discriminate cell types not in marker table 
                             GMM_parameterization = "V",
-                            RSS = T,
                             k = 20,				
                             sampling = 0.1,
                             verbose = T,
@@ -180,7 +177,6 @@ The next step involves the use the *GateMeClass_train* training function to obta
 ```
 new_gate <- GateMeClass_train(reference = training_set,
                           labels = training_set_lab,
-                          RSS = T,
                           GMM_parameterization = "V",
                           verbose = T, 
                           seed = 1)
@@ -192,7 +188,6 @@ List of parameters:
 ```
 reference             : Expression matrix of the reference annotated dataset, class = matrix, (mandatory)
 labels                : Labels of the reference dataset, class = character, (mandatory)
-RSS                   : RSS (Ranked Set Sampling). It is particularly advised in combination with GMM_parameterization = "V" to have a better resolution of the marker distribution, class = logical, default = T
 GMM_parameterization  : GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character, default = "E"
 verbose               : Show output information, class = logical, default = T
 seed                  : class = numeric, default = 1
@@ -210,7 +205,6 @@ res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             marker_table = new_gate,
                             reject_option = F,
                             GMM_parameterization = "V",
-                            RSS = T,
                             k = 20,				
                             sampling = 0.1,
                             verbose = T,
@@ -256,7 +250,6 @@ GateMeClass can be used also to annotate clusters obtained using other technique
 ```
 gate_clusters <- GateMeClass_train(exp_matrix = exp_matrix,
                                    labels = cluster_labels,            # This labels are obtained executing clustering with an external tool (e.g., FlowSOM)
-                                   RSS = T,
                                    GMM_parameterization = "V",
                                    verbose = T, 
                                    seed = 1)
