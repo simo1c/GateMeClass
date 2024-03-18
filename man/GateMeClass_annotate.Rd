@@ -11,7 +11,7 @@ GateMeClass_annotate(
     sampling = 0.1,
     k = 20,				
     verbose = TRUE,
-    narrow_marker_table = T,
+    narrow_marker_table = TRUE,
     seed = 1)
 }
 \arguments{
