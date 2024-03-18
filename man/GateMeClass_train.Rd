@@ -22,10 +22,10 @@ GateMeClass_train(
   GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character.
   }
   \item{verbose}{
-  Show output information.
+  Show output information, class = logical.
   }
   \item{seed}{
-  Seed for randomization.
+  Seed for randomization, class = numeric.
   }
 }
 \value{
