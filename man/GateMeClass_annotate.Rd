@@ -3,7 +3,8 @@
 \title{Annotation of a cytometry dataset using a marker table}
 \description{The annotation module of GateMeClass inputs a dataset in the form of a matrix and a marker table and returns a vector of cell annotations}
 \usage{
-GateMeClass_annotate(exp_matrix,
+GateMeClass_annotate(
+    exp_matrix,
     marker_table,
     GMM_parameterization = "E",
     reject_option = F,
