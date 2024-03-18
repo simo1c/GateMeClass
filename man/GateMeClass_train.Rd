@@ -3,7 +3,8 @@
 \title{Extracting the marker table from a reference annotated dataset}
 \description{The training module of GateMeClass inputs an annotated cytometry dataset in the form of an expression matrix and outputs a marker table with a pseudo gating strategy for each cell type}
 \usage{
-GateMeClass_train(reference,
+GateMeClass_train(
+    reference,
     labels,
     GMM_parameterization = "E",
     verbose = T, 
