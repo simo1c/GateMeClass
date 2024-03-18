@@ -26,7 +26,7 @@ GateMeClass_annotate(
   Parameters for the training function, class = list.
   }
   \item{GMM_parameterization}{
-  GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character.
+  GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character.
   }
   \item{reject_option}{
   This parameter tries to detect cell types not defined in the marker table using MNN algorithm, class = logical.
