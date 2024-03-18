@@ -7,25 +7,25 @@ GateMeClass_train(
     reference,
     labels,
     GMM_parameterization = "E",
-    verbose = T, 
+    verbose = TRUE, 
     seed = 1)
 }
 
 \arguments{
   \item{reference}{
-  Expression matrix of the reference annotated dataset, class = matrix
+  Expression matrix of the reference annotated dataset, class = matrix.
   }
   \item{labels}{
-  Labels of the reference dataset, class = character
+  Labels of the reference dataset, class = character.
   }
   \item{GMM_parameterization}{
-  GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character
+  GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character.
   }
   \item{verbose}{
-  Show output information
+  Show output information.
   }
   \item{seed}{
-  Seed for randomization
+  Seed for randomization.
   }
 }
 \value{
