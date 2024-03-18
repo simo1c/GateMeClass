@@ -22,7 +22,7 @@ GateMeClass_train(
   A character vector with the GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal).
   }
   \item{verbose}{
-  If TRUE show output information.
+  TRUE to show output information.
   }
   \item{seed}{
   Seed for randomization.
