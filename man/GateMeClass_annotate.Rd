@@ -17,47 +17,47 @@ GateMeClass_annotate(
 }
 \arguments{
   \item{exp_matrix}{
-  Expression matrix, class = matrix.
+  An expression matrix.
   }
   \item{marker_table}{
-  Manually curated or extracted marker table, class = data.frame.
+  A data.frame with a manually curated or extracted marker table.
   }
   \item{train_parameters}{
-  Parameters for the training function, class = list.
+  A list with the parameters for the training function.
   }
   \item{GMM_parameterization}{
-  GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character.
+  A character vector with the GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal).
   }
   \item{reject_option}{
-  This parameter tries to detect cell types not defined in the marker table using MNN algorithm, class = logical.
+  If TRUE this parameter tries to detect cell types not defined in the marker table using MNN algorithm.
   }
   \item{sampling}{
-  Percentage of the cells used for the annotation, class = numeric.
+  Percentage of the cells used for the annotation.
   }
   \item{k}{
-  k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric.
+  k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated.
   }
   \item{narrow_marker_table}{
-  format of marker table. TRUE for using a marker table with two columns, "Cell" with the name of cell type and "Gate" with the gating strategy (e.g., CD3+CD4+). FALSE for using a column for each marker, class = logical.
+  Format of marker table. TRUE for using a marker table with two columns, "Cell" with the name of cell type and "Gate" with the gating strategy (e.g., CD3+CD4+). FALSE for using a column for each marker.
   }
   \item{verbose}{
-  Show output information, class = logical.
+  If TRUE show output information.
   }
   \item{seed}{
-  Seed for randomization, class = numeric.
+  Seed for randomization.
   }
 }
 
 \value{
     The function returns a list with the following elements:
     \item{labels}{
-        The labels returned by GateMeClass, class = character.
+        A character vector with the labels returned by GateMeClass.
     }    
     \item{marker_table}{
-        The marker table used by GateMeClass, class = data.frame.
+        A data.frame with the marker table used by GateMeClass.
     }    
     \item{cell_signatures}{
-        The marker signatures of each cell attributed by GateMeClass, NA for cells unsampled, class = data.frame.
+        A data.frame with the marker signatures of each cell attributed by GateMeClass, NA for cells unsampled.
     }
 }
 \examples{
