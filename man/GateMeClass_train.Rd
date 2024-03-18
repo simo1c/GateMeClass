@@ -19,7 +19,7 @@ GateMeClass_train(
   Labels of the reference dataset, class = character.
   }
   \item{GMM_parameterization}{
-  GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character.
+  GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character.
   }
   \item{verbose}{
   Show output information.
