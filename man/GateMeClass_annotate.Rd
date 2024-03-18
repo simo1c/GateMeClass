@@ -27,13 +27,13 @@ GateMeClass_annotate(exp_matrix,
   This parameter tries to detect cell types not defined in the marker table using MNN algorithm, class = logical
   }
   \item{sampling}{
-  GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character
+  Percentage of the cells used for the annotation, class = numeric
   }
   \item{k}{
   k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric
   }
   \item{narrow_marker_table}{
-  format of marker table. TRUE for using a marker table with two columns, "Cell" with the name of cell type and "Gate" with the gating strategy (e.g., CD3+CD4+). FALSE for using a column for each marker (as in the above example), class = logical
+  format of marker table. TRUE for using a marker table with two columns, "Cell" with the name of cell type and "Gate" with the gating strategy (e.g., CD3+CD4+). FALSE for using a column for each marker, class = logical
   }
   \item{verbose}{
   Show output information
