@@ -10,7 +10,7 @@ GateMeClass_annotate(exp_matrix,
     sampling = 0.1,
     k = 20,				
     verbose = TRUE,
-    narrow_marker_table = FALSE,
+    narrow_marker_table = TRUE,
     seed = 1)
 }
 \arguments{
