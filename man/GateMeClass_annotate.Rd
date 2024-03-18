@@ -53,7 +53,7 @@ GateMeClass_annotate(
         The marker table used by GateMeClass, class = data.frame
     }    
     \item{cell_signatures}{
-        The marker signatures of each cell attributed by GateMeClass, class = data.frame
+        The marker signatures of each cell attributed by GateMeClass, NA for cells unsampled, class = data.frame
     }
 }
 \examples{
