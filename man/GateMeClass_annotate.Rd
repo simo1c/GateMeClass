@@ -41,10 +41,10 @@ GateMeClass_annotate(
   format of marker table. TRUE for using a marker table with two columns, "Cell" with the name of cell type and "Gate" with the gating strategy (e.g., CD3+CD4+). FALSE for using a column for each marker, class = logical.
   }
   \item{verbose}{
-  Show output information.
+  Show output information, class = logical.
   }
   \item{seed}{
-  Seed for randomization.
+  Seed for randomization, class = numeric.
   }
 }
 
