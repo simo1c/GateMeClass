@@ -6,7 +6,7 @@
 GateMeClass_train(reference,
     labels,
     GMM_parameterization = "E",
-    verbose = TRUE, 
+    verbose = T, 
     seed = 1)
 }
 
