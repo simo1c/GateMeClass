@@ -6,6 +6,7 @@
 GateMeClass_annotate(
     exp_matrix,
     marker_table,
+    train_parameters = = list(reference = NULL, labels = NULL),
     GMM_parameterization = "E",
     reject_option = FALSE,
     sampling = 0.1,
@@ -20,6 +21,9 @@ GateMeClass_annotate(
   }
   \item{marker_table}{
   Manually curated or extracted marker table, class = data.frame.
+  }
+  \item{train_parameters}{
+  Parameters for the training function, class = list.
   }
   \item{GMM_parameterization}{
   GMM (Gaussian-Mixture-Model) parameter: "V" (Varying) or "E" (Equal), class = character.
