@@ -13,19 +13,19 @@ GateMeClass_train(
 
 \arguments{
   \item{reference}{
-  Expression matrix of the reference annotated dataset, class = matrix.
+  The expression matrix of the reference annotated dataset.
   }
   \item{labels}{
-  Labels of the reference dataset, class = character.
+  A character vector with the labels of the reference dataset.
   }
   \item{GMM_parameterization}{
-  GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character.
+  A character vector with the GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal).
   }
   \item{verbose}{
-  Show output information, class = logical.
+  If TRUE show output information.
   }
   \item{seed}{
-  Seed for randomization, class = numeric.
+  Seed for randomization.
   }
 }
 \value{
