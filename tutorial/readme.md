@@ -85,7 +85,7 @@ train_parameters    : A list of parameters to pass to the GateMeClass_train func
 seed                : class = numeric, default = 1
 ```
 
-<p><
+<p>
 Example of marker table:
 ---------------------------------------------------------------------------
 Cell 	       |CD19|CD4|CD8|CD34|CD20|CD123|CD11c|CD16|CD7|CD3|HLA-DR|CD64 
