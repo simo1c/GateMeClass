@@ -779,7 +779,7 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
                                  ),
                                  reject_option = F,
                                  k = 20,
-                                 sampling = 0.2,
+                                 sampling = 0.1,
                                  narrow_marker_table = T,
                                  verbose = T,
                                  seed = 1){
