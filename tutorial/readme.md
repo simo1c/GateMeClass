@@ -85,14 +85,20 @@ train_parameters    : A list of parameters to pass to the GateMeClass_train func
 seed                : class = numeric, default = 1
 ```
 
+Example of marker table:
+
 |Cell|CD19|CD4|CD8|CD34|CD20|CD123|CD11c|CD16|CD7|CD3|HLA-DR|CD64|
 |----|----|---|---|----|----|-----|-----|----|---|---|------|----|
 |CD4+ T cells   | -  | + | - |  - | -  |  -  |  -  |  - | * | + |   -  |  -|    
 |CD8+ T cells   | -  | - | + |  - | -  |  -  |  -  |  - | + | + |   -  |  -|
 
+Example of narrow marker table:
 
-
-
+|Cell         | Gate|							       
+|-------------|-----|
+|CD4+ T cells | CD19-CD4+CD8-CD34-CD20-CD123-CD11c-CD16-CD3+HLA-DR-CD64-|     
+|
+|CD8+ T cells | CD19-CD4-CD8+CD34-CD20-CD123-CD11c-CD7+CD16-CD3+HLA-DR-CD64-|
 
 The output of *GateMeClass_train* is a list with the following elements: 
 
