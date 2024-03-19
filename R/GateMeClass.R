@@ -801,19 +801,21 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
     stop("The expression matrix is mandatory!")
   }
 
-  if(!is.null(marker_table)){
+  if(!is.null(marker_table) & narrow_marker_table){
     temp <- sapply(marker_table$Gate, function(x){
       str <- strsplit(x, "[m]|m[\\|\\^]|[-]|-[\\|\\^]|[+]|\\+[\\|\\^]|[*]")
       str[[1]] <- stri_remove_empty(str[[1]])
       return(str)
     })
-
+    
     if(length(setdiff(unique(unlist(temp)), rownames(exp_matrix))) > 0){
       for(i in 1:length(old_names[check$modified])){
         x <- old_names[check$modified][i]
         marker_table$Gate <- gsub(x, rownames(exp_matrix)[check$modified][i], marker_table$Gate)
       }
     }
+  }else if(!is.null(marker_table) & !narrow_marker_table){
+    colnames(marker_table)[-1] <- check_marker_names(colnames(marker_table[-1]))$marker_names
   }
 
   if(sampling < 1){
