@@ -93,7 +93,7 @@ Marker table with 'narrow_marker_table = FALSE':
 
 <br>
 
-Marker table with 'narrow_marker_table = TRUE':
+Marker table with ```narrow_marker_table = TRUE```:
 
 |Cell         | Gate|							       
 |-------------|-----|
