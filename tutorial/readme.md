@@ -84,7 +84,7 @@ train_parameters    : A list of parameters to pass to the GateMeClass_train func
 seed                : class = numeric, default = 1
 ```
 
-Marker table with 'narrow_marker_table = FALSE':
+Marker table with ```narrow_marker_table = FALSE```:
 
 |Cell|CD19|CD4|CD8|CD34|CD20|CD123|CD11c|CD16|CD7|CD3|HLA-DR|CD64|
 |----|----|---|---|----|----|-----|-----|----|---|---|------|----|
@@ -104,9 +104,9 @@ Marker table with ```narrow_marker_table = TRUE```:
 
 The output of *GateMeClass_train* is a list with the following elements: 
 
-1) labels            : The labels returned by GateMeClass, class = character
-2) marker_table      : The marker table used by GateMeClass, class = data.frame
-3) cell_signatures   : The marker signatures of each cell attributed by GateMeClass, class = data.frame
+1) ```labels```           : The labels returned by GateMeClass, class = character
+2) ```marker_table```      : The marker table used by GateMeClass, class = data.frame
+3) ```cell_signatures```   : The marker signatures of each cell attributed by GateMeClass, class = data.frame
 
 The output can be showed using the following:
 
