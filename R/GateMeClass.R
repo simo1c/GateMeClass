@@ -148,6 +148,7 @@ parse_marker_table <- function(marker_table, narrow_marker_table, extended_marke
     marker_table <- df_gates
   }
 
+  marker_table <- marker_table[, c("Cell", sort(colnames(marker_table[-1])))]
   celltypes <- marker_table$Cell
 
   if(length(grep("[\\*|\\||\\^]", celltypes)) > 0){
