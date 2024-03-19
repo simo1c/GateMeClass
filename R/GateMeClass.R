@@ -102,11 +102,11 @@ generate_set_values <- function(v, cell){
   return(sets_all_filtered)
 }
 
-## Read the gate table and generate the possbile marker signature of ceach cell type
+## Read the marker table and generate the possbile marker signature of ceach cell type
 parse_marker_table <- function(marker_table, narrow_marker_table, extended_marker_table){
 
   if(any(duplicated(marker_table$Cell))){
-    stop("The gate table must contains uniquely defined cell types!")
+    stop("The marker table must contains uniquely defined cell types!")
   }
 
   if(narrow_marker_table){
@@ -745,7 +745,7 @@ GateMeClass_train <- function(reference = NULL,
 
         sg <- w2
 
-        # Top discriminant marker is not present in gate table
+        # Top discriminant marker is not present in the marker table
         if(!int_pos){
           cell_markers[[c]] <- c(cell_markers[[c]], top_marker)
         }
@@ -859,7 +859,7 @@ GateMeClass_annotate <- function(exp_matrix = NULL,
     }
   }else{
     if(is.null(marker_table)){
-      stop("Please, specify a gate table or a reference dataset!")
+      stop("Please, specify a marker table or a reference dataset!")
     }
 
     if(verbose){
