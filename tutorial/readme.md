@@ -34,7 +34,7 @@ As an example we will use GateMeClass to annotate the cells of the Levine32 data
 # BiocManager::install("HDCytoData")
 
 library(HDCytoData)
-library("tidyr")
+library(tidyr)
 
 d_SE <- Levine_32dim_SE()
 d_sub <- assay(d_SE[, colData(d_SE)$marker_class == "type"])
