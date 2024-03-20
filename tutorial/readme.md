@@ -15,7 +15,7 @@ GateMeClass has the capability to learn the marker table from an externally anno
 
 ### Installation and loading of GateMeClass package
 
-To install and load GateMeClass please execute the following lines of code:
+To install GateMeClass please execute the following lines of code:
 ```
 install.packages("devtools")
 devtools::install_github("https://github.com/simo1c/GateMeClass")
