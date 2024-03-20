@@ -32,7 +32,6 @@ BiocManager::install("HDCytoData")
 install.packages("readxl")
 ```
 
-```
 ## Execution of GateMeClass
 
 ### Method 1. Annotation of cytometry data using a manually defined marker table
