@@ -20,6 +20,7 @@ To install and load GateMeClass please execute the following lines of code:
 install.packages("devtools")
 devtools::install_github("https://github.com/simo1c/GateMeClass")
 library(GateMeClass)
+```
 
 The other packages useful to run the tutorials are:
 
