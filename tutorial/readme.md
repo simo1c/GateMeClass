@@ -104,9 +104,9 @@ Marker table with ```narrow_marker_table = TRUE```:
 
 The output of *GateMeClass_train* is a list with the following elements: 
 
-1) ```labels```           : The labels returned by GateMeClass, class = character
-2) ```marker_table```      : The marker table used by GateMeClass, class = data.frame
-3) ```cell_signatures```   : The marker signatures of each cell attributed by GateMeClass, class = data.frame
+1) ```labels```           : a character vector with the labels returned by GateMeClass.
+2) ```marker_table```      : a data.frame with the marker table used by GateMeClass.
+3) ```cell_signatures```   : a data.frame with the marker signatures of each cell attributed by GateMeClass.
 
 The output can be showed using the following:
 
