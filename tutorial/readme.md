@@ -19,10 +19,9 @@ To install and load GateMeClass please execute the following lines of code:
 ```
 install.packages("devtools")
 devtools::install_github("https://github.com/simo1c/GateMeClass")
-library(GateMeClass)
 ```
 
-The other packages useful to run the tutorials are:
+The other packages to install for the tutorial are:
 
 ```
 if (!require("BiocManager", quietly = TRUE))
@@ -40,6 +39,7 @@ As an example we will use GateMeClass to annotate the cells of the Levine32 data
 </p>
 
 ```
+library(GateMeClass)
 library(HDCytoData)
 library(tidyr)
 library(readxl)
