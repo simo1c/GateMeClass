@@ -19,18 +19,6 @@ Depends:
     BiocManager,
     batchelor
 Imports:
-    stringi,
-    data.table,
-    moments,
-    mclust,
-    stringr,
-    scales,
-    recipes,
-    dplyr,
-    RcppAlgos,
-    caret,
-    BiocManager,
-    batchelor
 Suggests:
     ggplot2
 License: MIT
