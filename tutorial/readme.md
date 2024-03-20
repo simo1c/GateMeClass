@@ -72,16 +72,16 @@ In this example we executed GateMeClass using GMM  with varying variance (GMM_pa
 
 List of parameters:
 ```
-exp_matrix          : Expression matrix, class = matrix, (mandatory)
-marker_table        : Manually curated marker table, class = data.frame, 
-reject_option       : This parameter tries to detect cell types not defined in the marker table using MNN algorithm, class = logical, default = T
-GMM_parameterization: GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character, default = "E"
-k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated, class = numeric, default = 20
-sampling            : Perform a sampling of the cells annotating the rest with k-NN, class = numeric, default = 0.1
+exp_matrix          : An expression matrix.
+marker_table        : A data.frame with a manually curated or extracted marker table.
+reject_option       : If TRUE this parameter tries to detect cell types not defined in the marker table using MNN algorithm.
+GMM_parameterization: A character vector with the GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal).
+k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated.
+sampling            : Percentage of the cells used for the annotation.
 narrow_marker_table : format of marker table. See the example below.
-verbose             : Show output information, class = logical, default = T
-train_parameters    : A list of parameters to pass to the GateMeClass_train function, class = list, default = NULL
-seed                : class = numeric, default = 1
+verbose             : TRUE to show output information.
+train_parameters    : A list with the parameters for the training function.
+seed                : Seed for randomization.
 ```
 
 Marker table with ```narrow_marker_table = FALSE```:
@@ -203,11 +203,11 @@ Some of the parameters are shared between *GateMeClass_train* and *GateMeClass_a
 List of parameters:
 
 ```
-reference             : Expression matrix of the reference annotated dataset, class = matrix, (mandatory)
-labels                : Labels of the reference dataset, class = character, (mandatory)
-GMM_parameterization  : GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal), class = character, default = "E"
-verbose               : Show output information, class = logical, default = T
-seed                  : class = numeric, default = 1
+reference             : The expression matrix of the reference annotated dataset.
+labels                : A character vector with the labels of the reference dataset.
+GMM_parameterization  : A character vector with the GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal).
+verbose               : TRUE to show output information.
+seed                  : Seed for randomization.
 ```
 
 We can display the output of the function, which is the gating strategy of each cell type, using the command:
