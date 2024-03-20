@@ -154,12 +154,12 @@ gate <- data.frame(Cell = c("T cells"), Gate = ("CD3+"))
 
 res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             marker_table = gate,
-                            reject_option = T,          # we want to discriminate cell types not in marker table 
+                            reject_option = T,
                             GMM_parameterization = "V",
                             k = 20,				
                             sampling = 0.1,
                             verbose = T,
-                            narrow_marker_table = T,    # we specified a narrow marker table
+                            narrow_marker_table = T,
                             seed = 1)
 table(res$labels)
 ```
