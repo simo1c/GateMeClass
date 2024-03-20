@@ -20,6 +20,17 @@ To install and load GateMeClass please execute the following lines of code:
 install.packages("devtools")
 devtools::install_github("https://github.com/simo1c/GateMeClass")
 library(GateMeClass)
+
+The other packages useful to run the tutorials are:
+
+```
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("HDCytoData")
+
+install.packages("readxl")
+```
+
 ```
 ## Execution of GateMeClass
 
@@ -29,12 +40,9 @@ As an example we will use GateMeClass to annotate the cells of the Levine32 data
 </p>
 
 ```
-# if (!require("BiocManager", quietly = TRUE))
-    # install.packages("BiocManager")
-# BiocManager::install("HDCytoData")
-
 library(HDCytoData)
 library(tidyr)
+library(readxl)
 
 d_SE <- Levine_32dim_SE()
 d_sub <- assay(d_SE[, colData(d_SE)$marker_class == "type"])
@@ -49,7 +57,6 @@ population <- population[population != "unassigned"]
 Then, we read the excel file with the marker table:
 
 ```
-library(readxl) # install.packages("readxl")
 gate <- as.data.frame(read_excel("Levine32.xlsx"))
 gate[is.na(gate)] <- "*"                                           # required for markers not set
 ```
