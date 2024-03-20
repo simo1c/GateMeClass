@@ -74,7 +74,7 @@ res <- GateMeClass_annotate(exp_matrix = exp_matrix,
                             seed = 1)
 ```
 <p align="justify">
-In this example we executed GateMeClass using GMM  with varying variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells and k parameter set to 20 (k = 20) for k-NN and mutual nearest neighbor (MNN) algorithms for label refining. For a comphensive list of <i>GateMeClass_annotate</i> parameters refer to the following:
+In this example we executed GateMeClass using GMM  with variable variance (GMM_parameterization = "V"), no reject_option (reject_option = F) in order to do not care of cells potentially not defined in the marker table, sampling 10% (sampling = 0.1) of cells and k parameter set to 20 (k = 20) for k-NN and mutual nearest neighbor (MNN) algorithms for label refining. For a comphensive list of <i>GateMeClass_annotate</i> parameters refer to the following:
 </p>
 
 List of parameters:
@@ -82,7 +82,7 @@ List of parameters:
 exp_matrix          : An expression matrix.
 marker_table        : A data.frame with a manually curated or extracted marker table.
 reject_option       : If TRUE this parameter tries to detect cell types not defined in the marker table using MNN algorithm.
-GMM_parameterization: A character vector with the GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal).
+GMM_parameterization: A character vector with the GMM (Gaussian-Mixture-Model) variance parameter: "V" (Variable) or "E" (Equal).
 k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine uncertain labels to the most similar already annotated.
 sampling            : Percentage of the cells used for the annotation.
 narrow_marker_table : format of marker table. See the example below.
@@ -212,7 +212,7 @@ List of parameters:
 ```
 reference             : The expression matrix of the reference annotated dataset.
 labels                : A character vector with the labels of the reference dataset.
-GMM_parameterization  : A character vector with the GMM (Gaussian-Mixture-Model) parameter: "V" (Variable) or "E" (Equal).
+GMM_parameterization  : A character vector with the GMM (Gaussian-Mixture-Model) variance parameter: "V" (Variable) or "E" (Equal).
 verbose               : TRUE to show output information.
 seed                  : Seed for randomization.
 ```
