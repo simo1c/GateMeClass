@@ -87,7 +87,7 @@ k                   : k parameter of k-NN (k-Nearest-Neighbour) used to refine u
 sampling            : Percentage of the cells used for the annotation.
 narrow_marker_table : format of marker table. See the example below.
 verbose             : TRUE to show output information.
-train_parameters    : A list with the parameters for the training function.
+train_parameters    : A list with the parameters for the training function, i.e., reference and labels.
 seed                : Seed for randomization.
 ```
 
