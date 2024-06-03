@@ -18,4 +18,4 @@ For support please contact: Simone Caligola, simone.caligola@iov.veneto.it
 GateMeClass is distributed under the <a href = "https://raw.githubusercontent.com/simo1c/GateMeClass/main/LICENSE">MIT license.</a>
 
 ## Citation
-Caligola, Simone, et al. "GateMeClass: Gate mining and classification of cytometry data." <i>Bioinformatics</i> (2024): btae322.
+Caligola et al. "GateMeClass: Gate mining and classification of cytometry data." <i>Bioinformatics</i> (2024): btae322.
