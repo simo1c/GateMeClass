@@ -17,8 +17,13 @@ GateMeClass has the capability to learn the marker table from an externally anno
 
 To install GateMeClass please execute the following lines of code:
 ```
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("batchelor")
+
 install.packages("devtools")
-devtools::install_github("https://github.com/simo1c/GateMeClass")
+devtools::install_github("simo1c/GateMeClass")
 ```
 
 The other packages to install for the tutorial are:
